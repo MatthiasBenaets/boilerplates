@@ -1,0 +1,211 @@
+#Initial Install
+select azerty = 2
+
+##Prepare Disks
+lsblk (find disk name, for example sda)
+fdisk /dev/sda
+o 
+n - p - 1 - enter - +256M
+n - p - 2 - enter - enter
+a - 1
+w
+
+mkfs.ext2 /dev/sda1
+mkfs.ext4 /dev/sda2
+mount /dev/sda2 /mnt/gentoo
+
+##Install Stage3
+cd /mnt/gentoo
+links gentoo.org/downloads
+select Stage 3 openrc - save
+tar xpvf stage3-*.tar.xz --xattrs-include'*.*' --numeric-owner
+
+nano -w  /mnt/gentoo/etc/portage/make.conf
+	>COMMON_FLAGS="-O2 -pipe -march=native" OR for HP "-march=skylake -O2 -pipe"
+below FFLAGS:
+	>MAKEOPTS="-J[cores]" [cores]=amount
+	>ACCEPT_LICENSE="*"
+	>USE="-aqua -gnome -ios -ipod -kde -systemd -xfce X"
+
+##Install Base System
+mirrorselect -i -o >> /mnt/gentoo/etc/portage/make.conf
+select belgium mirrors
+
+mkdir --parents /mnt/gentoo/etc/portage/repos.conf
+cp /mnt/gentoo/usr/share/portage/config/repos.conf /mnt/gentoo/etc/portage/repos.conf/gentoo.conf
+
+cp --dereference /etc/resolv.conf /mnt/gentoo/etc/
+
+mount --types proc /proc /mnt/gentoo/proc
+mount --rbind /sys /mnt/gentoo/sys
+mount --make-rslave /mnt/gentoo/sys
+mount --rbind /dev /mnt/gentoo/dev
+mount --make-rslave /mnt/gentoo/dev
+
+chroot /mnt/gentoo /bin/bash
+source /etc/profile
+export PS1="(chroot) ${PS1}"
+
+mount /dev/sda1 /boot
+
+emerge-webrsync
+
+eselect profile list
+select am64 stable -> eselect profile set [number]
+
+emerge --ask --verbose --update --deep --newuse @world
+
+echo "Europe>Brussels" > /etc/timezone
+emerge --config sys-libs/timezone-data
+
+nano -w /etc/locale.gen
+	>en_BE ISO-8859-1
+	>en_BE.UTF-8 UTF-8
+	>C.UTF8 UTF-8
+
+locale.gen
+
+eselect locale list
+select locale en_BE.utf8 -> eselect locale set [number]
+. /etc/profile
+export PS1="(chroot) ${PS1}"
+
+##Configure Kernel (Genkernel)
+emerge --ask sys-kernel/gentoo-sources
+eselect kernel list 
+eselect kernel set [number]
+ls -l /usr/src/linux
+
+emerge --ask sys-apps/pciutils
+emerge --ask sys-kernel/genkernel
+if error:
+	echo "sys-kernel/linux-firmware @BINARY-REDISTRIBUTABLE" | tee -a /etc/portage//package.license
+
+emerge --ask sys-kernel/linux-kernel
+
+##Configure System
+nano -w /etc/fstab
+	>/dev/sda1	/boot		ext2	noauto,noatime	0 2
+	>/dev/sda2	/		ext4	noatime		0 1
+	>/dev/cdrom	/mnt/cdrom	auto	noauto,ro	0 0
+
+nano -w /etc/conf.d/hostname
+	>hostname="gentoo"
+
+emerge --ask --noreplace net-misc/netifrc
+
+ip a (check ethernet name, for example eth0)
+
+nano -w /etc/conf.d/net
+	>config_eth0="dhcp"
+cd /etc/init.d
+ln -s net.lo net.eth0
+rc-update add net.eth0 default
+
+nano -w /etc/hosts
+	>127.0.0.1	gentoo localhost
+	>::1		gentoo localhost
+
+passwd
+	My_hard_password
+
+nano -w /etc/conf.d/keymaps
+	>keymap="azerty"
+nano -w /etc/conf.d/hwclock
+	>clock="UTC+2"
+
+##Installing Tools
+emerge --ask app-admin/sysklogd
+rc-update add sysklogd default
+Optional install cron deamon (see handbook)
+
+emerge --ask sys-fs/e2fsprogs
+emerge --ask net-misc/dhcpcd
+Optional wifi:
+	emerge --ask net-wireless/iw net-wireless/wpa_supplicant
+
+##Configure Bootloader
+emerge --ask --verbose sys-boot/grub:2
+grub-install /dev/sda
+grub-mkconfig -o /boot/grub/grub.cfg
+
+exit
+cd
+umount -l /mnt/gentoo/dev{/shm,/pts,}
+umount -R /mnt/gentoo
+reboot
+
+##Finalizing
+root
+My_hard_password
+
+useradd -m -G users,wheel,audio,video,cdrom,usb -s /bin/bash matthias
+passwd matthias
+	My_hard_password
+su matthias
+
+#Install Display Server / Window Manager
+##Xorg
+nano -w /etc/portage/make.conf
+below USEFLAGS:
+	>INPUT_DEVICES="libinput synaptics"
+	>VIDEO_CARDS="(nvideo=nouveau;amd=radeon/amdgpu;intel=intel;virtualbox=virtio)"
+
+emerge app-admin/sudo
+nano -w /etc/sudoers
+	>%wheel ALL = (ALL)ALL   OR ADD "matthias ALL=(ALL) ALL" bellow root
+
+emerge -av x11-base/xorg-server x11-base/xorg-drivers
+nano -w /etc/portage/make.conf
+	>USE=" ... elogind X"
+emerge -av x11-base/xorg-server x11-base/xorg-drivers
+Optional xterm:
+emerge -av x11-terms/xterm
+
+env-update
+source /etc/profile
+
+##Window Manager
+emerge -av x11-wm/dwm x11-terms/st x11-misc/dmenu
+startx /usr/bin/dwm
+rc-update add elogind boot
+If error:
+	dispatch-conf
+
+##Finalize Edits
+su matthias
+cd
+nano -w .xinitrc
+	>#!/bin/sh
+	>exec dwm
+nano -w /etc/profile
+	>startx
+
+sudo reboot
+matthias
+My_hard_password
+startx
+
+##Wifi
+ip a "find name of networkcard, for example wlo1"
+
+nano /etc/network/interfaces:
+	>auto wlo1
+	>allow-hotplug wlo1
+	>iface wlo1 inet dhcp
+	>wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+	>iface default inet dhcp
+
+nano /etc/wpa_supplicant/wpa_supplicant.conf:
+	>ctrl_interface=/run/wpa_supplicant
+	>update_control=1
+	>network{
+	>ssid="name"
+	>psk="pass"
+	>proto=RSN
+	>key_mgmt=WPA-PSK
+	>pairwise=CCMP
+	>auth_alg=OPEN
+	>}
+
+

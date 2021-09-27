@@ -1,0 +1,113 @@
+#Initial Install
+lang=en
+loc=belgium
+key=belgian
+hostname=debian
+install with ethernet enp0s25
+usb with correct iwlwifi .deb package:
+- HP: iwlwifi-7260-17.ucode URL:packages.debian.org/search?keywords=firmware-iwlwifi 
+software=ONLY standard system utilities (+web/print/ssh server
+
+#Install repositories
+Apt install:
+update
+upgrade
+sudo
+git
+xorg
+make
+
+#Install Window Manager, Terminal, Menu
+git clone https://git.suckless.org/dwm
+git clone https://git.suckless.org/st
+git clone https://git.usckless.org/dmenu
+
+sudo make clean install x3
+
+##Dependencies suckless
+Apt install:
+gcc
+libx11-dev
+libxft-dev
+libxinerama-dev
+make
+
+#Startup Edits
+nano /home/matthias/dwm/config.h:
+{ .v = (onst char$[]{ "/usr/local/bin/st", "-e", cmd, NULL} }
+nano /etc/profile:
+	>startx
+nano /home/matthias/.xinitrc:
+	>exec dwm
+
+#Wifi
+ip a "find name of networkcard, for example wlo1"
+
+nano /etc/network/interfaces:
+	>auto wlo1
+	>allow-hotplug wlo1
+	>iface wlo1 inet dhcp
+	>wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+	>iface default inet dhcp
+
+nano /etc/wpa_supplicant/wpa_supplicant.conf:
+	>network={
+	>ssid="name"
+	>psk="pass"
+	>proto=RSN
+	>key_mgmt=WPA-PSK
+	>pairwise=CCMP
+	>auth_alg=OPEN
+	>}
+
+reboot
+
+#Synaptics Trackpad
+cd /etc/X11/xorg.conf.d
+nano -w 70-synaptics.conf
+	>Section "InputClass"
+	>Identifier "touchpad"
+	>Driver "synaptics"
+	>MatchIsTouchpad "on"
+	>Option "Tapping" "on"
+	>Option "NaturalScrolling" "on"
+	>EndSection
+
+#Error managing
+AMD: 
+nano /etc/apt/sources.list:
+	>add "non-free" to all sources
+apt-get update
+apt install firmware-amd-graphics
+nano /etc/modprobe.d/radeon.conf
+	>blacklist radeon
+nano /etc/modprobe.d/amdgpu.conf
+	>options amdgpu si_support=1
+	>options amdgpu cik_support=1
+
+Wifi:
+nano /etc/modprobe.d/iwlwifi.conf
+	>options iwlwifi enbale_ini=N
+
+#Debian Repositories
+Apt install:
+xwallpaper
+compton (see git/st)
+
+##Edits
+nano .xinitrc (always before exec dwm)
+	>xwallpaper --center /hom/matthias/[PATHTOIMG]
+	>compton -f &
+#Extras
+error no pkg? pkgs.org (for examplelibjpeg8 - get amd64.deb - sudo dpkg -i [NAME.deb])
+
+##qDslrDashboard
+download Linux x64
+tar -xzvf [NAME]
+cd in dir
+./qDslrDashboard.sh
+
+apt install libxb-iccm4 libxcb-xkb1 libxcb-icccm4 libxcb-image0 libxcb-render-util0 libxcb-randr0 libxcb-keysys1 libxcb-xinerama0
+SKIPABLE ls -sf /usr/lib/x86_64-linux-gnu/qt5/plugins/platforms/ /usr/bin
+apt install libqt5x11extras5
+
