@@ -9,18 +9,23 @@ usb with correct iwlwifi .deb package:
 software=ONLY standard system utilities (+web/print/ssh server
 
 #Install repositories
+su
 Apt install:
 update
 upgrade
-sudo
 git
 xorg
 make
+sudo
+
+nano /etc/sodoers
+	>ROOT ...
+	>matthias ALL=(ALL:ALL) ALL
 
 #Install Window Manager, Terminal, Menu
-git clone https://git.suckless.org/dwm
-git clone https://git.suckless.org/st
-git clone https://git.usckless.org/dmenu
+git clone https://www.github.com/MatthiasBenaets/dwm	 (https://git.suckless.org/dwm)
+git clone https://www.github.com/MatthiasBenaets/st	 (https://git.suckless.org/st)
+git clone https://git.suckless.org/dmenu
 
 sudo make clean install x3
 
@@ -30,11 +35,11 @@ gcc
 libx11-dev
 libxft-dev
 libxinerama-dev
-make
 
 #Startup Edits
-nano /home/matthias/dwm/config.h:
-{ .v = (onst char$[]{ "/usr/local/bin/st", "-e", cmd, NULL} }
+if using clean suckless download:
+	nano /home/matthias/dwm/config.h:
+		{ .v = (onst char$[]{ "/usr/local/bin/st", "-e", cmd, NULL} }
 nano /etc/profile:
 	>startx
 nano /home/matthias/.xinitrc:
@@ -61,6 +66,10 @@ nano /etc/wpa_supplicant/wpa_supplicant.conf:
 	>}
 
 reboot
+
+nano /home/matthias/.xinitrc:
+	>xrandr --output Virtual1 --mode 1280x960
+	>exec dwm
 
 #Synaptics Trackpad
 cd /etc/X11/xorg.conf.d
@@ -95,7 +104,7 @@ xwallpaper
 compton (see git/st)
 
 ##Edits
-nano .xinitrc (always before exec dwm)
+nano .xinitrc (always before >exec dwm)
 	>xwallpaper --center /hom/matthias/[PATHTOIMG]
 	>compton -f &
 #Extras

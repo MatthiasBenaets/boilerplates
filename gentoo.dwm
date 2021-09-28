@@ -1,4 +1,5 @@
 #Initial Install
+gentoo
 select azerty = 2
 
 ##Prepare Disks
@@ -18,14 +19,14 @@ mount /dev/sda2 /mnt/gentoo
 cd /mnt/gentoo
 links gentoo.org/downloads
 select Stage 3 openrc - save
-tar xpvf stage3-*.tar.xz --xattrs-include'*.*' --numeric-owner
+tar xpvf stage3-*.tar.xz --xattrs-include='*.*' --numeric-owner
 
 nano -w  /mnt/gentoo/etc/portage/make.conf
 	>COMMON_FLAGS="-O2 -pipe -march=native" OR for HP "-march=skylake -O2 -pipe"
 below FFLAGS:
-	>MAKEOPTS="-J[cores]" [cores]=amount
+	>MAKEOPTS="-j[cores]" [cores]=amount
 	>ACCEPT_LICENSE="*"
-	>USE="-aqua -gnome -ios -ipod -kde -systemd -xfce X"
+/*	>USE="-aqua -gnome -ios -ipod -kde -systemd -wayland -xfce alsa X"*/
 
 ##Install Base System
 mirrorselect -i -o >> /mnt/gentoo/etc/portage/make.conf
@@ -51,19 +52,35 @@ mount /dev/sda1 /boot
 emerge-webrsync
 
 eselect profile list
-select am64 stable -> eselect profile set [number]
+select amd64 stable -> eselect profile set [number]
 
 emerge --ask --verbose --update --deep --newuse @world
 
-echo "Europe>Brussels" > /etc/timezone
+echo "Europe/Brussels" > /etc/timezone
 emerge --config sys-libs/timezone-data
 
 nano -w /etc/locale.gen
-	>en_BE ISO-8859-1
-	>en_BE.UTF-8 UTF-8
+	>nl_BE ISO-8859-1
+	>nl_BE.UTF-8 UTF-8
+	>en_US ISO-8859-1
+	>en_US.UTF-8 UTF-8
 	>C.UTF8 UTF-8
+Optional: nano -w /etc/env.d/02locale
+	>LANG=en_US.UTF-8
+	>LC_CTYPE=en_US.UTF-8
+	>LC_NUMERIC=nl_BE.UTF-8
+	>LC_TIME=nl_BE.UTF-8
+	>LC_COLLATE=nl_BE.UTF-8
+	>LC_MONETARY=nl_BE.UTF-8
+	>LC_MESSAGES=en_US.UTF-8
+	>LC_PAPER=nl_BE.UTF-8
+	>LC_NAME=nl_BE.UTF-8
+	>LC_ADDRESS=nl_BE.UTF-8
+	>LC_TELEPHONE=nl_BE.UTF-8
+	>LC_MEASUREMENT=nl_BE.UTF-8
+	>LC_IDENTIFICATION=nl_BE.UTF-8
 
-locale.gen
+locale-gen
 
 eselect locale list
 select locale en_BE.utf8 -> eselect locale set [number]
@@ -81,7 +98,7 @@ emerge --ask sys-kernel/genkernel
 if error:
 	echo "sys-kernel/linux-firmware @BINARY-REDISTRIBUTABLE" | tee -a /etc/portage//package.license
 
-emerge --ask sys-kernel/linux-kernel
+emerge --ask sys-kernel/linux-firmware (if error: run sys-kernel/genkernel again)
 
 ##Configure System
 nano -w /etc/fstab
@@ -103,8 +120,8 @@ ln -s net.lo net.eth0
 rc-update add net.eth0 default
 
 nano -w /etc/hosts
-	>127.0.0.1	gentoo localhost
-	>::1		gentoo localhost
+	>127.0.0.1	[hostname] localhost
+	>::1		[hostname] localhost
 
 passwd
 	My_hard_password
