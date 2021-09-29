@@ -6,10 +6,11 @@ hostname=debian
 install with ethernet enp0s25
 usb with correct iwlwifi .deb package:
 - HP: iwlwifi-7260-17.ucode URL:packages.debian.org/search?keywords=firmware-iwlwifi 
-software=ONLY standard system utilities (+web/print/ssh server
+software=ONLY standard system utilities (+web/print/ssh server)
 
 #Install repositories
 su
+
 Apt install:
 update
 upgrade
@@ -21,8 +22,11 @@ sudo
 nano /etc/sodoers
 	>ROOT ...
 	>matthias ALL=(ALL:ALL) ALL
+su matthias
 
 #Install Window Manager, Terminal, Menu
+mkdir .suckless
+cd into folder
 git clone https://www.github.com/MatthiasBenaets/dwm	 (https://git.suckless.org/dwm)
 git clone https://www.github.com/MatthiasBenaets/st	 (https://git.suckless.org/st)
 git clone https://git.suckless.org/dmenu
@@ -43,6 +47,7 @@ if using clean suckless download:
 nano /etc/profile:
 	>startx
 nano /home/matthias/.xinitrc:
+	>xrandr --output Virtual1 --mode 1280x960
 	>exec dwm
 
 #Wifi
@@ -66,10 +71,6 @@ nano /etc/wpa_supplicant/wpa_supplicant.conf:
 	>}
 
 reboot
-
-nano /home/matthias/.xinitrc:
-	>xrandr --output Virtual1 --mode 1280x960
-	>exec dwm
 
 #Synaptics Trackpad
 cd /etc/X11/xorg.conf.d
@@ -105,7 +106,7 @@ compton (see git/st)
 
 ##Edits
 nano .xinitrc (always before >exec dwm)
-	>xwallpaper --center /hom/matthias/[PATHTOIMG]
+	>xwallpaper --center /home/matthias/[PATHTOIMG]
 	>compton -f &
 #Extras
 error no pkg? pkgs.org (for examplelibjpeg8 - get amd64.deb - sudo dpkg -i [NAME.deb])
