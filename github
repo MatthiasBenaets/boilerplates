@@ -12,7 +12,13 @@ git remote add origin https://github.com/MatthiasBenaets/[name].git
 
 * = new commits
 
-#Template
+##CLONE
+git clone https://github.com/MatthiasBenaets/[name].git
+cd [name]
+git config --global user.email "matthias.benaets@gmail.com"
+git config --global user.name "MatthiasBenaets"
+
+#TEMPLATE .git/config
 [core]
 	repositoryformatversion = 0
 	filemode = true
