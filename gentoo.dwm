@@ -31,7 +31,7 @@ below FFLAGS:
 
 ##Install Base System
 mirrorselect -i -o >> /mnt/gentoo/etc/portage/make.conf
-select belgium mirrors
+select [country] mirrors
 
 mkdir --parents /mnt/gentoo/etc/portage/repos.conf
 cp /mnt/gentoo/usr/share/portage/config/repos.conf /mnt/gentoo/etc/portage/repos.conf/gentoo.conf
@@ -47,7 +47,6 @@ mount --make-rslave /mnt/gentoo/dev
 chroot /mnt/gentoo /bin/bash
 . /etc/profile
 export PS1="(chroot) ${PS1}"
-
 mount /dev/sda1 /boot
 
 emerge-webrsync
@@ -101,7 +100,7 @@ if error:
 
 genkernel all
 
-emerge --ask sys-kernel/linux-firmware (if error: run sys-kernel/genkernel again)
+emerge --ask sys-kernel/linux-firmware
 
 ##Configure System
 nano -w /etc/fstab
@@ -114,8 +113,12 @@ nano -w /etc/conf.d/hostname
 
 emerge --ask --noreplace net-misc/netifrc
 
-ip a (check ethernet name, for example eth0)
 
+nano -w /etc/conf.d/keymaps
+	>keymap="azerty"
+nano -w /etc/conf.d/hwclock
+	>clock="UTC+2"
+ip a (check ethernet name, for example eth0)
 nano -w /etc/conf.d/net
 	>config_eth0="dhcp"
 cd /etc/init.d
@@ -128,11 +131,6 @@ nano -w /etc/hosts
 
 passwd
 	My_hard_password
-
-nano -w /etc/conf.d/keymaps
-	>keymap="azerty"
-nano -w /etc/conf.d/hwclock
-	>clock="UTC+2"
 
 ##Installing Tools
 emerge --ask app-admin/sysklogd
@@ -162,6 +160,13 @@ My_hard_password
 useradd -m -G users,wheel,audio,video,cdrom,usb -s /bin/bash matthias
 passwd matthias
 	My_hard_password
+
+emerge app-admin/sudo
+nano -w /etc/sudoers
+	>%wheel ALL = (ALL)ALL   OR ADD "matthias ALL=(ALL) ALL" bellow root
+
+rm /stage3-*.tar.*
+
 su matthias
 
 #Install Display Server / Window Manager
@@ -171,14 +176,10 @@ below USEFLAGS:
 	>INPUT_DEVICES="libinput synaptics"
 	>VIDEO_CARDS="(nvideo=nouveau;amd=radeon/amdgpu;intel=intel;virtualbox=virtio)"
 
-emerge app-admin/sudo
-nano -w /etc/sudoers
-	>%wheel ALL = (ALL)ALL   OR ADD "matthias ALL=(ALL) ALL" bellow root
-
 emerge -av x11-base/xorg-server x11-base/xorg-drivers
 nano -w /etc/portage/make.conf
 	>USE=" ... elogind X"
-emerge -av x11-base/xorg-server x11-base/xorg-drivers
+
 Optional xterm:
 emerge -av x11-terms/xterm
 

@@ -120,4 +120,3 @@ cd in dir
 apt install libxb-iccm4 libxcb-xkb1 libxcb-icccm4 libxcb-image0 libxcb-render-util0 libxcb-randr0 libxcb-keysys1 libxcb-xinerama0
 SKIPABLE ls -sf /usr/lib/x86_64-linux-gnu/qt5/plugins/platforms/ /usr/bin
 apt install libqt5x11extras5
-
