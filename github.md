@@ -2,7 +2,7 @@
 ### Terminal Commands
 <details>
 <summary>Create</summary>
-```console
+<pre>
 echo "# [repo.name]" >> README.md
 git init
 git add .
@@ -10,36 +10,36 @@ git commit -m "info"
 git branch -M main
 git remote add origin https://github.com/[github.username]/[repo.name].git
 git push (-u origin main)
-```
+</pre>
 </details>
 <details>
 <summary>Commit</summary>
-```console
+<pre>
 git add .
 git commit -m "info"
 git push
-```
+</pre>
 </details>
 <details>
 <summary>Push</summary>
-```console
+<pre>
 git push
-```
+</pre>
 </details>
 <details>
 <summary>Pull</summary>
-```console
+<pre>
 git pull(-u origin main)
-```
+</pre>
 </details>
 <details>
 <summary>Clone</summary>
-```console
+<pre>
 git clone https://github.com/[github.username]/[repo.name].git
 cd [repo.name]
 git config --global user.email "[email]"
 git config --global user.name "MatthiasBenaets"
-```
+</pre>
 </details>
 
 ---
@@ -47,7 +47,7 @@ git config --global user.name "MatthiasBenaets"
 ### Template
 <details>
 <summary>.git/config</summary>
-```C
+<pre>
 [core] 
 	repositoryformatversion = 0
 	filemode = true
@@ -59,7 +59,7 @@ git config --global user.name "MatthiasBenaets"
 [branch "main"]
 	remote = origin
 	merge = refs/heads/main
-```
+</pre>
 </details>
 
 ---
@@ -69,9 +69,9 @@ git config --global user.name "MatthiasBenaets"
 <summary>Personal Access Token</summary>
 [github.com/settings/tokens](https://github.com/settings/tokens)
 <details>
-<summary> </summary>
+<summary>Token</summary>
 MatthiasBenaets <br>
-ghp_AOKK7k63pl3B9FBurFCWMPThm3VjVLC022K0JZ <br>
+Token: see home directory <br>
 Expires: 31/12/2021
 </details> 
 </details>

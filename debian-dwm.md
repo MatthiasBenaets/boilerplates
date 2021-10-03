@@ -15,7 +15,7 @@ software=ONLY standard system utilities (+web/print/ssh server) <br>
 </details>
 <details>
 <summary>Install Needed Packages</summary>
-```console
+<pre>
 su
 apt update
 apt upgrade
@@ -25,11 +25,11 @@ nano /etc/sodoers
 	>ROOT ...
 	>[username] ALL=(ALL:ALL) ALL
 su [username]
-```
+</pre>
 </details>
 <details>
 <summary>Wifi</summary>
-```console
+<pre>
 ip a "find name of networkcard, for example wlo1"
 
 nano /etc/network/interfaces:
@@ -50,7 +50,7 @@ nano /etc/wpa_supplicant/wpa_supplicant.conf:
 	>}
 
 reboot
-```
+</pre>
 </details>
 
 ---
@@ -58,7 +58,7 @@ reboot
 ### Installation Window Manager, Terminal, Menu
 <details>
 <summary>Install Window Manager, Terminal, Menu</summary>
-```console
+<pre>
 mkdir .suckless
 cd into folder
 git clone https://www.github.com/[github.username]/dwm
@@ -66,17 +66,17 @@ git clone https://www.github.com/[github.username]/st
 git clone https://git.suckless.org/dmenu
 
 make clean install x3
-```
+</pre>
 </details>
 <details>
 <summary>Dependencies suckless</summary>
-```console
+<pre>
 apt install gcc libx11-dev libxft-dev libxinerama-dev
-```
+</pre>
 </details>
 <details>
 <summary>Startup Edits</summary>
-```console
+<pre>
 if using clean suckless download:
 	nano /home/matthias/dwm/config.h:
       { .v = (onst char$[]{ "/usr/local/bin/st", "-e", cmd, NULL} }
@@ -85,7 +85,7 @@ nano /etc/profile:
 nano /home/matthias/.xinitrc:
 	>xrandr --output Virtual1 --mode 1280x960
 	>exec dwm
-```
+</pre>
 </details>
 
 ---
@@ -93,22 +93,22 @@ nano /home/matthias/.xinitrc:
 ### Enable Computer Features
 <details>
 <summary>Audio</summary>
-```console
+<pre>
 apt install alsa-utils pulseaudio pavucontrol
 pulseaudio --check
 pulseaudio -D
 alsamixer -> press M for unmute
 pavucontrol
-```
+</pre>
 </details>
 <details>
 <summary>Bluetooth</summary>
-```console
+<pre>
 apt install bluez blueman
-```
+</pre>
 <details>
 <summary>auto switch</summary>
-```console
+<pre>
 nano /etc/pulse/default.pa
 	>.ifexists module-bluetooth-discover.so
 	>load-module module-bluetooth-discover
@@ -120,7 +120,7 @@ nano /etc/bluetooth/audio.conf
 
 pulseaudio -k
 reboot
-```
+</pre>
 </details>
 <br>
 dmenu: <br>
@@ -133,7 +133,7 @@ Should work out of the box
 </details>
 <details>
 <summary>Synaptics Trackpad</summary>
-```console
+<pre>
 cd /etc/X11/xorg.conf.d
 nano -w 70-synaptics.conf
 	>Section "InputClass"
@@ -143,12 +143,12 @@ nano -w 70-synaptics.conf
 	>Option "Tapping" "on"
 	>Option "NaturalScrolling" "on"
 	>EndSection
-```
+</pre>
 </details>
 <details>
 <summary>Error managing</summary>
 AMD:
-```console
+<pre>
 nano /etc/apt/sources.list:
 	>add "non-free" to all sources
 apt-get update
@@ -158,37 +158,36 @@ nano /etc/modprobe.d/radeon.conf
 nano /etc/modprobe.d/amdgpu.conf
 	>options amdgpu si_support=1
 	>options amdgpu cik_support=1
-```
+</pre>
 Wifi:
-```console
+<pre>
 nano /etc/modprobe.d/iwlwifi.conf
 	>options iwlwifi enbale_ini=N
-```
+</pre>
 </details>
 <details>
 <summary>Wallpaper</summary>
-
-```console
+<pre>
 apt install xwallpaper compton
 nano .xinitrc (always before >exec dwm)
 	>xwallpaper --center /home/matthias/[PATHTOIMG]
 	>compton -f &
-```
+</pre>
 </details>
 <details>
 <summary>Extras</summary>
 error no pkg?<br> 
 pkgs.org (for example libjpeg8 - get amd64.deb - sudo dpkg -i [NAME.deb])
-</details>
 <details>
 <summary>qDslrDashboard</summary>
 download Linux x64<br>
 pkgs.org= libjpeg8 && libjpeg-turbo8
-```console
+<pre>
 apt install libqt5x11extras5
 
 tar xzvf [NAME]
 cd in dir
 ./qDslrDashboard.sh
-```
+</pre>
+</details>
 </details>
