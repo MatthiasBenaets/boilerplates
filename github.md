@@ -1,8 +1,8 @@
 # Github Notes
 ### Terminal Commands
 <details>
-<summary>**Create** </summary>
-```
+<summary>Create</summary>
+```console
 echo "# [repo.name]" >> README.md
 git init
 git add .
@@ -13,28 +13,28 @@ git push (-u origin main)
 ```
 </details>
 <details>
-<summary>** Commit** </summary>
-```
+<summary>Commit</summary>
+```console
 git add .
 git commit -m "info"
 git push
 ```
 </details>
 <details>
-<summary>**Push**</summary>
-```
+<summary>Push</summary>
+```console
 git push
 ```
 </details>
 <details>
-<summary>**Pull** </summary>
-```
+<summary>Pull</summary>
+```console
 git pull(-u origin main)
 ```
 </details>
 <details>
-<summary>**Clone**</summary>
-```
+<summary>Clone</summary>
+```console
 git clone https://github.com/[github.username]/[repo.name].git
 cd [repo.name]
 git config --global user.email "[email]"
@@ -46,8 +46,8 @@ git config --global user.name "MatthiasBenaets"
 
 ### Template
 <details>
-<summary>**.git/config**</summary>
-```
+<summary>.git/config</summary>
+```C
 [core] 
 	repositoryformatversion = 0
 	filemode = true
@@ -66,7 +66,7 @@ git config --global user.name "MatthiasBenaets"
 
 ### Token
 <details>
-<summary>**Personal Access Token**</summary>
+<summary>Personal Access Token</summary>
 [github.com/settings/tokens](https://github.com/settings/tokens)
 <details>
 <summary> </summary>

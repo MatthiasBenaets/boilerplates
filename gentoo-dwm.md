@@ -2,16 +2,16 @@
 
 ### Installation Gentoo
 <details>
-<summary>**Start Up**</summary>
+<summary>Start Up</summary>
 On boot:
-```
+```console
 gentoo
 2 = azerty
 ```
 </details>
 <details>
-<summary>**Prepare Disks**</summary>
-```
+<summary>Prepare Disks</summary>
+```console
 lsblk (find disk name, for example sda)
 fdisk /dev/sda
 o 
@@ -26,8 +26,8 @@ mount /dev/sda2 /mnt/gentoo
 ```
 </details>
 <details>
-<summary>**Install Stage3**</summary>
-```
+<summary>Install Stage3</summary>
+```console
 cd /mnt/gentoo
 links gentoo.org/downloads
 select Stage 3 openrc - save
@@ -43,8 +43,8 @@ below FFLAGS:
 ```
 </details>
 <details>
-<summary>**Install Base System**</summary>
-```
+<summary>Install Base System</summary>
+```console
 mirrorselect -i -o >> /mnt/gentoo/etc/portage/make.conf
 select [country] mirrors
 
@@ -82,8 +82,8 @@ nano -w /etc/locale.gen
 	>C.UTF8 UTF-8
 ```
 <details>
-<summary>**Optional**</summary>
-```
+<summary>Optional</summary>
+```console
 nano -w /etc/env.d/02locale
 	>LANG=en_US.UTF-8
 	>LC_CTYPE=en_US.UTF-8
@@ -100,7 +100,7 @@ nano -w /etc/env.d/02locale
 	>LC_IDENTIFICATION=nl_BE.UTF-8
 ```
 </details>
-```
+```console
 locale-gen
 
 eselect locale list
@@ -110,8 +110,8 @@ export PS1="(chroot) ${PS1}"
 ```
 </details>
 <details>
-<summary>**Configure Kernel (Genkernel)**</summary>
-```
+<summary>Configure Kernel (Genkernel)</summary>
+```console
 emerge --ask sys-kernel/gentoo-sources
 eselect kernel list 
 eselect kernel set [number]
@@ -128,12 +128,12 @@ emerge --ask sys-kernel/linux-firmware
 ```
 </details>
 <details>
-<summary>**Configure System**</summary>
-```
+<summary>Configure System</summary>
+```console
 nano -w /etc/fstab
 	>/dev/sda1	/boot		ext2	defaults,noatime	0 2
-	>/dev/sda2	/			ext4	noatime				0 1
-	>/dev/cdrom	/mnt/cdrom	auto	noauto,ro			0 0
+	>/dev/sda2	/		ext4	noatime			0 1
+	>/dev/cdrom	/mnt/cdrom	auto	noauto,ro		0 0
 
 nano -w /etc/conf.d/hostname
 	>hostname="gentoo"
@@ -161,8 +161,8 @@ passwd
 ```    
 </details>
 <details>
-<summary>**Installing Tools**</summary>
-```
+<summary>Installing Tools</summary>
+```console
 emerge --ask app-admin/sysklogd
 rc-update add sysklogd default
 Optional install cron deamon (see handbook)
@@ -171,15 +171,15 @@ emerge --ask sys-fs/e2fsprogs
 emerge --ask net-misc/dhcpcd
 ```
 <details>
-<summary>**Optional wifi**</summary>
-```
+<summary>Optional wifi</summary>
+```console
 emerge --ask net-wireless/iw net-wireless/wpa_supplicant
 ```
 </details>
 </details>
 <details>
-<summary>**Configure Bootloader**</summary>
-```
+<summary>Configure Bootloader</summary>
+```console
 emerge --ask --verbose sys-boot/grub:2
 grub-install /dev/sda
 grub-mkconfig -o /boot/grub/grub.cfg
@@ -192,8 +192,8 @@ reboot
 ```
 </details>
 <details>
-<summary>**Finalizing**</summary>
-```
+<summary>Finalizing</summary>
+```console
 root
 [password]
 
@@ -211,8 +211,8 @@ su [username]
 ```
 </details>
 <details>
-<summary>**Setup Wifi**</summary>
-```
+<summary>Setup Wifi</summary>
+```console
 ip a "find name of networkcard, for example wlo1"
 
 emerge net-wirless/wpa_supplicant
@@ -243,8 +243,8 @@ nano /etc/wpa_supplicant/wpa_supplicant.conf:
 ### Installation Display Server / Window Manager / Terminal
 
 <details>
-<summary>**Xorg**</summary>
-```
+<summary>Xorg</summary>
+```console
 nano -w /etc/portage/make.conf
 below USEFLAGS:
 	>INPUT_DEVICES="libinput synaptics"
@@ -255,8 +255,8 @@ nano -w /etc/portage/make.conf
 	>USE=" ... elogind X"
 ```
 <details>
-<summary>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Optional Xterm**</summary>
-```
+<summary>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Optional Xterm</summary>
+```console
 emerge -av x11-terms/xterm
 
 env-update
@@ -265,8 +265,8 @@ source /etc/profile
 </details>
 </details>
 <details>
-<summary>**Window Manager**</summary>
-```
+<summary>Window Manager</summary>
+```console
 emerge -av x11-wm/dwm x11-terms/st x11-misc/dmenu x11-apps/setxkbmap (x11-apps/xrandr [for VB])
 startx /usr/bin/dwm
 rc-update add elogind boot
@@ -275,8 +275,8 @@ If error:
 ```
 </details>
 <details>
-<summary>**Edit Startup Files**</summary>
-```
+<summary>Edit Startup Files</summary>
+```console
 su [username]
 cd
 nano -w .xinitrc
@@ -298,8 +298,8 @@ startx
 
 ### Patching Suckless dwm/st/dm
 <details>
-<summary>**Patching suckless and edit config**</summary>
-```
+<summary>Patching suckless and edit config</summary>
+```console
 nano /etc/portage/package.use/dwm
 	>x11-wm/dwm savedconfig (or add global use-flag)
 cd /etc/portage/savedconfig/x11-wm/
@@ -321,68 +321,68 @@ startx
 
 ### Wiki Notes
 <details>
-<summary>**Use Flags**</summary>
+<summary>Use Flags</summary>
 For example: neofetch needs imlib
 <details>
 <summary>General</summary>
-```
+```console
 nano /etc/portage/make.conf
 	 >USE="imlib"
 ```
 </details>
 <details>
 <summary>Specific</summary>
-```
+```console
 nano /etc/portage/package.use/neofetch
 	>www-client/w3m-* imlib
 ```
 </details>
 </details>
 <details>
-<summary>**Install, Uninstall, Update Packages**</summary>
+<summary>Install, Uninstall, Update Packages</summary>
 <details>
 <summary>Install</summary>
-```
+```console
 emerge --ask [package]
 ```
 </details>
 <details>
 <summary>Uninstall</summary>
 -Remove without checking dependencies:
-```
+```console
 emerge --unmurge --ask [package]
 ```
 -Remove but check dependcencies first:
-```
+```console
 emerge --ask --verbose --depclean [package]
 ```
 -Remove unused dependencies:
-```
+```console
 emerge --ask --depclean
 . /etc/profile
 ```
 -Remove from world favorites and afterwards delete with dependencies only used by package **Recommended**
-```
+```console
 emerge --ask --deselect [package] (removed from world favorites)
 emerge --ask --depclean
 ```
 -Add back to world favorites
-```
+```console
 emerge --ask --noreplace [package]
 ```
 </details>
 <details>
 <summary>Update</summary>
 -Update
-```
+```console
 emerge --sync
 ```
 -Upgrade
-```
+```console
 emerge -avDuN @world --> upgrades all packages from /var/lib/portage/world
 ```
 -Getting IMPORTANT messages when emerging
-```
+```console
 cd [PathThatIsGiven]
 ls -a > check ._cfg0000* file and replace/delete if needed
 etc-update -> should not have any messages anymore
@@ -390,28 +390,28 @@ etc-update -> should not have any messages anymore
 </details>
 <details>
 <summary>Check Dependencies</summary>
-```
+```console
 emerge gentoolkit
 equery d [package/dependency] -> get list of packages that depend on it
 ```
 </details>
 <details>
 <summary>Check Vulnerable packages</summary>
-```
+```console
 glsa-check -t all
 if found: glsa-check -f all
 ```
 </details>
 <details>
 <summary>Clean Up System</summary>
-```
+```console
 emerge gentoolkit
 eclean-dist -dp
 eclean-dist -d
 ```
 </details>
 <details>
-<summary>**DO BIWEEKLY**</summary>
+<summary>DO BIWEEKLY</summary>
 emerge --sync
 glsa-check -t all
 eclean-dist -d

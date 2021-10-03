@@ -2,7 +2,7 @@
 # Debian - DWM - Setup
 ###Installation Debian
 <details>
-<summary>**Initial Install**</summary>
+<summary>Initial Install</summary>
 lang=en <br>
 loc=belgium <br>
 key=belgian <br>
@@ -14,8 +14,8 @@ usb with correct iwlwifi .deb package: <br>
 software=ONLY standard system utilities (+web/print/ssh server) <br>
 </details>
 <details>
-<summary>**Install Needed Packages**</summary>
-```
+<summary>Install Needed Packages</summary>
+```console
 su
 apt update
 apt upgrade
@@ -28,8 +28,8 @@ su [username]
 ```
 </details>
 <details>
-<summary>**Wifi**</summary>
-```
+<summary>Wifi</summary>
+```console
 ip a "find name of networkcard, for example wlo1"
 
 nano /etc/network/interfaces:
@@ -57,8 +57,8 @@ reboot
 
 ### Installation Window Manager, Terminal, Menu
 <details>
-<summary>**Install Window Manager, Terminal, Menu**</summary>
-```
+<summary>Install Window Manager, Terminal, Menu</summary>
+```console
 mkdir .suckless
 cd into folder
 git clone https://www.github.com/[github.username]/dwm
@@ -69,14 +69,14 @@ make clean install x3
 ```
 </details>
 <details>
-<summary>**Dependencies suckless**</summary>
-```
+<summary>Dependencies suckless</summary>
+```console
 apt install gcc libx11-dev libxft-dev libxinerama-dev
 ```
 </details>
 <details>
-<summary>**Startup Edits**</summary>
-```
+<summary>Startup Edits</summary>
+```console
 if using clean suckless download:
 	nano /home/matthias/dwm/config.h:
       { .v = (onst char$[]{ "/usr/local/bin/st", "-e", cmd, NULL} }
@@ -92,8 +92,8 @@ nano /home/matthias/.xinitrc:
 
 ### Enable Computer Features
 <details>
-<summary>**Audio**</summary>
-```
+<summary>Audio</summary>
+```console
 apt install alsa-utils pulseaudio pavucontrol
 pulseaudio --check
 pulseaudio -D
@@ -102,13 +102,13 @@ pavucontrol
 ```
 </details>
 <details>
-<summary>**Bluetooth**</summary>
-```
+<summary>Bluetooth</summary>
+```console
 apt install bluez blueman
 ```
 <details>
-<summary>**auto switch**</summary>
-```
+<summary>auto switch</summary>
+```console
 nano /etc/pulse/default.pa
 	>.ifexists module-bluetooth-discover.so
 	>load-module module-bluetooth-discover
@@ -123,17 +123,17 @@ reboot
 ```
 </details>
 <br>
-**dmenu:** <br>
+dmenu: <br>
 blueman-applets <br>
 blueman-manager
 </details>
 <details>
-<summary>**Webcam and Microphone**</summary>
+<summary>Webcam and Microphone</summary>
 Should work out of the box
 </details>
 <details>
-<summary>**Synaptics Trackpad**</summary>
-```
+<summary>Synaptics Trackpad</summary>
+```console
 cd /etc/X11/xorg.conf.d
 nano -w 70-synaptics.conf
 	>Section "InputClass"
@@ -146,9 +146,9 @@ nano -w 70-synaptics.conf
 ```
 </details>
 <details>
-<summary>**Error managing**</summary>
-**AMD:** 
-```
+<summary>Error managing</summary>
+AMD:
+```console
 nano /etc/apt/sources.list:
 	>add "non-free" to all sources
 apt-get update
@@ -159,16 +159,16 @@ nano /etc/modprobe.d/amdgpu.conf
 	>options amdgpu si_support=1
 	>options amdgpu cik_support=1
 ```
-**Wifi:**
-```
+Wifi:
+```console
 nano /etc/modprobe.d/iwlwifi.conf
 	>options iwlwifi enbale_ini=N
 ```
 </details>
 <details>
-<summary>**Wallpaper**</summary>
+<summary>Wallpaper</summary>
 
-```
+```console
 apt install xwallpaper compton
 nano .xinitrc (always before >exec dwm)
 	>xwallpaper --center /home/matthias/[PATHTOIMG]
@@ -176,14 +176,15 @@ nano .xinitrc (always before >exec dwm)
 ```
 </details>
 <details>
-<summary>**Extras**</summary>
+<summary>Extras</summary>
 error no pkg?<br> 
 pkgs.org (for example libjpeg8 - get amd64.deb - sudo dpkg -i [NAME.deb])
+</details>
 <details>
-<summary>**qDslrDashboard**</summary>
+<summary>qDslrDashboard</summary>
 download Linux x64<br>
 pkgs.org= libjpeg8 && libjpeg-turbo8
-```
+```console
 apt install libqt5x11extras5
 
 tar xzvf [NAME]
