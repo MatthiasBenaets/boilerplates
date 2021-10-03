@@ -1,6 +1,5 @@
-
 # Debian - DWM - Setup
-###Installation Debian
+### Installation Debian
 <details>
 <summary>Initial Install</summary>
 lang=en <br>
