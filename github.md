@@ -67,7 +67,7 @@ git config --global user.name "MatthiasBenaets"
 ### Token
 <details>
 <summary>Personal Access Token</summary>
-[github.com/settings/tokens](https://github.com/settings/tokens)
+<a href="https://github.com/settings/tokens">github.com/settings/tokens</a><b>
 <details>
 <summary>Token</summary>
 MatthiasBenaets <br>

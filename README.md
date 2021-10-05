@@ -1,11 +1,11 @@
 # Notes
 <details>
-<summary>Linux</summary>
-[Debian dwm](debian-dwm.md)
-[Gentoo dwm](gentoo-dwm.md)
-</details
+<summary><b>Linux</b></summary>
+<a href="debian-dwm.md">Debian dwm</a><br>
+<a href="gentoo-dwm.md">Gentoo dwm</a><br>
+</details>
 <details>
-<summary>Github</summary>
-[Github](github.md)
+<summary><b>Github</b></summary>
+<a href="github.md">Github</a><br>
 </details>
 

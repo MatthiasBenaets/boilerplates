@@ -8,7 +8,7 @@ key=belgian <br>
 hostname=debian <br>
 install with ethernet enp0s25 <br>
 usb with correct iwlwifi .deb package: <br>
-- HP: [iwlwifi-7260-17.ucode](www.packages.debian.org/search?keywords=firmware-iwlwifi) <br>
+- HP: <a href="www.packages.debian.org/search?keywords=firmware-iwlwifi">iwlwifi-7260-17.ucode</a><br>
 
 software=ONLY standard system utilities (+web/print/ssh server) <br>
 </details>
