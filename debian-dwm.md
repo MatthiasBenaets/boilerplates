@@ -70,7 +70,7 @@ make clean install x3
 <details>
 <summary>Dependencies suckless</summary>
 <pre>
-apt install gcc libx11-dev libxft-dev libxinerama-dev
+apt install gcc libx11-dev libxft-dev libxinerama-dev fonts-font-awesome
 </pre>
 </details>
 <details>
@@ -165,15 +165,49 @@ nano /etc/modprobe.d/iwlwifi.conf
 </pre>
 </details>
 <details>
-<summary>Wallpaper</summary>
+<summary>Compositor & Image Viewer</summary>
 <pre>
-apt install xwallpaper compton
+apt install feh compton
 nano .xinitrc (always before >exec dwm)
-	>xwallpaper --center /home/matthias/[PATHTOIMG]
+	>feh --bg-center /home/matthias/[PATHTOIMG]
 	>compton -f &
 </pre>
 </details>
 <details>
+<details>
+<summary>File Manager</summary>
+<pre>
+apt install ranger
+ranger --copy-config=all
+</pre>
+</details>
+<details>
+
+---
+
+### Customization
+
+<summary>Patching and Dotfiles</summary>
+<details>
+<summary>Suckless Patching</summary>
+Save patches from Suckless website and move to correct directory.
+<pre>
+sudo patch < [patch.name]
+Best practice: manually change the config.def.h files
+sudo make clean install
+reboot
+</pre>
+</details>
+<details>
+<summary>Ranger</summary>
+<pre>
+nano .config/ranger/rc.conf
+	>set preview_images true
+	>set preview_images_method ueberzug
+	>set draw_borders true
+</pre>
+</details>
+</details>
 <summary>Extras</summary>
 error no pkg?<br> 
 pkgs.org (for example libjpeg8 - get amd64.deb - sudo dpkg -i [NAME.deb])
