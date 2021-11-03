@@ -338,7 +338,7 @@ nano /etc/portage/package.use/neofetch
 <details>
 <summary>Install, Uninstall, Update Packages</summary>
 <details>
-<summary>Intall</summary>
+<summary>Install</summary>
 <pre>
 emerge --ask [package]
 </pre>

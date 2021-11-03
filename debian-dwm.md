@@ -174,19 +174,18 @@ nano .xinitrc (always before >exec dwm)
 </pre>
 </details>
 <details>
-<details>
 <summary>File Manager</summary>
 <pre>
 apt install ranger
 ranger --copy-config=all
 </pre>
 </details>
-<details>
 
 ---
 
 ### Customization
 
+<details>
 <summary>Patching and Dotfiles</summary>
 <details>
 <summary>Suckless Patching</summary>
@@ -208,6 +207,7 @@ nano .config/ranger/rc.conf
 </pre>
 </details>
 </details>
+<details>
 <summary>Extras</summary>
 error no pkg?<br> 
 pkgs.org (for example libjpeg8 - get amd64.deb - sudo dpkg -i [NAME.deb])
