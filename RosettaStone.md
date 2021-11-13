@@ -1,5 +1,7 @@
 # Rosetta Stone
 
+scroll and shift-scroll
+
 | Action | Void | Arch | Red Hat/Fedora | Debian/Ubuntu | SUSE/openSUSE | Gentoo |
 | :---   | :--- | :--- | :---           | :---          | :---          | :---   |
 | Install a package(s) by name| xbps-install	| pacman -S	| dnf install	|apt-get install	|zypper install zypper in	|emerge [-a] |

@@ -1,7 +1,7 @@
 # Apt - Pacman - Xbps - DWM - Setup
-### Installation Debian
+### Installation
 <details>
-<summary>Initial Install</summary>
+<summary>Initial Install Debian</summary>
 lang=en <br>
 loc=belgium <br>
 key=belgian <br>
@@ -183,7 +183,7 @@ pacman -S tlp
 systemctl enable tlp.service
 xbps-install tlpln -s /etc/sv/tlp /var/service
 </pre>
-</details
+</details>
 <details>
 <summary>Error managing Debian</summary>
 AMD:
