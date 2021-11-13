@@ -1,4 +1,4 @@
-# Debian - DWM - Setup
+# Apt - Pacman - Xbps - DWM - Setup
 ### Installation Debian
 <details>
 <summary>Initial Install</summary>
@@ -16,11 +16,15 @@ software=ONLY standard system utilities (+web/print/ssh server) <br>
 <summary>Install Needed Packages</summary>
 <pre>
 su
-apt update
-apt upgrade
-apt install sudo xorg make git
+apt update &&apt upgrade
+pacman -Syu
+xbps-install -Suy
 
-nano /etc/sodoers
+apt install sudo xorg make git
+pacman -S xorg make git
+xbps-install xorg make git
+
+nano /etc/sudoers
 	>ROOT ...
 	>[username] ALL=(ALL:ALL) ALL
 su [username]
@@ -49,6 +53,16 @@ nano /etc/wpa_supplicant/wpa_supplicant.conf:
 	>}
 
 reboot
+
+OR
+
+apt-get install network-manager
+pacman -S networkmanager
+systemctl enable NetworkManager.service
+xbps-install NetworkManager
+sv down dhcpcd
+sudo rm /var/service/dhcpcd
+sudo ln -s /etc/sv/NetworkManager /var/service
 </pre>
 </details>
 
@@ -58,19 +72,25 @@ reboot
 <details>
 <summary>Install Window Manager, Terminal, Menu</summary>
 <pre>
-mkdir .suckless
-cd into folder
-git clone https://www.github.com/[github.username]/dwm
-git clone https://www.github.com/[github.username]/st
-git clone https://git.suckless.org/dmenu
+git clone https://www.github.com/[github.username]/dwm .dwm
+git clone https://www.github.com/[github.username]/st .st
+git clone https://www.github.com/[github.username]/dmenu .dmenu
+git clone https://www.github.com/[github.username]/dwmblocks .dwmblocks
 
-make clean install x3
+make clean install x4
+git clone https://www.github.com/[github.username]/dotfiles .dotfiles
+cp -r .dotfiles/. $HOME 
 </pre>
 </details>
 <details>
-<summary>Dependencies suckless</summary>
+<summary>Dependencies</summary>
 <pre>
-apt install gcc libx11-dev libxft-dev libxinerama-dev fonts-font-awesome
+apt install gcc libx11-dev libxft-dev libxinerama-dev (libx11-xcb-dev libxcb-res0-dev fonts-font-awesome sxhkd feh compton python3-pip)
+pip3 install ueberzug
+
+pacman -s gcc libx11 libxft libxinerama (libxcb xorg-setxkbmap xorg-xrandr xorg-xsetroot ttf-font-awesome sxhkd  feh xcompmgr ueberzug)
+
+xbps-install pkg-config libX11-devel libXft-devel libXinerama-devel (setxkbmap setxkbmap sxetroot font-awesome sxhkd feh compton ranger ueberzug)
 </pre>
 </details>
 <details>
@@ -78,10 +98,10 @@ apt install gcc libx11-dev libxft-dev libxinerama-dev fonts-font-awesome
 <pre>
 if using clean suckless download:
 	nano /home/matthias/dwm/config.h:
-      { .v = (onst char$[]{ "/usr/local/bin/st", "-e", cmd, NULL} }
-nano /etc/profile:
+      { .v = (const char$[]{ "/usr/local/bin/st", "-e", cmd, NULL} }
+vim /etc/profile:
 	>startx
-nano /home/matthias/.xinitrc:
+vim /home/matthias/.xinitrc:
 	>xrandr --output Virtual1 --mode 1280x960
 	>exec dwm
 </pre>
@@ -93,27 +113,35 @@ nano /home/matthias/.xinitrc:
 <details>
 <summary>Audio</summary>
 <pre>
-apt install alsa-utils pulseaudio pavucontrol
+apt install alsa-utils pulseaudio pulsemixer
+pacman -S alsa-utils pulseaudio pulsemixer
+xbps-install alsa-utils pulseaudio pulsemixer
+
 pulseaudio --check
 pulseaudio -D
-alsamixer -> press M for unmute
-pavucontrol
+alsamixer -> press M for unmute -> select correct sound card
 </pre>
 </details>
 <details>
 <summary>Bluetooth</summary>
 <pre>
-apt install bluez blueman
+apt install bluez blueman pulseaudio-module-bluetooth
+pacman -S bluez bluez-utils blueman pulseaudio-bluetooth
+systemctl enable bluetooth.service
+xbps-install bluez blueman bluez-alsa
+sudo ln -s /etc/sv/bluetoothd /var/service/
+sudo ln -s /etc/sv/dbus /var/service/
+
 </pre>
 <details>
 <summary>auto switch</summary>
 <pre>
-nano /etc/pulse/default.pa
+vim /etc/pulse/default.pa
 	>.ifexists module-bluetooth-discover.so
 	>load-module module-bluetooth-discover
 	>load-module module-switch-on-connect
 	>.endif
-nano /etc/bluetooth/audio.conf
+vim /etc/bluetooth/audio.conf
 	>[General]
 	>Disable=Headset
 
@@ -133,34 +161,46 @@ Should work out of the box
 <details>
 <summary>Synaptics Trackpad</summary>
 <pre>
+apt-get install libinput-bin
+pacman -S libinput
+xbps-install libinput
+
 cd /etc/X11/xorg.conf.d
-nano -w 70-synaptics.conf
+nano -w 30-tocuhpad.conf
 	>Section "InputClass"
-	>Identifier "touchpad"
-	>Driver "synaptics"
-	>MatchIsTouchpad "on"
+	>Identifier "devname"
+	>Driver "libinput"
 	>Option "Tapping" "on"
-	>Option "NaturalScrolling" "on"
+	>Option "NaturalScrolling" "true"
 	>EndSection
 </pre>
 </details>
 <details>
-<summary>Error managing</summary>
+<summary>Power Management Laptop</summary>
+<pre>
+apt-get install tlp
+pacman -S tlp
+systemctl enable tlp.service
+xbps-install tlpln -s /etc/sv/tlp /var/service
+</pre>
+</details
+<details>
+<summary>Error managing Debian</summary>
 AMD:
 <pre>
-nano /etc/apt/sources.list:
+vim /etc/apt/sources.list:
 	>add "non-free" to all sources
 apt-get update
 apt install firmware-amd-graphics
-nano /etc/modprobe.d/radeon.conf
+vim /etc/modprobe.d/radeon.conf
 	>blacklist radeon
-nano /etc/modprobe.d/amdgpu.conf
+vim /etc/modprobe.d/amdgpu.conf
 	>options amdgpu si_support=1
 	>options amdgpu cik_support=1
 </pre>
 Wifi:
 <pre>
-nano /etc/modprobe.d/iwlwifi.conf
+vim /etc/modprobe.d/iwlwifi.conf
 	>options iwlwifi enbale_ini=N
 </pre>
 </details>
@@ -168,16 +208,20 @@ nano /etc/modprobe.d/iwlwifi.conf
 <summary>Compositor & Image Viewer</summary>
 <pre>
 apt install feh compton
-nano .xinitrc (always before >exec dwm)
-	>feh --bg-center /home/matthias/[PATHTOIMG]
-	>compton -f &
+pacman -S feh xcompmgr
+xbps-install feh compton
+
+vim .xinitrc (always before >exec dwm)
+	>feh --bg-center $HOME/[PATHTOIMG]
+	>compton -f & / xcompmgr -f &
 </pre>
 </details>
 <details>
 <summary>File Manager</summary>
 <pre>
 apt install ranger
-ranger --copy-config=all
+pacman -S ranger
+xbps-install ranger
 </pre>
 </details>
 
@@ -193,14 +237,20 @@ Save patches from Suckless website and move to correct directory.
 <pre>
 sudo patch < [patch.name]
 Best practice: manually change the config.def.h files
+rm config.h
 sudo make clean install
 reboot
 </pre>
 </details>
 <details>
-<summary>Ranger</summary>
+<summary>Dotfiles</summary>
 <pre>
-nano .config/ranger/rc.conf
+cp -r $HOME/.dotfiles .
+</details>
+<details>
+<summary>Ranger preview</summary>
+<pre>
+vim .config/ranger/rc.conf
 	>set preview_images true
 	>set preview_images_method ueberzug
 	>set draw_borders true
@@ -208,11 +258,11 @@ nano .config/ranger/rc.conf
 </details>
 </details>
 <details>
-<summary>Extras</summary>
+<summary>Extras Debian</summary>
 error no pkg?<br> 
 pkgs.org (for example libjpeg8 - get amd64.deb - sudo dpkg -i [NAME.deb])
 <details>
-<summary>qDslrDashboard</summary>
+<summary>for example qDslrDashboard</summary>
 download Linux x64<br>
 pkgs.org= libjpeg8 && libjpeg-turbo8
 <pre>

@@ -1,7 +1,7 @@
 # Notes
 <details>
 <summary><b>Linux</b></summary>
-<a href="debian-dwm.md">Debian dwm</a><br>
+<a href="general-dwm.md">General dwm</a><br>
 <a href="gentoo-dwm.md">Gentoo dwm</a><br>
 </details>
 <details>
