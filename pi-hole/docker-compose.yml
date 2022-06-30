@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  pihole:
+    image: pihole/pihole:latest
+    container_name: pihole
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - 53:53/udp
+      - 53:53/tcp
+      - 67:67/udp
+      - 80:80/tcp
+      - 443:443/tcp
+    environment:
+      - TZ=Europe/Brussels
+      - WEBPASSWORD=password
+    volumes:
+      - /home/matthias/Docker/pihole:/etc/pihole
+      - /home/matthias/Docker/dnsmas.q:/etc/dnsmasq.d

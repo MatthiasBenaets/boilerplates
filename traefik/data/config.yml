@@ -1,0 +1,27 @@
+http:
+  routers:
+    plex:
+      entryPoints:
+        - "https"
+      rule: "Host(`wildcard.domain.example`)"
+      tls:
+        certResolver: cloudflare
+      service: plex
+    pi:
+      entryPoints:
+        - "https"
+      rule: "Host(`wildcard.domain.example`)"
+      tls:
+        certResolver: cloudflare
+      service: pi
+  services:
+    plex:
+      loadBalancer:
+        servers:
+          - url: "http://<local host ip>:32400"
+        passHostHeader: true
+    pi:
+      loadBalancer:
+        servers:
+          - url: "http://<local host ip>"
+        passHostHeader: true

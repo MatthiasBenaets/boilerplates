@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  duckdns:
+    image: linuxserver/duckdns:latest
+    container_name: duckdns
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Brussels
+      - SUBDOMAINS=duckdnssubdomain1,subdomain2
+      - TOKEN=duckdnstoken
+      - LOG_FILE=false                  # Need volume if this is active
+    volumes:
+      - /home/matthias/Docker/duckdns:/config
+    restart: unless-stopped

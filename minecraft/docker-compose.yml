@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  minecraft:
+    image: itzg/minecraft-server
+    container_name: minecraft
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+    ports:
+      - 25565:25565
+    environment:
+      EULA: "TRUE"
+      #TYPE: "BUKKIT"
+      OPS: "Raaawr"
+      ENABLE_WHITELIST: "TRUE"
+      ENFORCE_WHITELIST: "TRUE"
+    volumes:
+      - minecraftdata:/data
+      - /home/matthias/Server/minecraft/plugins:/plugins
+
+volumes:
+  minecraftdata:
+    external: true                    # $ docker volume create minecraftdata

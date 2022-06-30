@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  rtmp:
+    image: tiangolo/nginx-rtmp
+    container_name: rtmp
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - 1936:1935

@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  hello:
+    image: nginxdemos/hello
+    container_name: hello
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.hello.rule=Host(`home.lan`)"
+      - "traefik.http.services.hello.loadbalancer.server.port=80"
+      - "traefik.docker.network=proxy"
+
+networks:
+  proxy:
+    external: true
