@@ -13,4 +13,4 @@ services:
     environment:
       - TZ=Europe/Brussels
     volumes:
-      - /home/matthias/Docker/zoffline:/usr/src/app/zwift-offline/storage
+      - <path/to/host/storage>:/usr/src/app/zwift-offline/storage

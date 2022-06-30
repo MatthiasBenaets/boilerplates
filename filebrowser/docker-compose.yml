@@ -13,19 +13,19 @@ services:
       - PUID=1000     # just run $ id
       - GUID=1000
     volumes:
-      - /home/Matthias:/srv
-      - /home/Matthias/Docker/filebrowser/filebrowser.db:/database/filebrowser.db   # $ touch filebrowser.db
-      #- /home/Matthias/Docker/filebrowser/settings.json:/config/settings.json
+      - </path/to/chosen/host/root>:/srv
+      - </path/to/filebrowser.db/on/host>:/database/filebrowser.db   # $ touch filebrowser.db
+      #- <path/to/settings.json/on/host>:/config/settings.json
     labels:
       # Enable Traefik Overlay
       - "traefik.enable=true"
       # Router: HTTP redirect
       - "traefik.http.routers.filebrowser.entrypoints=http"
-      - "traefik.http.routers.filebrowser.rule=Host(`wildcard.domain.example`)"
+      - "traefik.http.routers.filebrowser.rule=Host(`<wildcard.domain.example>`)"
       - "traefik.http.middlewares.filebrowser-https-redirect.redirectscheme.scheme=https"
       # Router: HTTPS for TLS
       - "traefik.http.routers.filebrowser-secure.entrypoints=https"
-      - "traefik.http.routers.filebrowser-secure.rule=Host(`wildcard.domain.example`)"
+      - "traefik.http.routers.filebrowser-secure.rule=Host(`<wildcard.domain.example>`)"
       - "traefik.http.routers.filebrowser-secure.tls=true"
       # Middleware
       - "traefik.http.routers.filebrowser.middlewares=filebrowser-https-redirect"

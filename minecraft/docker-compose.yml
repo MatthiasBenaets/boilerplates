@@ -17,8 +17,10 @@ services:
       ENFORCE_WHITELIST: "TRUE"
     volumes:
       - minecraftdata:/data
-      - /home/matthias/Server/minecraft/plugins:/plugins
+      - </path/to/host/plugins>:/plugins
 
 volumes:
   minecraftdata:
     external: true                    # $ docker volume create minecraftdata
+
+# Connect to <hostip>:25565

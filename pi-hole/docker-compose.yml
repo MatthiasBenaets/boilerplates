@@ -17,5 +17,5 @@ services:
       - TZ=Europe/Brussels
       - WEBPASSWORD=password
     volumes:
-      - /home/matthias/Docker/pihole:/etc/pihole
-      - /home/matthias/Docker/dnsmas.q:/etc/dnsmasq.d
+      - <path/to/host/pihole>:/etc/pihole
+      - <path/to/host/dnsmasq.d>:/etc/dnsmasq.d

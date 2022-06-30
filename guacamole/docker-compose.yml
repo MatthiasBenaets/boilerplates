@@ -8,17 +8,17 @@ services:
     networks:
       - proxy
     volumes:
-      - /home/matthias/Server/guacamole/config:/config
+      - </path/to/host/config>:/config
     labels:
       # Enable Traefik overlay
       - "traefik.enable=true"
       # Router: HTTP redirect
       - "traefik.http.routers.guacamole.entrypoints=http"
-      - "traefik.http.routers.guacamole.rule=Host(`wildcard.domain.example`)"
+      - "traefik.http.routers.guacamole.rule=Host(`<wildcard.domain.example>`)"
       - "traefik.http.middlewares.guacamole-https-redirect.redirectscheme.scheme=https"
       # Router: HTTPS for TLS
       - "traefik.http.routers.guacamole-secure.entrypoints=https"
-      - "traefik.http.routers.guacamole-secure.rule=Host(`wildcard.domain.example`)"
+      - "traefik.http.routers.guacamole-secure.rule=Host(`<wildcard.domain.example>`)"
       - "traefik.http.routers.guacamole-secure.tls=true"
       # Middleware
       - "traefik.http.routers.guacamole.middlewares=guacamole-https-redirect"

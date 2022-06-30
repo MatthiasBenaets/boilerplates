@@ -9,9 +9,8 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Brussels
-      - SUBDOMAINS=duckdnssubdomain1,subdomain2
-      - TOKEN=duckdnstoken
+      - SUBDOMAINS=<duckdns subdomain1>,<subdomain2>
+      - TOKEN=<duckdns token>
       - LOG_FILE=false                  # Need volume if this is active
     volumes:
-      - /home/matthias/Docker/duckdns:/config
-    restart: unless-stopped
+      - </path/to/host/config>:/config
