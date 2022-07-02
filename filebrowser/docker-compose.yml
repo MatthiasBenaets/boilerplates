@@ -11,11 +11,11 @@ services:
       - proxy
     environment:
       - PUID=1000     # just run $ id
-      - GUID=1000
+      - PGID=100
     volumes:
       - </path/to/chosen/host/root>:/srv
       - </path/to/filebrowser.db/on/host>:/database/filebrowser.db   # $ touch filebrowser.db
-      #- <path/to/settings.json/on/host>:/config/settings.json
+      - </path/to/settings.json/on/host>:/config/settings.json
     labels:
       # Enable Traefik Overlay
       - "traefik.enable=true"
@@ -40,3 +40,6 @@ networks:
     external: true
 
 # Login: admin:admin
+#
+# Change branding path to /srv/<path/to/themes> or add as extra volume and point to volume
+# Trash bin: Global Settings - Command runner - Before delete - /bin/sh -c 'if [[ "$FILE" != "/srv/<path/to/trash>/"* ]]; then mv $FILE /srv/<path/to/trash>; fi'

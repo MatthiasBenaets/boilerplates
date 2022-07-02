@@ -19,7 +19,7 @@ services:
       # Router: HTTP redirect
       - "traefik.http.routers.portainer.entrypoints=http"
       - "traefik.http.routers.portainer.rule=Host(`<wildcard.domain.example>`)"
-      # Router: HHTPS for TLS
+      # Router: HTTPS for TLS
       - "traefik.http.routers.portainer-secure.entrypoints=https"
       - "traefik.http.routers.portainer-secure.rule=Host(`<wildcard.domain.example>`)"
       - "traefik.http.routers.portainer-secure.tls=true"

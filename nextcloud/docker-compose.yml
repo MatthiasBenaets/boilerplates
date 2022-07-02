@@ -1,0 +1,90 @@
+version: '3'
+
+services:
+  nextcloud:
+    image: nextcloud
+    container_name: nextcloud
+    restart: unless-stopped
+    links:
+      - mariadb
+    networks:
+      - proxy
+    environment:
+      - MYSQL_PASSWORD=password
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_HOST=mariadb
+    volumes:
+      - </path/to/host/data>:/var/www/html
+    labels:
+      # Enable Traefik overlay
+      - "traefik.enable=true"
+
+      - "traefik.http.routers.nextcloud.entrypoints=http"
+      - "traefik.http.routers.nextcloud.rule=Host(`<wildcard.domain.example nextcloud>`)"
+      # Router: HTTPS for TLS
+      - "traefik.http.routers.nextcloud-secure.entrypoints=https"
+      - "traefik.http.routers.nextcloud-secure.rule=Host(`<wildcard.domain.example nextcloud>`)"
+      - "traefik.http.routers.nextcloud-secure.tls=true"
+      - "traefik.http.routers.nextcloud-secure.service=nextcloud"
+      # Middleware
+      - "traefik.http.middlewares.nextcloud-https-redirect.redirectscheme.scheme=https"
+      # Service
+      - "traefik.http.routers.nextcloud.middlewares=nextcloud-https-redirect"
+      - "traefik.http.services.nextcloud.loadbalancer.server.port=80"
+      # Network
+      - "traefik.docker.network=proxy"
+
+  mariadb:
+    image: mariadb:10.5
+    restart: unless-stopped
+    container_name: nextclouddb
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    networks:
+      - proxy
+    volumes:
+      - </path/to/host/datadb>:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_PASSWORD=password
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+
+  # Used to edit files. Not required and an alternative is OnlyOffice. In this case install Community Document Server and OnlyOffice.
+  collabora:
+    image: collabora/code
+    container_name: collabora
+    restart: unless-stopped
+    networks:
+      - proxy
+    ports:
+      - 9980:9980
+    expose:
+      - "9980"      
+    environment:
+      - domain=<wildcard.domain.example nextcloud>
+      - 'dictionaries=en_US,nl_BE'
+      - VIRTUAL_PROTO=http
+      - VIRTUAL_PORT=9980
+      - VIRTUAL_HOST=<wildcard.domain.example of collabora>
+      - "extra_params=--o:ssl.enable=false  --o:ssl.termination=true"
+    cap_add:
+      - MKNOD
+    tty: true
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.collabora.rule=Host(`<wildcard.domain.example collabora>`)"
+      - "traefik.http.routers.collabora.entrypoints=http"
+      - "traefik.http.middlewares.collabora-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.collabora.middlewares=collabora-https-redirect"
+      - "traefik.http.routers.collabora-secure.entrypoints=https"
+      - "traefik.http.routers.collabora-secure.rule=Host(`<wildcard.domain.example collabora`)"
+      - "traefik.http.routers.collabora-secure.tls=true"
+    # To use collabora, install Nextcloud Office and add https://<wildcard.hostname.example collabora> in the settings under office
+
+networks:
+  proxy:
+    external: true
+
+# If you want to use the Nextcloud app on mobile but receive some errors, go to </path/to/host/data>/config and add "'overwriteprotocol' => 'https'," inbetween the first rounded brackets of file "config.php"
