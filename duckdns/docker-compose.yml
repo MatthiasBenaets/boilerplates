@@ -6,8 +6,8 @@ services:
     container_name: duckdns
     restart: unless-stopped
     environment:
-      - PUID=1000
-      - PGID=1000
+      - PUID=<$ id -u>
+      - PGID=<$ id -g>
       - TZ=Europe/Brussels
       - SUBDOMAINS=<duckdns subdomain1>,<subdomain2>
       - TOKEN=<duckdns token>

@@ -10,11 +10,11 @@ services:
     networks:
       - proxy
     environment:
-      - PUID=1000     # just run $ id
-      - PGID=100
+      - PUID=<$ id -u>
+      - PGID=<$ id -g>
     volumes:
       - </path/to/chosen/host/root>:/srv
-      - </path/to/filebrowser.db/on/host>:/database/filebrowser.db   # $ touch filebrowser.db
+      - </path/to/filebrowser.db/on/host>:/database.db   # $ touch database.db
       - </path/to/settings.json/on/host>:/config/settings.json
     labels:
       # Enable Traefik Overlay
