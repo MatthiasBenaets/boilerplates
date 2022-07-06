@@ -4,32 +4,35 @@ services:
   nginx:
     image: nginx:latest
     container_name: nginx
+
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
+
     networks:
       - proxy
+
     volumes:
       #- /etc/localtime:/etc/localtime:ro
       #- /var/run/docker.sock:/var/run/docker.sock:ro
       - </path/to/host/website>:/usr/share/nginx/html
-    labels:
-      # Enable traefik overlay
+
+   labels:
       - "traefik.enable=true"
-      # Router: HTTP redirect
+
       - "traefik.http.routers.nginx.entrypoints=http"
       - "traefik.http.routers.nginx.rule=Host(`<wildcard.domain.example>`)"
       - "traefik.http.middlewares.nginx-https-redirect.redirectscheme.scheme=https"
-      # Router: HTTPS for TLS
+
       - "traefik.http.routers.nginx-secure.entrypoints=https"
       - "traefik.http.routers.nginx-secure.rule=Host(`<wildcard.domain.example>`)"
       - "traefik.http.routers.nginx-secure.tls=true"
-      # Middleware
+
       - "traefik.http.routers.nginx.middlewares=nginx-https-redirect"
-      # Service
+
       - "traefik.http.routers.nginx-secure.service=nginx"
       - "traefik.http.services.nginx.loadbalancer.server.port=80"
-      # Network
+
       - "traefik.docker.network=proxy"
 
 networks:

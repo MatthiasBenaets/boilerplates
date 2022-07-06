@@ -1,0 +1,58 @@
+#+title: Zwift Offline
+#+property: header-args :tangle docker-compose.yml
+
+Zoffline enables the use of Zwift offline by acting as a partial implementation of a Zwift server. -<https://github.com/zoffline/zwift-offline>
+
+** Requirements
+
+- Zwift installed (not logged in)
+- Indoor Trainer
+- Depending on how you want to use Zoffline, have a look at the [[https://github.com/zoffline/zwift-offline][github]].
+
+** Docker-compose.yml
+*** Docker Image
+
+- Docker Service Name = zoffline
+- Image: Specify the docker image. No version behind colon so always latest version.
+- Container_name: Name that will be given to the container. If not stated, this will be randomized.
+
+#+begin_src yaml
+version: '3'
+
+services:
+  zoffline:
+    image: zoffline/zoffline
+    container_name: zoffline
+#+end_src
+
+*** General
+
+- Restart: The container will always try to restart unless it is manually stopped by the user.
+
+#+begin_src yaml
+    restart: unless-stopped
+#+end_src
+
+*** Network
+
+- Ports: This is the port used for Zoffline. Left is the host port, right is the container port.
+
+#+begin_src yaml
+    ports:
+      - 80:80
+      - 443:443
+      - 3022:3022/udp
+      - 3023:3023
+#+end_src
+
+*** Variables
+
+- Environment: Add timezone
+- Volumes: Storage volumes need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a direcotry or file inside the container.
+
+#+begin_src yaml
+    environment:
+      - TZ=Europe/Brussels
+    volumes:
+      - <path/to/host/storage>:/usr/src/app/zwift-offline/storage
+#+end_src

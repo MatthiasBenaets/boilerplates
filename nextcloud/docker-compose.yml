@@ -4,42 +4,52 @@ services:
   nextcloud:
     image: linuxserver/nextcloud
     container_name: nextcloud
+
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
+
     networks:
       - proxy
+
     environment:
       - PUID=<$ id -u>
-      - GUID=<$ id -g>
+      - PGID=<$ id -g>
       - TZ=Europe/Brussels
     volumes:
       - </path/to/host/config>:/config
-      - </path/to/host/data:/data
-    labels:
-      # Enable Traefik overlay
+      - </path/to/host/data>:/data
+      - </>:/mnt/<name>
+
+   labels:
       - "traefik.enable=true"
-      # Router: HTTPS for TLS
+
       - "traefik.http.routers.nextcloud.entrypoints=https"
       - "traefik.http.routers.nextcloud.rule=Host(`<wildcard.domain.example>`)"
       - "traefik.http.routers.nextcloud.tls=true"
       - "traefik.http.routers.nextcloud.service=nextcloud"
-      # Service
+
       - "traefik.http.services.nextcloud.loadbalancer.server.port=443"
       - "traefik.http.services.nextcloud.loadbalancer.server.scheme=https"
-      # Network
+
       - "traefik.docker.network=proxy"
 
   collabora:
     image: collabora/code
     container_name: collabora
+
     restart: unless-stopped
+    cap_add:
+      - MKNOD
+    tty: true
+
     networks:
       - proxy
     ports:
       - 9980:9980
     expose:
       - "9980"
+
     environment:
       - domain=<wildcard.domain.example nextcloud>
       - 'dictionaries=en_US,nl_BE'
@@ -47,34 +57,22 @@ services:
       - VIRTUAL_PORT=9980
       - VIRTUAL_HOST=<wildcard.domain.example of collabora>
       - "extra_params=--o:ssl.enable=false  --o:ssl.termination=true"
-    cap_add:
-      - MKNOD
-    tty: true
-    labels:
+
+   labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
-      - "traefik.http.routers.collabora.rule=Host(`<wildcard.domain.example collabora>`)"
+
       - "traefik.http.routers.collabora.entrypoints=http"
+      - "traefik.http.routers.collabora.rule=Host(`<wildcard.domain.example collabora>`)"
       - "traefik.http.middlewares.collabora-https-redirect.redirectscheme.scheme=https"
-      - "traefik.http.routers.collabora.middlewares=collabora-https-redirect"
+
       - "traefik.http.routers.collabora-secure.entrypoints=https"
       - "traefik.http.routers.collabora-secure.rule=Host(`<wildcard.domain.example collabora`)"
       - "traefik.http.routers.collabora-secure.tls=true"
-    # To use collabora, install Nextcloud Office and add https://<wildcard.hostname.example collabora> in the settings under office
+
+      - "traefik.http.routers.collabora.middlewares=collabora-https-redirect"
+
+      - "traefik.docker.network=proxy"
 
 networks:
   proxy:
     external: true
-
-# Installed Apps: 
-#   - Contacts
-#   - Calendar
-#   - Mail
-#   * Talk
-#   * External Storage:  - SMB/CIFS - Host = <ip> - Share = <share name> - Username and password
-#   If using collabora:
-#     - Nextcloud office/Collabora Online
-#     For now don't install Collabora Online - built-in CODE Server. It make Nextcloud unusable.
-#   If using OnlyOffice:          #This might only work with the offical image
-#     - ONLYOFFICE
-#     - Community Document Server

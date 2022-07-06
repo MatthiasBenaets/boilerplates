@@ -1,0 +1,122 @@
+#+title: Guacamole
+#+property: header-args :tangle docker-compose.yml
+
+Apache Guacamole is a clientless remote desktop gateway. It supports standard protocols like VNC and RDP. We call it clientless because no plugins or client software are required.
+This is an all-in-one image forked from oznu/guacamole.
+
+** Requirements
+
+- Active VNC Connection and or SSH Connection
+
+** Docker-compose.yml
+*** Docker Image
+
+- Docker Service Name = guacamole
+- Image: Specify the docker image. No version behind the colon so it will pull the latest version.
+- Container_name: Name that will be given to the container. If not stated, this will be randomized.
+
+#+begin_src yaml
+version: '3'
+
+services:
+  guacamole:
+    image: maxwaldorf/guacamole
+    container_name: guacamole
+#+end_src
+
+*** General
+
+- Restart: The container will always try to restart unless it is manually stopped by the user.
+
+#+begin_src yaml
+    restart: unless-stopped
+#+end_src
+
+*** Network
+
+- Networks:
+  - This will make use of the same network as Traefik uses.
+  - No ports are set here since Traefik will handle this.
+
+#+begin_src yaml
+    networks:
+      - proxy
+#+end_src
+
+*** Variables
+
+- Volumes: volume need to be passed through or keep locally. Left volume is a local directory or file. Right volume is a directory or file inside the container.
+  - Here we link the website to the container.
+
+#+begin_src yaml
+    volumes:
+      - </path/to/host/config>:/config
+#+end_src
+
+*** Labels
+
+- Labels: Using labels to configure container to use Traefik. Questions: Refer to traefik boilerplate.
+- First enable Traefik so it can manage the service.
+#+begin_src yaml
+    labels:
+      - "traefik.enable=true"
+#+end_src
+- Add a router for unsecure connection.
+  - The entrypoint is http.
+  - A host domainname is set.
+  - A middleware is declare to redirect the unsecure connection to https.
+#+begin_src yaml
+      - "traefik.http.routers.guacamole.entrypoints=http"
+      - "traefik.http.routers.guacamole.rule=Host(`<wildcard.domain.example>`)"
+      - "traefik.http.middlewares.guacamole-https-redirect.redirectscheme.scheme=https"
+#+end_src
+- Add a router for secure connections.
+  - The entrypoint is https.
+  - A host domain is set.
+  - Enable TLS to get a certificate.
+#+begin_src yaml
+      - "traefik.http.routers.guacamole-secure.entrypoints=https"
+      - "traefik.http.routers.guacamole-secure.rule=Host(`<wildcard.domain.example>`)"
+      - "traefik.http.routers.guacamole-secure.tls=true"
+#+end_src
+
+- Configure the declared middleware.
+  - This will redirect unsecure to secure connection.
+#+begin_src yaml
+      - "traefik.http.routers.guacamole.middlewares=guacamole-https-redirect"
+#+end_src
+- Configure the service.
+  - Declare the service guacamole.
+  - Income requests will get forwarded to port 8080 (port used by guacamole)
+#+begin_src yaml
+      - "traefik.http.routers.guacamole-secure.service=guacamole"
+      - "traefik.http.services.guacamole.loadbalancer.server.port=8080"
+#+end_src
+- Network that will be used with the container.
+  - This is the same network used by Traefik.
+#+begin_src yaml
+      - "traefik.docker.network=proxy"
+#+end_src
+
+*** Declared Network
+
+- The network "proxy" is already defined under networks. This will create or reference the network.
+- It's stated that docker will not need need to create this network since it already should exist. In this case, you should have already created this after setting up Traefik.
+
+#+begin_src yaml
+networks:
+  proxy:
+    external: true
+#+end_src
+
+** Usage
+
+- Base login: guacadmin - guacadmin
+  - Create new user - tick all options below - logout - login - delete guacadmin
+- Add connection:
+  - Give a name
+  - Choose protocol
+  - Under parameters:
+    - Hostname = internal ip-address
+    - Port = 5900 for vnc, 22 for ssh
+    - Set system username and password

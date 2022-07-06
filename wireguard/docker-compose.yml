@@ -4,34 +4,28 @@ services:
   wireguard:
     image: linuxserver/wireguard:latest
     container_name: wireguard
+
+    restart: unless-stopped
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
+
+    ports:
+      - 51820:51820/udp
+
     environment:
       - PUID=<$ id -u>
       - PGID=<$ id -g>
       - TZ=Europe/Brussels
       - SERVERURL=<wildcard.domain.example>
       - SERVERPORT=51820
-      - PEERS=1 # Amount of different devices you want to connect
-      - PEERDNS=auto # Can be changed to Pi-hole IP to get adblocker
+      - PEERS=1
+      - PEERDNS=auto
       - INTERNAL_SUBNET=10.13.13.0
-      - ALLOWEDIPS=0.0.0.0/0,::/0 # Can remove ::/0 if not using ipv6
-      - LOG_CONFS=true #optional
+      - ALLOWEDIPS=0.0.0.0/0,::/0
+      - LOG_CONFS=true
     volumes:
       - </path/to/host/config>:/config
       - /lib/modules:/lib/modules
-    ports:
-      - 51820:51820/udp
-    sysctls:
-      - net.ipv4.conf.all.src_valid_mark=1
-    restart: unless-stopped
-
-#Add new subdomain to dns provider without proxy enabled.
-#Open port 51820 on router(modem) to local host ip.
-#Some locally hosted services with a WebUI might not be accessible it the firewall of the device blocks it. Allow these port on the firewall.
-#If service are on docker, don't forget to specify the port. (Still need to figure out of to use pi-hole dns)
-#
-#Change peers depending on how many devices you want to connect.
-#Connect with computer use: </path/to/host/config>/peer<number>/peer<number>.conf
-#Generate QR to connect smartphone: $ docker exec -it wireguard /app/show-peer <number>

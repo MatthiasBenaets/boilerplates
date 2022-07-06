@@ -4,12 +4,15 @@ services:
   zoffline:
     image: zoffline/zoffline
     container_name: zoffline
+
     restart: unless-stopped
+
     ports:
       - 80:80
       - 443:443
       - 3022:3022/udp
       - 3023:3023
+
     environment:
       - TZ=Europe/Brussels
     volumes:

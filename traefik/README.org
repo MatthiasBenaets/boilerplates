@@ -1,0 +1,245 @@
+#+title: Traefik
+
+Traefik is a leading modern reverse proxy and load balancer that makes deploying microservices easy. Traefik integrates with your existing infrastructure components and configures itself automatically and dynamically. -<https://traefik.io>
+
+** Requirements
+
+- Register a domain.
+  - I use [[http://epik.com]].
+- Move domain to Cloudflare.
+  - Better DNS resolve
+  - Easy encryption certificates
+- Accessibility over the internet.
+  - On Cloudflare set A record for: root (@), subdomain, wildcard (*) and/or www
+  - On router, forward port 80 and 443 to host ip
+- Accessibility locally
+  - Add custom url to local dns records on router (or something like pi-hole)
+  - No need to move url to Cloudflare or to set A records
+
+** Docker-compose.yml
+*** Docker Image
+
+- Docker Service Name = traefik
+- Image: Specify the docker image and behind the colon the tag used. This is the version.
+- Container_name: Name that will be given to the container. If not stated, this will be randomized.
+
+#+begin_src yaml :tangle docker-compose.yml
+version: '3'
+
+services:
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+#+end_src
+
+*** General
+
+- Restart: The container will always try to restart unless it is manually stopped by the user.
+- Security_opt: The container will not be able to get extra privileges while it's running.
+
+#+begin_src yaml :tangle docker-compose.yml
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+#+end_src
+
+*** Network
+
+- Networks: Traefik will use its own network to communicate with services.
+  - Every service that wants to make use of the reverse proxy needs to be part of this network. In this example "proxy"
+- Ports: Traefik will handle port automatically but we do need to manually set these for Traefik itself.
+  - The left port is the host port. The right port is the container port.
+  - To make services available over the internet, these should stay 80 and 443. These ports will also need to be made available on the modem/router and route to the host device.
+
+#+begin_src yaml :tangle docker-compose.yml
+    networks:
+      - proxy
+    ports:
+      - 80:80
+      - 443:443
+#+end_src
+
+*** Variables
+
+- Environment: This boilerplate uses Cloudflare as the DNS resolver. The Cloudflare account email and general api key need to be given.
+- Volumes: Multiple volumes need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a directory or file inside the container.
+  - Traefik expects a traefik.yml and acme.json file before initial startup.
+    - ~$ touch traefik.yml acme.json~ or copy the one in this repo
+    - ~$ sudo chmod 600 acme.json~
+
+#+begin_src yaml :tangle docker-compose.yml
+    environment:
+      - CF_API_EMAIL=<cloudflare account email>
+      - CF_API_KEY=<cloudflare global account api>
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - </path/to/host/traefik.yml>:/traefik.yml:ro
+      - </path/to/host/acme.json>:/acme.json
+      - </path/to/host/config.yml>:/config.yml:ro
+#+end_src
+
+*** Labels
+
+- Labels: Traefik uses label to configure itself and other services that make use of Traefik.
+- First enable Traefik so it can manage the service.
+#+begin_src yaml :tangle docker-compose.yml
+    labels:
+      - "traefik.enable=true"
+#+end_src
+- Add a router for unsecure connection named traefik.
+  - The entrypoint is http, which is declared in traefik.yml.
+  - A host domainname is set.
+  - A middleware is declare to redirect the unsecure connection to https.
+#+begin_src yaml :tangle docker-compose.yml
+      - "traefik.http.routers.traefik.entrypoints=http"
+      - "traefik.http.routers.traefik.rule=Host(`<wildcard.domain.example>`)"
+      - "traefik.http.routers.traefik.middlewares=traefik-https-redirect"
+#+end_src
+- Add a router for secure connection named traefik-secure.
+  - The entrypoint is in this case https.
+  - This will receive the same out domainname
+  - Since the Traefik dashboard does not have a login, declare a basic authentication middleware.
+  - Enable TSL for a secure connection. The resolver will generate a certificate.
+  - This example uses Cloudflare as the resolver.
+  - Declare the domain and subdomains that need to receive a certificate
+    - Main: Your domain name
+    - Sans: Specify multiple subdomains or add a wildcard for all subdomains using "*".
+  - Use the internal api service so the dashboard can be used.
+#+begin_src yaml :tangle docker-compose.yml
+      - "traefik.http.routers.traefik-secure.entrypoints=https"
+      - "traefik.http.routers.traefik-secure.rule=Host(`<wildcard.domain.example>`)"
+      - "traefik.http.routers.traefik-secure.middlewares=traefik-auth"
+      - "traefik.http.routers.traefik-secure.tls=true"
+      - "traefik.http.routers.traefik-secure.tls.certresolver=cloudflare"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].main=<domain.example>"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].sans=<*.domain.example>"
+      - "traefik.http.routers.traefik-secure.service=api@internal"
+#+end_src
+- Configure the declared middlewares.
+  - The unsecure router will use a middleware to redirect traffic to entrypoint https.
+  - The secure router will ask for authentication. It's recommended to hash your password: ~$sudo echo $(htpasswd -nb "<USER>" "<PASSWORD>") | set -e s/\\$/\\$\\$/g~
+  - X-Forwarded-Proto is the standard header for identifying the protocol that a client will connect to. In this case to secure https.
+#+begin_src yaml :tangle docker-compose.yml
+      - "traefik.http.middlewares.traefik-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=<USER>:<PASSWORD>"
+      - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
+#+end_src
+
+*** Declared network
+
+- The network "proxy" is already defined under networks. This will create or reference the network.
+- It's stated that docker will not need need to create this network since it already should exist. This will also need to be used for all other service that make use of Traefik.
+- To create the network: ~$ docker network create proxy~
+
+#+begin_src yaml :tangle docker-compose.yml
+networks:
+  proxy:
+    external: true
+#+end_src
+
+** Traefik.yml
+*** Dashboard
+
+- This will enable or disable the Traefik dashboard.
+
+#+begin_src yaml :tangle data/traefik.yml
+api:
+  dashboard: true
+  debug: true
+#+end_src
+
+*** Security
+
+- Declare a secure (https) and unsecure (http) entrypoint.
+  - Each has its own port. These are ofcourse always the same.
+- Allow insecure connections inbetween connecting from external device to the host. This is quite normal.
+
+#+begin_src yaml :tangle data/traefik.yml
+entryPoints:
+  http:
+    address: ":80"
+  https:
+    address: ":443"
+serversTransport:
+  insecureSkipVerify: true
+#+end_src
+
+*** Providers
+
+- These are teh file providers Traefik listens to.
+  - The docker socket
+  - Additional configurations in ~/config.yml~
+    - Mainly used for extra non-docker services that you want to manage with Traefik.
+
+#+begin_src yaml :tangle data/traefik.yml
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+  file:
+    filename: /config.yml
+#+end_src
+
+*** Certificate resolver
+
+- To get a secure connection, a certificate needs to be provided. In this example the resolver declared is cloudflare (this is also used again in the compose-file labels).
+  - The certificate information will be stored in ~acme.json~
+- A email is needed to receive a certificate.
+- For Cloudflare it's very simple to receive a certificate since it is automatically done by them when they are your DNS resolver.
+  - It does just a basic dnsChallange.
+
+#+begin_src yaml :tangle data/traefik.yml
+certificatesResolvers:
+  cloudflare:
+    acme:
+      email: admin@<domain.example>
+      storage: acme.json
+      dnsChallenge:
+        provider: cloudflare
+        resolvers:
+          - "1.1.1.1:53"
+          - "1.0.0.1:53"
+#+end_src
+
+**  Config.yml
+
+- Within this file, other local services can be specified to make use of Traefik. This is useful because not everything can be run as a docker container.
+- These are kind of set up like the labels used in a docker-compose.yml file.
+
+*** Routers
+
+- Create the router:
+  - Give it a name.
+  - Pick a entryPoint. (secure recommended ofcourse)
+  - Create a subdomain for the service.
+  - Choose the TLS certificate resolver. For this boilerplate it's Cloudflare.
+  - Declare a service.
+
+#+begin_src yaml :tangle data/config.yml
+http:
+  routers:
+    plex:
+      entryPoints:
+        - "https"
+      rule: "Host(`<wildcard.domain.example>`)"
+      tls:
+        certResolver: cloudflare
+      service: plex
+#+end_src
+
+*** Service
+
+- Creating the service:
+  - Give it a name. (preferably the same as the router)
+  - Within the loadbalancer, point to the local ip of the service.
+  - Allow passHostHeader to forward the client Host header to the server (local service).
+
+#+begin_src yaml :tangle data/config.yml
+  services:
+    plex:
+      loadBalancer:
+        servers:
+          - url: "http://<local host ip>:32400"
+        passHostHeader: true
+#+end_src

@@ -1,0 +1,59 @@
+#+title: RTMP
+#+property: header-args :tangle docker-compose.yml
+
+Real-Time Messaging Protocol or RTMP is a communication protocol for live audio and video streaming over the internet.
+Docker image with Nginx using the nginx-rtmp-module module for live multimedia (video) streaming. -<https://hub.docker.com/r/tiangolo/nginx-rtmp/>
+
+** Requirements
+
+- If planning to stream over the internet, open the chosen port to your host running, for example, OBS.
+- A device to actually stream from. This readme is aimed at using GoPro's.
+- A phone with internet connectivity and the GoPro Quik app.
+
+** Docker-compose.yml
+*** Docker Image
+
+- Docker Service Name = rtmp
+- Image: Specify the docker image. No version (behind colon) specified, so it will pull the latest version.
+- Container_name: Name that will be given to the container. If not stated, this will be randomized.
+
+#+begin_src yaml
+version: '3'
+
+services:
+  rtmp:
+    image: tiangolo/nginx-rtmp
+    container_name: rtmp
+#+end_src
+
+*** General
+
+- Restart: The container will always try to restart unless it is manually stopped by the user.
+- Security_opt: The container will not be able to get extra privileges while it's running.
+
+#+begin_src yaml
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+#+end_src
+
+*** Network
+
+- Ports: This is the port used for RTMP. Left is the host port, right is the container port.
+  - The host port chosen needs to be forwareded to the host ip in your modem/router if you wish to use steam to your computer over the internet.
+
+#+begin_src yaml
+    ports:
+      - 1935:1935
+#+end_src
+
+** Usage
+*This is targeted to streaming over the internet, interprate this as you wish for local steaming*
+1. Check that ports are available.
+2. Start the rtmp container.
+3. Connect GoPro to Phone via GoPro Quik.
+4. Start a network hotspot.
+5. Go to Menu "Go Live".
+6. Connect to hotspot.
+7. Enter address: ~rtmp://<ip address>:<port>/live/123~
+8. Go Live.

@@ -1,0 +1,121 @@
+#+title: Filebrowser
+#+property: header-args :tangle docker-compose.yml
+
+Filebrowser provides a file managing interface within a specified directory and it can be used to upload, delete, preview, rename and edit your files. It allows the creation of multiple users and each user can have its own directory.
+
+** Docker-compose.yml
+*** Docker Image
+
+- Docker Service Name = filebrowser
+- Image: Specify the docker image. No version behind the colon so it will use the latest version.
+- Container_name: Name that will be given to the container. If not stated, this will be randomized.
+
+#+begin_src yaml
+version: '3'
+
+services:
+  filebrowser:
+    image: filebrowser/filebrowser:latest
+    container_name: filebrowser
+#+end_src
+
+*** General
+
+- Restart: The container will always try to restart unless it is manually stopped by the user.
+- Security_opt: Don't allow container to get extra priviliges while it is running.
+
+#+begin_src yaml
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+#+end_src
+
+*** Network
+
+- Networks:
+  - This will make use of the same network as Traefik uses.
+  - No ports are set here since Traefik will handle this.
+
+#+begin_src yaml
+    networks:
+      - proxy
+#+end_src
+
+*** Variables
+
+- Environment:
+  - Set the PGID and PUID.
+- Volumes: Multiple volumes need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a direcotry or file inside the container.
+
+#+begin_src yaml
+    environment:
+      - PUID=<$ id -u>
+      - PGID=<$ id -g>
+    volumes:
+      - </path/to/chosen/host/root>:/srv
+      - </path/to/filebrowser.db/on/host>:/database.db
+      - </path/to/settings.json/on/host>:/config/settings.json
+#+end_src
+
+*** Labels
+
+- Labels: Using labels to configure container to use Traefik. Questions: Refer to traefik boilerplate.
+- First enable Traefik so it can manage the service.
+#+begin_src yaml
+   labels:
+      - "traefik.enable=true"
+#+end_src
+- Add a router for unsecure connection.
+  - The entrypoint is http.
+  - A host domainname is set.
+  - A middleware is declare to redirect the unsecure connection to https.
+#+begin_src yaml
+      - "traefik.http.routers.filebrowser.entrypoints=http"
+      - "traefik.http.routers.filebrowser.rule=Host(`<wildcard.domain.example>`)"
+      - "traefik.http.middlewares.filebrowser-https-redirect.redirectscheme.scheme=https"
+#+end_src
+- Add a router for secure connections.
+  - The entrypoint is https.
+  - A host domain is set.
+  - Enable TLS to get a certificate.
+#+begin_src yaml
+      - "traefik.http.routers.filebrowser-secure.entrypoints=https"
+      - "traefik.http.routers.filebrowser-secure.rule=Host(`<wildcard.domain.example>`)"
+      - "traefik.http.routers.filebrowser-secure.tls=true"
+#+end_src
+- Configure the declared middleware.
+  - This will redirect unsecure to secure connection.
+#+begin_src yaml
+      - "traefik.http.routers.filebrowser.middlewares=filebrowser-https-redirect"
+#+end_src
+- Configure the service.
+  - Declare the service filebrowser.
+  - Income requests will get forwarded to port 80 (port used by filebrowser)
+#+begin_src yaml
+      - "traefik.http.routers.filebrowser-secure.service=filebrowser"
+      - "traefik.http.services.filebrowser.loadbalancer.server.port=80"
+#+end_src
+- Network that will be used with the container.
+  - This is the same network used by Traefik.
+#+begin_src yaml
+      - "traefik.docker.network=proxy"
+#+end_src
+
+*** Declared Network
+
+- The network "proxy" is already defined under networks. This will create or reference the network.
+- It's stated that docker will not need need to create this network since it already should exist. In this case, you should have already created this after setting up Traefik.
+
+#+begin_src yaml
+networks:
+  proxy:
+    external: true
+#+end_src
+
+** Usage
+
+- Create the database: ~$ touch database.db~
+- Login default: admin - admin
+- Branding can be changed using correct path to assets: ~/srv/<path/to/theme>~ or at an extra volume and use the path you then specify.
+- Extra:
+  - Trash bin: Global Settigns - Command runner - Before delete - ~/bin/sh -c 'if [[ "$FILE" != "/srv/<path/to/trash>/"* ]]; then mv $FILE /srv/<path/to/trash>; fi'~
