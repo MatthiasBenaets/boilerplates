@@ -20,7 +20,7 @@ services:
       - </path/to/filebrowser.db/on/host>:/database.db
       - </path/to/settings.json/on/host>:/config/settings.json
 
-   labels:
+    labels:
       - "traefik.enable=true"
 
       - "traefik.http.routers.filebrowser.entrypoints=http"

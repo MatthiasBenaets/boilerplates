@@ -7,8 +7,7 @@ WireGuard is an extremely simple yet fast and modern VPN that utilizes state-of-
 
 - Forward port 51820 on your modem/router to the device ip running Wireguard.
 - Create a new subdomain on your dns resolver that points to your public ip and disable proxy.
-- Some locally hosted services with a WebUI might not be accessible it the firewall of the device blocks it. Allow these port on the firewall.
-
+- Locally hosted services might not be accessible because the firewall of the device blocks it. Allow these port on the firewall.
 
 ** Docker-compose.yml
 *** Docker Image
@@ -43,9 +42,16 @@ services:
 
 *** Network
 
+- Networks: Setting up a network that can be accessed by Pihole and WireGuard.
+  - This is useful if you want to use Pihole while connected to your VPN.
+  - Setting a static-ip so it can be reference in the WireGuard docker-compose.yml file.
 - Ports: port 51820 is used by WireGuard
 
 #+begin_src yaml
+    # Network only needed if you want to use pihole while connected to the WireGuard VPN.
+    networks:
+      wireguard-pihole:
+        ipv4_address: 172.20.0.3
     ports:
       - 51820:51820/udp
 #+end_src
@@ -57,9 +63,9 @@ services:
   - Timezone
   - Add serverurl
   - Port = 51820
-  - Choose how many different devices can connect to the network
+  - Choose how many different devices can connect to network using an integer or string.
   - Optional:
-    - Peerdns is useful if you have for example pihole (point to that local ip).
+    - Peerdns is useful if you have for example pihole. If you want to use the default dns of wireguard change it to "auto".
     - Internal subnet can be kept default.
     - Allowedip can be specified.
       - In this example everything gets tunnelled (ipv4 and ipv6).
@@ -74,8 +80,10 @@ services:
       - TZ=Europe/Brussels
       - SERVERURL=<wildcard.domain.example>
       - SERVERPORT=51820
+      #- PEERS=desktop,laptop
       - PEERS=1
-      - PEERDNS=auto
+      - PEERDNS=172.20.0.2
+      #- PEERDNS=auto
       - INTERNAL_SUBNET=10.13.13.0
       - ALLOWEDIPS=0.0.0.0/0,::/0
       - LOG_CONFS=true
@@ -84,9 +92,32 @@ services:
       - /lib/modules:/lib/modules
 #+end_src
 
+*** Declared Network
+
+- Create (if it does not exist) a network that can be used by Pihole and WireGuard
+  - This is useful if you want to use Pihole while connected to your VPN.
+
+#+begin_src yaml
+# Network only needed if you want to use pihole while connected to the WireGuard VPN.
+networks:
+   wireguard-pihole:
+     name: "wireguard-pihole"
+     driver: bridge
+     ipam:
+       driver: default
+       config:
+         - subnet: 172.20.0.0/24
+#+end_src
+
 ** Usage
 
 - Change peers depending on how many devices you want to connect.
-- Connect with computer use file located: ~</path/to/host/config>/peer<number>/peer<number>.conf~
-- Generate QR to connect smartphone: ~$ docker exec -it wireguard /app/show-peer <number>~
-  - Inside portainer: The terminal will also print the qr-code on initial startup
+- Computer:
+  - Install wireguard on device https://www.wireguard.com/install/
+  - Check that static ip and dns is still relevant, otherwise just use DHCP and default DNS.
+  - Connect with computer use file located: ~</path/to/host/config>/peer<number>/peer<number/name>.conf~
+    - GUI: Upload the file to the GUI interface and connect.
+    - CLI: ~$ sudo mv peer<number/name>.conf /etc/wireguard/wg0.conf~ (create path if it does not exist) and run ~$ wg-quick up wg0~
+- Phone:
+  - Generate QR to connect smartphone: ~$ docker exec -it wireguard /app/show-peer <number/name>~
+    - Inside portainer: The terminal will also print the qr-code on initial startup

@@ -64,7 +64,7 @@ services:
 - Labels: Using labels to configure container to use Traefik. Questions: Refer to traefik boilerplate.
 - First enable Traefik so it can manage the service.
 #+begin_src yaml
-   labels:
+    labels:
       - "traefik.enable=true"
 #+end_src
 - Add a router for unsecure connection.
@@ -112,4 +112,16 @@ services:
 networks:
   proxy:
     external: true
+#+end_src
+
+** Extras
+- Add 404 page:
+  - ~$ vim /etc/nginx/conf.d/default.conf~
+  - Insert between ~Server {  }~:
+#+begin_src
+error_page 404 403 500 503 /<404name>.html;
+location = /<404name>.html {
+        root /usr/share/nginx/html;
+        internal;
+}
 #+end_src

@@ -1,0 +1,7 @@
+#+title:  Subtitle Cleaner
+
+Just a script that will clean subtitles from pretty much any advertisments.
+
+- ~$ find </path/to/subtitles> -name '*.srt' -exec </path/to/this/script.sh> "{}" \~;
+
+  You can add extra Regex rules depending on your native language to the REGEX_TO_REMOVE list.

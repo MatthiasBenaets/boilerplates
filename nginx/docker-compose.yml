@@ -17,7 +17,7 @@ services:
       #- /var/run/docker.sock:/var/run/docker.sock:ro
       - </path/to/host/website>:/usr/share/nginx/html
 
-   labels:
+    labels:
       - "traefik.enable=true"
 
       - "traefik.http.routers.nginx.entrypoints=http"

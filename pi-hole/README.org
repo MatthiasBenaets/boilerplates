@@ -35,9 +35,16 @@ services:
 
 *** Network
 
+- Networks: Setting up a network that can be accessed by Pihole and WireGuard.
+  - This is useful if you want to use Pihole while connected to your VPN.
+  - Setting a static-ip so it can be reference in the WireGuard docker-compose.yml file.
 - Ports: Used for Pi-hole
 
 #+begin_src yaml
+    # Network only needed if you want to use pihole while connected to the WireGuard VPN.
+    networks:
+      wireguard-pihole:
+        ipv4_address: 172.20.0.2
     ports:
       - 53:53/udp
       - 53:53/tcp
@@ -60,6 +67,23 @@ services:
     volumes:
       - <path/to/host/pihole>:/etc/pihole
       - <path/to/host/dnsmasq.d>:/etc/dnsmasq.d
+#+end_src
+
+*** Declared Network
+
+- Create (if it does not exist) a network that can be used by Pihole and WireGuard
+  - This is useful if you want to use Pihole while connected to your VPN.
+
+#+begin_src yaml
+# Network only needed if you want to use pihole while connected to the WireGuard VPN.
+networks:
+   wireguard-pihole:
+     name: "wireguard-pihole"
+     driver: bridge
+     ipam:
+       driver: default
+       config:
+         - subnet: 172.20.0.0/24
 #+end_src
 
 ** Usage

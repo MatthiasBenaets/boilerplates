@@ -11,6 +11,10 @@ services:
     #cap_add:
       #- NET_ADMIN
 
+    # Network only needed if you want to use pihole while connected to the WireGuard VPN.
+    networks:
+      wireguard-pihole:
+        ipv4_address: 172.20.0.2
     ports:
       - 53:53/udp
       - 53:53/tcp
@@ -24,3 +28,13 @@ services:
     volumes:
       - <path/to/host/pihole>:/etc/pihole
       - <path/to/host/dnsmasq.d>:/etc/dnsmasq.d
+
+# Network only needed if you want to use pihole while connected to the WireGuard VPN.
+networks:
+   wireguard-pihole:
+     name: "wireguard-pihole"
+     driver: bridge
+     ipam:
+       driver: default
+       config:
+         - subnet: 172.20.0.0/24

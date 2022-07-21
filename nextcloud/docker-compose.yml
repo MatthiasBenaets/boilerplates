@@ -21,7 +21,7 @@ services:
       - </path/to/host/data>:/data
       - </>:/mnt/<name>
 
-   labels:
+    labels:
       - "traefik.enable=true"
 
       - "traefik.http.routers.nextcloud.entrypoints=https"
@@ -58,7 +58,7 @@ services:
       - VIRTUAL_HOST=<wildcard.domain.example of collabora>
       - "extra_params=--o:ssl.enable=false  --o:ssl.termination=true"
 
-   labels:
+    labels:
       - "traefik.enable=true"
 
       - "traefik.http.routers.collabora.entrypoints=http"

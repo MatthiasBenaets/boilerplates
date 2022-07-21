@@ -64,7 +64,7 @@ services:
 - Labels: Using labels to configure container to use Traefik. Questions: Refer to traefik boilerplate.
 - First enable Traefik so it can manage the service.
 #+begin_src yaml
-   labels:
+    labels:
       - "traefik.enable=true"
 #+end_src
 - Add a router for secure connections.
@@ -154,7 +154,7 @@ services:
 - Labels: Using labels to configure container to use Traefik. Questions: Refer to traefik boilerplate.
 - First enable Traefik so it can manage the service.
 #+begin_src yaml
-   labels:
+    labels:
       - "traefik.enable=true"
 #+end_src
 - Add a router for unsecure connection.

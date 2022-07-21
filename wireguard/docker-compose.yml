@@ -12,6 +12,10 @@ services:
       - NET_ADMIN
       - SYS_MODULE
 
+    # Network only needed if you want to use pihole while connected to the WireGuard VPN.
+    networks:
+      wireguard-pihole:
+        ipv4_address: 172.20.0.3
     ports:
       - 51820:51820/udp
 
@@ -22,10 +26,21 @@ services:
       - SERVERURL=<wildcard.domain.example>
       - SERVERPORT=51820
       - PEERS=1
-      - PEERDNS=auto
+      - PEERDNS=172.20.0.2  #ip of pihole
+      #- PEERDNS=auto
       - INTERNAL_SUBNET=10.13.13.0
       - ALLOWEDIPS=0.0.0.0/0,::/0
       - LOG_CONFS=true
     volumes:
       - </path/to/host/config>:/config
       - /lib/modules:/lib/modules
+
+# Network only needed if you want to use pihole while connected to the WireGuard VPN.
+networks:
+   wireguard-pihole:
+     name: "wireguard-pihole"
+     driver: bridge
+     ipam:
+       driver: default
+       config:
+         - subnet: 172.20.0.0/24
