@@ -1,0 +1,76 @@
+#+title: Bazarr
+#+property: header-args :tangle docker-compose.yml
+
+Bazarr is a companion application to Sonarr and Radarr. It manages and downloads subtitles based on your requirements. -<https://github.com/morpheus65535/bazaar>
+
+** Docker-compose.yml
+*** Docker Image
+
+- Docker Service Name = lscr.io/linuxserver/bazarr:latest
+- Image: Specify the docker image. No version behind colon so always latest version.
+- Container_name: Name that will be given to the container. If not stated, this will be randomized.
+
+#+begin_src yaml
+version: '2.1'
+
+services:
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+#+end_src
+
+*** General
+
+- Restart: The container will always try to restart unless it is manually stopped by the user.
+
+#+begin_src yaml
+    restart: unless-stopped
+#+end_src
+
+*** Network
+
+- Ports: This is the port used by Bazarr. Left is the host port, right is the container port.
+
+#+begin_src yaml
+    ports:
+      - 6767:6767
+#+end_src
+
+*** Variables
+
+- Environment: Add timezone, give same id as your user id ~$ id <username>~
+- Volumes: Storage volumes need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a direcotry or file inside the container.
+  - The movies and tv host path need to be the same as Sonarr and Radarr
+
+#+begin_src yaml
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Brussels
+    volumes:
+      - </path/to/host/config>:/config
+      - </path/to/host/movies>:/movies
+      - </path/to/host/tv>:/tv
+#+end_src
+
+** Notes
+- Settings:
+  - Lanauages:
+    - Lanuage filter: dutch, english
+    - Add new profile
+      - Give name
+      - Add languages
+      - Save
+    - Select default settings. Pick default profile for movies and tv.
+  - Providers:
+    - Add: OpenSubtitles.org, Wizdom, Supersubtitles, TVSubtitles, YIFY Subtitles, Subscenter
+  - Subtitles:
+    - AlongSide Media File
+    - Enable Remove tags, OCR Fixes, Common fixes, fix uppercase
+    - If problems with permission: Permission (chmod) 0664
+  - Radarr/Sonarr:
+    - Enable
+    - Add url (best to not use localhost or 127.0.0.1)
+    - Add api key
+    - Test - Save
+    - Min score for me is around 50

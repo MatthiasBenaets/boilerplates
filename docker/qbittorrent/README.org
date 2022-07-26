@@ -1,0 +1,62 @@
+#+title: qBittorrent
+#+property: header-args :tangle docker-compose.yml
+
+The qBittorrent project aims to provide an open-source software alternative to µTorrent. -<https://www.qbittorrent.org/>
+
+** Docker-compose.yml
+*** Docker Image
+
+- Docker Service Name = lscr.io/linuxserver/qbittorrent:latest
+- Image: Specify the docker image. No version behind colon so always latest version.
+- Container_name: Name that will be given to the container. If not stated, this will be randomized.
+
+#+begin_src yaml
+version: '2.1'
+
+services:
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+#+end_src
+
+*** General
+
+- Restart: The container will always try to restart unless it is manually stopped by the user.
+
+#+begin_src yaml
+    restart: unless-stopped
+#+end_src
+
+*** Network
+
+- Ports: This is the port used by qBittorrent. Left is the host port, right is the container port.
+
+#+begin_src yaml
+    ports:
+      - 8080:8080
+      - 6881:6881
+      - 6881:6881/udp
+#+end_src
+
+*** Variables
+
+- Environment: Add timezone, give same id as your user id ~$ id <username>~. Webui port needs to be the same as is given above.
+- Volumes: Storage volumes need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a direcotry or file inside the container.
+  - The movies and tv host path need to be the same as Sonarr and Radarr
+
+#+begin_src yaml
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Brussels
+      - WEBUI_PORT=8080
+    volumes:
+      - </path/to/host/config>:/config
+      - </path/to/host/Downloads>:/downloads
+#+end_src
+
+** Notes
+- Default login is "admin/adminadmin"
+  - Somehow login might not work on firefox, try another browser
+  - Login can be changed under Tools - WebUI
+- Tools - Options - Default save path: /downloads

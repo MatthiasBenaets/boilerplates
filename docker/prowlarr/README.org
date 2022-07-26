@@ -1,0 +1,66 @@
+#+title: Prowlarr
+#+property: header-args :tangle docker-compose.yml
+
+Prowlarr is an indexer manager/proxy built on the popular *arr .net/reactjs base stack to integrate with your various PVR apps. -<https://github.com/Prowlarr/Prowlarr>
+
+** Docker-compose.yml
+*** Docker Image
+
+- Docker Service Name = lscr.io/linuxserver/prowlarr:latest
+- Image: Specify the docker image. No version behind colon so always latest version.
+- Container_name: Name that will be given to the container. If not stated, this will be randomized.
+
+#+begin_src yaml
+version: '2.1'
+
+services:
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+#+end_src
+
+*** General
+
+- Restart: The container will always try to restart unless it is manually stopped by the user.
+
+#+begin_src yaml
+    restart: unless-stopped
+#+end_src
+
+*** Network
+
+- Ports: This is the port used by Prowlarr. Left is the host port, right is the container port.
+
+#+begin_src yaml
+    ports:
+      - 9696:9696
+#+end_src
+
+*** Variables
+
+- Environment: Add timezone, give same id as your user id ~$ id <username>~
+- Volumes: Storage volumes need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a direcotry or file inside the container.
+
+#+begin_src yaml
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Brussels
+    volumes:
+      - </path/to/host/config>:/config
+#+end_src
+
+** Notes
+- In the WebUI under settings:
+  - Indexers:
+    - Add indexers
+      - Give name
+      - Set baase url
+      - I use: 1337x, Badass torrents, kcikasstorrents.to, The Pirate Bay, Rarbg, TorrentGalaxym, YTS
+  - Apps:
+    - Add Radarr and Sonarr
+      - Full Sync
+      - Prowlarr url (use http:// and don't use localhost or 127.0.0.1)
+      - Radarr or Sonarr url (use http:// and don't use localhost or 127.0.0.1)
+      - Add api key of Radarr or Sonarr
+- This will automatically add the trackers to Radarr and or Sonarr

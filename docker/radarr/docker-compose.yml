@@ -1,0 +1,20 @@
+version: '2.1'
+
+services:
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+
+    restart: unless-stopped
+
+    ports:
+      - 7878:7878
+
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Brussels
+    volumes:
+      - </path/to/host/config>:/config
+      - </path/to/host/movies>:/movies
+      - </path/to/host/downloads>:/downloads

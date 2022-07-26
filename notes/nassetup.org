@@ -1,0 +1,72 @@
+#+title: Proxmox & Truenas Setup
+
+* Proxmox
+** Installation
+- Select installation drive ((nvme-)ssd)
+- Choose locale
+- Set password and email (login will be 'root')
+- Set up networking
+  - Pick a hostname: 'proxmox.<domain.com>'
+  - My preference: x.x.x.1 = default gateway and dns, x.x.x.2 = proxmox, x.x.x.3 = truenas
+- Installation
+- Disable enterprise repository in proxmox repositories
+** VM Setup
+- Drop down proxmox datacenter
+- Select the local storage and upload ISO Image
+- Create VM
+  - General: Give it a name
+  - General: Start at boot, order 1
+  - OS: Select uploaded ISO
+  - System: Enable Qemu Agent
+  - Disks: Enable SSD emulation if storage is an SSD
+  - CPU: Atleast 2 core
+  - Memory: 8GB RAM + 1GB per TB
+  - Memory: Disable Ballooning Device
+- Select VM
+  - Passthrough hard disk - Hardware - Add
+* Truenas
+** Installation
+- Start VM with console
+- Install/Upgrade
+- Select disk to install to
+- Set a password (login will be 'root')
+- Installation
+- Shutdown
+- Hardware
+  - CD/DVD: Do not use any media
+- Start VM
+** Setup
+- Credentials - Local User:
+  - Add a new user
+    - Permit Sudo
+- Storage:
+  - Create a pool
+  - Add a dataset inside the pool
+    - View permissions
+    - Edit and change owner to newly created user
+      - Apply user
+      - Change permissions rwxrwxr-x
+      - Apply permissions recursivly & to child dataset
+** Network
+- Edit existing interface
+  - Disable DHCP
+  - Add IP Address alias
+  - Apply
+- Test changes - Surf to new ip and save
+- Change settings Global Configuration
+  - add default ipv4 gateway and nameserver 1 = ip.ip.ip.1
+- Test network with ping: System Settings -> Shell
+** SMB
+- Shared:
+  - Add SMB Shared
+  - Enable service
+- Mounting: ~$ sudo mount -t cifs -o username=<user>,password=<pass>,uid=<user>,gid=<group> //<ip>/<share-name> </mount/location>~
+- Proxmox: Datacenter - Storage - add SMB/CIFS and fill in credentials.
+  - This storage can be now also be used for the VMs
+    - When on the Disks menu, select the correct storage
+** Apps
+- Select the pool to create app dataset
+- Manage catalogs
+  - Add catalogs - continue
+  - "truecharts" - https://github.com/truecharts/catalog - stable - main
+  - This can take a while to verify and set up

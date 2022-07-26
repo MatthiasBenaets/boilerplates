@@ -1,0 +1,77 @@
+#+title: Sonarr
+#+property: header-args :tangle docker-compose.yml
+
+Sonarr is a PVR for Usenet and BitTorrent users. -<https://github.com/Sonarr/Sonarr>
+
+** Docker-compose.yml
+*** Docker Image
+
+- Docker Service Name = lscr.io/linuxserver/sonarr:latest
+- Image: Specify the docker image. No version behind colon so always latest version.
+- Container_name: Name that will be given to the container. If not stated, this will be randomized.
+
+#+begin_src yaml
+version: '2.1'
+
+services:
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+#+end_src
+
+*** General
+
+- Restart: The container will always try to restart unless it is manually stopped by the user.
+
+#+begin_src yaml
+    restart: unless-stopped
+#+end_src
+
+*** Network
+
+- Ports: This is the port used by Sonarr. Left is the host port, right is the container port.
+
+#+begin_src yaml
+    ports:
+      - 8989:8989
+#+end_src
+
+*** Variables
+
+- Environment: Add timezone, give same id as your user id ~$ id <username>~
+- Volumes: Storage volumes need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a direcotry or file inside the container.
+  - The downloads host path need to be the same as the downloading client's
+
+#+begin_src yaml
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Brussels
+    volumes:
+      - </path/to/host/config>:/config
+      - </path/to/host/tv>:/tv
+      - </path/to/host/Downloads>:/downloads
+#+end_src
+
+** Notes
+- The series directory will need to be created by you (it should be owned by the same id)
+- In the WebUI under settings:
+  - Media Management:
+    - Rename movies
+    - Replace Illegal characters
+    - Format
+      - {series title} - S(season:00}E{episode:00} - {episode title}
+      - {series title} - {air-date} - {episode title}
+      - {series title} - S{season:00}E{episode:00} - {episode title}
+      - Season {season:00}
+      - Extend
+    - root folder is /series
+  - Indexers will get handled by prowlarr (boilerplate)
+  - Download client:
+    - qBittorrent (boilerplate)
+      - enable
+      - host: <ip address> (preferablly not localhost or 127.0.0.1)
+      - port: 8080
+      - Enter login and password
+  - General:
+    - Here you can find the api key that will be needed if you want to use something like prowlarr or jackett
