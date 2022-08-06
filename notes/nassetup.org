@@ -10,6 +10,7 @@
   - My preference: x.x.x.1 = default gateway and dns, x.x.x.2 = proxmox, x.x.x.3 = truenas
 - Installation
 - Disable enterprise repository in proxmox repositories
+- Add no-subscription repository
 ** VM Setup
 - Drop down proxmox datacenter
 - Select the local storage and upload ISO Image
@@ -22,8 +23,15 @@
   - CPU: Atleast 2 core
   - Memory: 8GB RAM + 1GB per TB
   - Memory: Disable Ballooning Device
-- Select VM
-  - Passthrough hard disk - Hardware - Add
+- Passthrough
+  - Proxmox disks: Initialize disk with gpt
+  - Passthrough with hba card - VM: Hardware - Add - PCIE
+  - Passthrough seperately
+    - From proxmox shell:
+      - ~apt-get install lshw~
+      - ~ls -l /dev/disk/by-id/~
+      - ~qm set <vm id> -scsi<1,2,3,...> /dev/disk/by-id/<full serial-model-number>~
+      - repeat
 * Truenas
 ** Installation
 - Start VM with console

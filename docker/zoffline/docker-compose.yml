@@ -2,7 +2,7 @@ version: '3'
 
 services:
   zoffline:
-    image: zoffline/zoffline
+    image: zoffline/zoffline:latest
     container_name: zoffline
 
     restart: unless-stopped

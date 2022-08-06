@@ -213,19 +213,21 @@ certificatesResolvers:
   - Give it a name.
   - Pick a entryPoint. (secure recommended ofcourse)
   - Create a subdomain for the service.
+  - In case you want to default to another path, set up a middleware
   - Choose the TLS certificate resolver. For this boilerplate it's Cloudflare.
   - Declare a service.
 
 #+begin_src yaml :tangle data/config.yml
 http:
   routers:
-    plex:
+    pi:
       entryPoints:
         - "https"
       rule: "Host(`<wildcard.domain.example>`)"
+      middleware: pi-portal
       tls:
         certResolver: cloudflare
-      service: plex
+      service: pi
 #+end_src
 
 *** Service
@@ -237,9 +239,22 @@ http:
 
 #+begin_src yaml :tangle data/config.yml
   services:
-    plex:
+    pi:
       loadBalancer:
         servers:
-          - url: "http://<local host ip>:32400"
+          - url: "http://<local host ip>:80"
         passHostHeader: true
+#+end_src
+
+*** Middleware
+
+- Creating a middleware:
+  - Use the referenced middleware-name from your router
+  - Add a prefix where it will default touch
+
+#+begin_src yaml :tangle data/config.yml
+  middlewares:
+    pi-portal:
+      addprefix:
+        prefix: "/admin"
 #+end_src

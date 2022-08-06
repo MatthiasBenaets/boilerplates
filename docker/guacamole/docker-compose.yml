@@ -2,7 +2,7 @@ version: '3'
 
 services:
   guacamole:
-    image: maxwaldorf/guacamole
+    image: maxwaldorf/guacamole:latest
     container_name: guacamole
 
     restart: unless-stopped

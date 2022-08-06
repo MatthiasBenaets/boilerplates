@@ -2,7 +2,7 @@ version: '3'
 
 services:
   rtmp:
-    image: tiangolo/nginx-rtmp
+    image: tiangolo/nginx-rtmp:latest
     container_name: rtmp
 
     restart: unless-stopped

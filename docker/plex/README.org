@@ -1,0 +1,57 @@
+#+title: Plex
+#+property: header-args :tangle docker-compose.yml
+
+Plex is a global streaming media service and a client–server media player platform -<https://www.plex.tv>
+
+** Docker-compose.yml
+*** Docker Image
+
+- Docker Service Name = lscr.io/linuxserver/plex:latest
+- Image: Specify the docker image. No version behind colon so always latest version.
+- Container_name: Name that will be given to the container. If not stated, this will be randomized.
+
+#+begin_src yaml
+version: '2.1'
+
+services:
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+#+end_src
+
+*** General
+
+- Restart: The container will always try to restart unless it is manually stopped by the user.
+
+#+begin_src yaml
+    restart: unless-stopped
+#+end_src
+
+*** Network
+
+- Make port accessible on host network ip.
+
+#+begin_src yaml
+    network_mode: host
+#+end_src
+
+*** Variables
+
+- Environment: Plex version, give same id as your user id ~$ id <username>~
+- Volumes: Storage volumes need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a direcotry or file inside the container.
+  - tv and movies should point to same location as existing movies and series (from sonarr and radarr)
+
+#+begin_src yaml
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - VERSION=docker
+      #- PLEX_CLAIM=#optional
+    volumes:
+      - </path/to/host/config>:/config
+      - </path/to/host/tv>:/tv
+      - </path/to/host/movies:/movies
+#+end_src
+
+** Notes
+- Portal can be found on <ip address>:32400/web/index.html
