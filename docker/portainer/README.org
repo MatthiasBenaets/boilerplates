@@ -3,6 +3,10 @@
 
 Portainer Community Edition is a lightweight service delivery platform for containerized applications that can be used to manage Docker, Swarm, Kubernetes and ACI environments. It is designed to be as simple to deploy as it is to use. The application allows you to manage all your orchestrator resources (containers, images, volumes, networks and more) through a ‘smart’ GUI and/or an extensive API.
 
+** Docker run
+- To make it easy and hassle-free:
+~# docker run -d -p 8000:8000 -p 9443:9443 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest~
+
 ** Docker-compose.yml
 *** Docker Image
 
@@ -107,3 +111,15 @@ networks:
   proxy:
     external: true
 #+end_src
+
+** Notes
+*Connecting to docker sockets on other computers/hosts*
+- Install portainer agent on the other host (portainer not needed)
+  - ~docker run -d -p 9001:9001 --name portainer_agent --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v /var/lib/docker/volumes:/var/lib/docker/volumes portainer/agent:latest~
+  - In portainer nagivate to Environment and Add environment
+    - Select Docker and start the wizard
+    - Select Agent (not Edge Agent)
+    - Give it a name. for example the host name.
+    - enter the ip with port :9001
+    - Connect and finish
+  - Docker environment should not be available @ portainer Home

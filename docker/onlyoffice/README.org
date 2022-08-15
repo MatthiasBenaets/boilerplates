@@ -1,0 +1,44 @@
+#+title: OnlyOffice
+#+property: header-args :tangle docker-compose.yml
+
+** Docker-compose.yml
+*** Docker Image
+
+- Docker Service Name = onlyoffice
+- Image: Specify the docker image. No version behind the colon so it will use the latest version.
+- Container_name: Name that will be given to the container. If not stated, this will be randomized.
+
+#+begin_src yaml
+version: '2'
+
+services:
+  onlyoffice:
+    image: onlyoffice/documentserver:latest
+    container_name: onlyoffice
+#+end_src
+
+*** General
+
+- Restart: The container will always try to restart unless it is manually stopped by the user.
+
+#+begin_src yaml
+    restart: unless-stopped
+    stdin_open: true
+#+end_src
+
+*** Network
+
+- Ports:
+
+#+begin_src yaml
+    ports:
+      - 80:80
+#+end_src
+
+** Usage
+
+- When OnlyOffice is installed, add your own documentserver in the Office menu.
+  - https://<wildcard.domain.example onlyoffice>
+- When using traefik, dont forget to add a middleware header: customrequestheaders: X-Forwarded-Proto: "https"
+- If you don't want OnlyOffice, you can also install Collabora:
+  - Install Collabora Office/Nextcloud office and the included boilerplate

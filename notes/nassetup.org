@@ -1,4 +1,9 @@
-#+title: Proxmox & Truenas Setup
+#+title: Proxmox, TrueNAS, VM and Container Setup
+
+* Bios
+- Enable SVM (amd) or VT-d (intel) 
+- Sata mode to AHCI not RAID
+- Enable XMP if supported
 
 * Proxmox
 ** Installation
@@ -11,7 +16,37 @@
 - Installation
 - Disable enterprise repository in proxmox repositories
 - Add no-subscription repository
-** VM Setup
+- Iommo setup:
+  - Via the proxmox shell edit /etc/default/grub
+    - Add or edit: GRUB_CMDLINE_LINUX_DEFAULT="quiet amd_iommu=on"
+    - ~update-grub~
+  - Edit /etc/modules
+    - add on seperate lines: vfio vfio_iommu_type1 vfio_pci vfio_virqfd
+  - Reboot
+- Pve Shell: ~pveam update~ to get turnkey templates if they are not available
+- (optional) ACMA (traefik will always grand a certificate, just required for novnc on proxmox mobile (vpn and local dns needed (pihole & wireshark in boileplates))):
+  - Datacenter - ACMA:
+  - Accounts: Add staging account with admin@domain email and give it a name. Add a normal lets encrypt account with same info.
+  - Challenge: cloudflare, Cloudflare Managed DNS.
+    - CF Account ID can be found on the overview page of the website.
+    - API token can be found under this id.
+      - Create a token: Edit zone DNS
+        - Change token name to proxmox
+        - Permission:
+          - zone dns edit
+          - zone zone read
+        - Sone Resources:
+          - include specific zone <domain.com>
+        - Create
+  - Proxmox server: System - Certificates
+    - Add DNS - cloudflare - pve.<domain.com> - Create
+    - Using Account: Staging - Order Certificates Now
+    - If the reloaded webUI uses the staging certificates, it can be changed to official letsencypt account and order certificates again.
+    - (if there are any issues, you might need to add an A record for pve to your public ip with dns only and a TTL ~2min)
+  - In pihole: Add a local dns entry for pve.<domain.com> to the ip of proxmox
+    - Via mobile you can not connect to pve.domain.com:8006
+    - You should normally be still able to add the same domain to traefik and the local dns will not interfere if you don't add the port
+** TrueNAS Setup
 - Drop down proxmox datacenter
 - Select the local storage and upload ISO Image
 - Create VM
@@ -24,15 +59,18 @@
   - Memory: 8GB RAM + 1GB per TB
   - Memory: Disable Ballooning Device
 - Passthrough
-  - Proxmox disks: Initialize disk with gpt
-  - Passthrough with hba card - VM: Hardware - Add - PCIE
+  - Proxmox disks: Initialize disk with gpt (I think only needed if you passthrough only the disk)
+  - Passthrough with hba sas card or mobo sata controller- VM: Hardware - Add - PCIE
+    - For me SATA1,2,3 = 08:00.0
+      - ~lspci~
+      - You can check to which sata controller drive is connected with ~udevadm info -q path -n /dev/<sd...>~
   - Passthrough seperately
     - From proxmox shell:
-      - ~apt-get install lshw~
       - ~ls -l /dev/disk/by-id/~
       - ~qm set <vm id> -scsi<1,2,3,...> /dev/disk/by-id/<full serial-model-number>~
       - repeat
-* Truenas
+
+* TrueNAS
 ** Installation
 - Start VM with console
 - Install/Upgrade
@@ -44,6 +82,7 @@
   - CD/DVD: Do not use any media
 - Start VM
 ** Setup
+- System Settings: Check correct localization
 - Credentials - Local User:
   - Add a new user
     - Permit Sudo
@@ -64,13 +103,28 @@
 - Change settings Global Configuration
   - add default ipv4 gateway and nameserver 1 = ip.ip.ip.1
 - Test network with ping: System Settings -> Shell
-** SMB
+** Share
+*** SMB
 - Shared:
-  - Add SMB Shared
+  - Add SMB Share
+    - Select path
+    - Set a name
   - Enable service
-- Mounting: ~$ sudo mount -t cifs -o username=<user>,password=<pass>,uid=<user>,gid=<group> //<ip>/<share-name> </mount/location>~
+- Quick mount these shares in vm: ~$ sudo mount -t cifs -o username=<user>,password=<pass>,uid=<user>,gid=<group> //<ip>/<share-name> </mount/location>~
 - Proxmox: Datacenter - Storage - add SMB/CIFS and fill in credentials.
-  - This storage can be now also be used for the VMs
+  - This storage can be now also be used for the VMs and containers
+    - When on the Disks menu, select the correct storage
+*** NFS
+- Shared:
+  - Add NFS Share
+    - Select path
+    - Can set an allowed network (192.168.x.0/24) and hosts
+    - Advanced options:
+      - Maproot User = <your user>
+      - Maproot Group = <your user>
+   - Enable service
+- Proxmox: Datacenter - Storage - add NFS and fill in credentials.
+  - This storage can be now also be used for the VMs and containers
     - When on the Disks menu, select the correct storage
 ** Apps
 - Select the pool to create app dataset
@@ -78,3 +132,288 @@
   - Add catalogs - continue
   - "truecharts" - https://github.com/truecharts/catalog - stable - main
   - This can take a while to verify and set up
+** Alerts
+- Bell top right - gear icon
+  - Setup mail using smtp or gmail oauth
+- Credentials - Local users
+  - Set an email for the root user
+** Services
+- System Settings - Services:
+  - SSH enabled and starts automatically
+  - ~ssh <create user>@<ip address>~ This can not be root. You can always just ~su~.
+
+* VM
+- Select the local storage and upload ISO Image
+- Create VM
+  - General: Give it a name
+  - General: Start at boot and select a boot order (+ timeout time until next bootorder number starts)
+  - OS: Select uploaded ISO
+  - System: Enable Qemu Agent if distro does not support it
+  - Disks: Enable SSD emulation if storage is an SSD
+  - CPU: Set core amount
+  - Memory: Set ram
+  - Memory: Disable Ballooning Device
+- Inside VM
+  - edit /etc/fstab
+    - Auto mount shared drive: //<ip address smb>/<share name> </local/mount/point> cifs username=<user>,password=<pass>,_netdev,x-systemd.automount 0 0
+  - install acpid. enable and start it. This is used to more easily shut down a vm.
+
+* Container
+- Select storage that allows saving CT Templates
+- Templates: select template
+- Create CT
+  - General: Give hostname
+  - General: Set password
+  - General: Set priviliges mode
+  - enable nesting (makes it a bit quicker)
+  - Template: Select template
+  - Disks: Set storage and size (SMB sometimes might not work, in that case use NFS Share)
+  - CPU: Set cores
+  - Memory: Set memory (and maybe swap)
+  - Network: Give a ipv4 static ip and gateway
+  - Passthrough other storage
+    - From proxmox shell:
+      - ~pct set <ct id> -mp<0,1,2,3,...> /mnt/pve/<smb storage>,mp=</container/mount/point>~
+- Container options:
+  - Features:
+    - nesting (allow containers in containers)
+    - smb/cifs (network drives)
+
+** Notes:
+- Wireguard: run ~sysctl net.ipv4.ip_forward=1~ in node and container to actually get things working.
+- Root ssh login: edit ~/etc/ssh/sshd_config~ and add "PermitRootLogin yes"
+
+* Personal setup
+** Network
+- 192.168.0.1 = gateway
+- 192.168.0.2 = proxmox
+- 192.168.0.3 = truenas
+- 192.168.0.4 = network: portainer, pihole, wireguard
+- 192.168.0.5 = proxy: traefik
+- 192.168.0.6-9 = reserved vm/container
+- 192.168.0.10 = media: deluge, prowlarr, radarr, sonarr, bazarr, plex
+- 192.168.0.11 = cloud: nextcloud, mariadb, collabora
+- 192.168.0.12-49 = reserved vm/container
+- 192.168.0.50-99 = static network devices
+- 192.168.0.100-254 = dhcp
+- 192.168.0.255 = broadcast
+** Proxmox
+*** Drives
+- nvme0n1 = local, local-lvm
+- nvme1m1 = store (directory)
+- hdds = truenas
+*** Storage
+- local: iso images, container templates
+- local-lvm: disk images, container
+- store: disk image, container
+- truenas: vzdump backup, iso images
+*** ID
+- 100-199 = vm services
+- 200-299 = containers
+- 300-399 = vm graphical environment
+- 400-... = misc
+*** Backup
+- VM backups are saved to storage truenas with Stop Mode and ZSTD compression
+** VM
+*** TrueNAS
+Proxmox:
+- ID = 100
+- Boot order = 1, Up = 60
+- QEMU Guest Agent = enabled
+- CPU = 8 cores
+- RAM = 24GB (no ballooning)
+- Storage = 32GB stored on local-lvm
+Truenas:
+- Network
+  - IP = 192.168.0.3
+  - Default gateway = 192.168.0.1
+  - Nameserver = 1.1.1.1 1.0.0.1 192.168.0.1
+- Credentials - Local users
+  - create user = root, user1, user2
+  - set personal email on user root and user1
+  - Add groups "bultin_users" and "users" to Auxiliary Groups for user1 and 2
+  - Permit sudo for both users
+- Storage
+  - Pool = vault
+  - Dataset = storage (general storage), proxmox (virtualization), media (photos & videos), family (shared family storage), family/photo (photo folder family)
+  - Edit permissions:
+  |   | storage   | proxmox   | media     | family    | family/photo |
+  |---+-----------+-----------+-----------+-----------+--------------|
+  | u | user1 rwx | user1 rwx | user1 rwx | user2 rwx | user2 rwx    |
+  | g | users rwx | user1 rwx | users rwx | users rwx | user2 rwx    |
+  | o | other rx  | other rx  | other rx  | other rx  | other rx     |
+- Shares
+  - Active smb share for each dataset
+- Alerts
+  - Bell top right - Cog - Email
+  - Setup GMail OAuth
+- Data Protection
+  - Scrub vault every week on Wednesday at 12AM
+  - Snapshot every dataset weekly on sunday at 12AM and keep atleast 4 weeks
+  - SMART Test, long test on all (data) drives every first day of the month at 12 AM
+- Services
+  - SSH enabled on boot
+**** Proxmox
+Add network share created for proxmox as extra storage in proxmox
+
+*** Media
+proxmox:
+- use debian iso
+- ID = 101
+- boot order = 2 (1 if not on truenas pool)
+- CPU = 4 cores
+- RAM = 4GB (no ballooning)
+- Storage = 64GB stored on local-lvm. Used to store these on the truenas dataset. When doing this enable native instead of io_uring (this can be buggy)
+- Enable QEMU Guest Agent (or work wit acpid (below))
+vm:
+- ~apt install sudo && vim /etc/sudoers~: add user to sudoers
+- ~apt install qemu-guest-agent && systemctl start qemu-guest-agent && reboot~
+  - Some ram/timeout fixes:
+    - ~sysctl -w vm.dirty_ratio=10 && sysctl -w vm.dirty_background_ratio=5 && sysctl -p~
+- ~apt install acpid && systemctl enable/start acpid.service~: makes it easier to gracefully shut down vm. I guess it's not really an issue to use both acpid and qemu-guest-agent
+- Install docker engine
+- Set static ip
+  - ~sudo vim /etc/network/interfaces~:
+    - swap ~allow-hotplug <nic> \ iface <nic> inet dhcp~ to ~auto <nic> \ iface <nic> inet static \ address <static> \ netmask 255.255.255.0 \ gateway 192.168.0.1~
+  - ~sudo systemctl restart networking.service~
+- Connect media smb:
+  - ~sudo apt install cifs-utils~
+  - ~sudo vim /etc/fstab~
+  - ~sudo mkdir -p /mnt/media /mnt/photo/family~: used to mount share
+  - Add
+    - ~//192.168.0.3/media /mnt/media cifs username=<smblogin>,password=<smblogin>,uid=1000,gid=1000,_netdev,nofail 0 0~
+    - ~//192.168.0.3/media /mnt/photo/family cifs username=<smblogin>,password=<smblogin>,uid=1000,gid=1000,_netdev,nofail 0 0~
+- Setup the portainer agent: ~docker run -d -p 9001:9001 --name portainer_agent --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v /var/lib/docker/volumes:/var/lib/docker/volumes portainer/agent:latest~
+  - So it can be accessed by portainer running on the network container. (more info on connection in boilerplates)
+- File setup for services
+  - ~sudo mkdir /home/<user>/Downloads~
+  - ~sudo mkdir /home/<user>/Docker /home/<user>/Docker/{deluge,prowlarr,radarr,sonarr,bazarr,plex}~
+- Setup torrent, prowlarr, radarr, sonarr, bazarr in portainer (using the boilerplates)
+
+*** Windows
+- Windows 11 iso from official website
+- Virtio drivers: https://pve.proxmox.com/wiki/Windows_VirtIO_Drivers (I believe they are hosted by Fedora)
+- ID = 300
+- CPU = 4 cores
+- CPU type = host (when moved to other host, might need to change)
+- RAM = 8GB (ballooning on)
+- Guest OS = Type MS Windows 11/2022
+- System = q35
+- BIOS = OVMF
+- Add TPM
+- Network model = VirtIO
+- Enable Qemu Agent
+- Disk Device = VirtIO Block
+- After creation:
+  - Add hardware: CD/DVD Drive with virtio iso
+**** Notes
+- On first boot, quickly press enter to correctly boot.
+- During installation load the correct drivers from virtio iso:
+  - amd64/win11
+  - netkvm/win11
+- In windows, in file explorer, open virtio iso
+  - Install all drivers using the virtio-win-gt-x64 installer and reboot
+  - It's also recommended to install the virtio-win-guest-tools (this will fix the mouse stutter when using spice)
+- After installation, press esc during boot to change resolution to prefered resolution
+  - This can be buggy and you might need to reboot multiple times
+- If the vm gets stuck or can't reboot or shut down, in the pve shell run:
+  - ~ps aux | grep 300~
+  - ~kill -9 <id given>~
+
+*** MacOS
+- MacOS monterey iso from https://techrechard.com/
+- OpenCore iso from guide link below
+- ID = 300
+- CPU = 4 cores
+- CPU type = Penryn
+- RAM = 8GB (ballooning on)
+- Guest OS = Other
+- System = q35
+- Graphic card = VMware compatible
+- Hard Drive iso = OpenCore
+- BIOS = OVMF
+- Pre-Enrolled Keys unchecked
+- Network model = VirtIO
+- Disk Device = VirtIO Block
+- Cache = Write back (unsafe)
+- Network Model: VirtIO or VMware vmxnet3
+- After creation:
+  - Add hardware: CD/DVD Drive with MacOS monterey iso
+**** Notes
+- Follow this guide: https://i12bretro.github.io/tutorials/0628.html
+
+*** Running with spice
+- Makes sound possible
+- Add/Change hardware:
+  - Audio Device: ich9-intel-hda
+  - Display: SPICE (qxl,memory=128)
+- Mouse stutter? - install virtio-win-guest-tools in the virtio iso.
+- When launching with console, it will download a virt-viewer file.
+  - If disto allows it, just double-click and it will open de vm.
+  - Otherwise ~remote-viewer <path/to/file>~
+
+** Container
+*** Network
+proxmox:
+- container template of debian 11
+- ID = 200
+- Boot order = 1
+- CPU = 1 core
+- RAM = 1GB (no ballooning)
+- SWAP = 1GB
+- Storage = 8GB stored on local-lvm
+- Firewall = Disabled
+- IP = 192.168.0.4
+- In proxmox and container shell ~sysctl net.ipv4.ip_forward=1~
+container:
+- Install docker engine: https://docs.docker.com/engine/install/debian/
+- Get portainer: ~docker run -d -p 8000:8000 -p 9443:9443 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest~
+  - Inside portainer create a stack for wireguard and pihole (also don't for get to create the needed dirs to store data). Setups can be found in boilerplates.
+
+*** Cloud
+proxmox:
+- container template of debian 11
+- ID = 201
+- Boot order = 1
+- CPU = 1 core
+- RAM = 1GB (no ballooning)
+- SWAP = 1GB
+- Storage = 8GB stored on local-lvm
+- Firewall = Enabled
+- IP = 192.168.0.11
+- Unprivileged container = No (need to mount cifs)
+- Features
+  - nesting = enables (makes everything faster in privileged container)
+  - mount = cifs
+container:
+- Install docker engine: https://docs.docker.com/engine/install/debian/
+- Get portainer: ~docker run -d -p 8000:8000 -p 9443:9443 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest~
+  - Inside portainer create a stack for nextcloud (+mariadb) and collabora (also don't for get to create the needed dirs to store data). Setups can be found in boilerplates.
+- From personal experience it's better to use the official docker setup (from boilerplates) because it's easier to set it up with mariadb (which is a bit more performant then SQlite)
+  - The only issue is that external SMB is not enables but this can still be done using fstab and adding a local directory pass through to docker.
+- Edit ~/etc/fstab~ and add ~//192.168.0.3/storage /mnt/storage cifs username=<smblogin>,password=<smblogin>,uid=33,gid=33,_netdev,nofail 0 0~ (uid/gid 33 is used because this is the www-data docker group)
+
+- Nextcloud:
+  - It's recommended to set up https with Traefik beforehand. This makes the setup a bit easier and automated.
+    - If this is not done and you can't log in after registration, use chromium or firefox private window.
+  - Editors:
+    - Onlyoffice
+      - Setup a stack from the boilerplates
+      - Nextcloud apps: install onlyoffice
+      - Nextcloud settings: add url of onlyoffice documentserver
+    - Collabora
+      - Setup a stack form the boilerplates
+      - Nextcloud apps: install nextcloud office (or sometimes named collabora office)
+      - Nextcloud settings: add url of collabora
+        - There might be change this gives an error with mismatching http and https but should be fine. In worse case reload page.
+  - Apps:
+    - Enable external storage support
+    - Install nextcloud office
+  - Settings:
+    - Administration:
+      - External storage: Add local storage linked to ~/data~ (since this is how it's used in the boilerplate)
+  - Edit docker files: ~/html/config/config.php~ between ~$CONFIG = array ( ... );~:
+    - Add trusted domains if everything was set-up before setting up tls and a domain url
+      - ~'trusted_domains' => array ( 0 => 'subdomain.domain', ),~
+    - Allow connections from mobile phone app:
+      - ~'overwriteprotocol' => 'https',~

@@ -1,0 +1,120 @@
+#+title: Collabora
+#+property: header-args :tangle docker-compose.yml
+
+** Docker-compose.yml
+*** Docker Image
+
+- Docker Service Name = collabora
+- Image: Specify the docker image. No version behind the colon so it will use the latest version.
+- Container_name: Name that will be given to the container. If not stated, this will be randomized.
+
+#+begin_src yaml
+version: '3'
+
+services:
+  collabora:
+    image: collabora/code
+    container_name: collabora
+#+end_src
+
+*** General
+
+- Restart: The container will always try to restart unless it is manually stopped by the user.
+- Cap_add: Continue to have capability granted even after removed form docker defaults.
+- Tty: Needed to run process in interactive mode.
+
+#+begin_src yaml
+    restart: unless-stopped
+    cap_add:
+      - MKNOD
+    tty: true
+#+end_src
+
+*** Network
+
+- Networks:
+  - Use Traefik proxy network so the a domain can be used and everything is secure.
+  - It still needs to expose the port so Nextcloud can actually connect to it
+
+#+begin_src yaml
+    networks:
+      - proxy
+    ports:
+      - 9980:9980
+    expose:
+      - "9980"
+#+end_src
+
+*** Variables
+
+- Environment:
+  - Domain needs to be the nextcloud domain.
+  - Select the languages supported on Collabora.
+  - Virtual protocol, port and domain from Collabora.
+  - Some extra parameters that I have no clue what they do. Something with SSL.
+
+#+begin_src yaml
+    environment:
+      - domain=<wildcard.domain.example nextcloud>
+      - 'dictionaries=en_US,nl_BE'
+      - VIRTUAL_PROTO=http
+      - VIRTUAL_PORT=9980
+      - VIRTUAL_HOST=<wildcard.domain.example of collabora>
+      - "extra_params=--o:ssl.enable=false  --o:ssl.termination=true"
+#+end_src
+
+*** Labels
+
+- Labels: Using labels to configure container to use Traefik. Questions: Refer to traefik boilerplate.
+- First enable Traefik so it can manage the service.
+#+begin_src yaml
+    labels:
+      - "traefik.enable=true"
+#+end_src
+- Add a router for unsecure connection.
+  - The entrypoint is http.
+  - A host domainname is set.
+  - A middleware is declare to redirect the unsecure connection to https.
+#+begin_src yaml
+      - "traefik.http.routers.collabora.entrypoints=http"
+      - "traefik.http.routers.collabora.rule=Host(`<wildcard.domain.example collabora>`)"
+      - "traefik.http.middlewares.collabora-https-redirect.redirectscheme.scheme=https"
+#+end_src
+- Add a router for secure connections.
+  - The entrypoint is https.
+  - A host domain is set.
+  - Enable TLS to get a certificate.
+#+begin_src yaml
+      - "traefik.http.routers.collabora-secure.entrypoints=https"
+      - "traefik.http.routers.collabora-secure.rule=Host(`<wildcard.domain.example collabora`)"
+      - "traefik.http.routers.collabora-secure.tls=true"
+#+end_src
+- Configure the declared middleware.
+  - This will redirect unsecure to secure connection.
+#+begin_src yaml
+      - "traefik.http.routers.collabora.middlewares=collabora-https-redirect"
+#+end_src
+- Network that will be used with the container.
+  - This is the same network used by Traefik.
+#+begin_src yaml
+      - "traefik.docker.network=proxy"
+#+end_src
+
+*** Declared Network
+
+- The network "proxy" is already defined under networks. This will create or reference the network.
+- It's stated that docker will not need need to create this network since it already should exist. In this case, you should have already created this after setting up Traefik.
+
+#+begin_src yaml
+networks:
+  proxy:
+    external: true
+#+end_src
+
+** Usage
+
+- When Nextcloud Office/Collabora Online is installed, add your own Collabora Server in the Office menu.
+  - https://<wildcard.domain.example collabora>
+- At the moment Collabora Online - built-in Code Server is very buggy and unusable. For now it recommended to run your own instance of collabora.
+- If you don't want Collabora, you can also install OnlyOffice:
+  - Install the included boilerplace and OnlyOffice app on Nextcloud

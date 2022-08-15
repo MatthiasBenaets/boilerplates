@@ -1,0 +1,12 @@
+version: '2'
+
+services:
+  onlyoffice:
+    image: onlyoffice/documentserver:latest
+    container_name: onlyoffice
+
+    restart: unless-stopped
+    stdin_open: true
+
+    ports:
+      - 80:80

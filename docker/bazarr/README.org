@@ -55,7 +55,7 @@ services:
 
 ** Notes
 - Settings:
-  - Lanauages:
+  - Languages:
     - Lanuage filter: dutch, english
     - Add new profile
       - Give name
@@ -74,3 +74,5 @@ services:
     - Add api key
     - Test - Save
     - Min score for me is around 50
+- Config.ini:
+  - If the terminal complains that the port is already taken, edit the ip in the config/config.ini to 0.0.0.0

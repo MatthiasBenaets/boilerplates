@@ -22,13 +22,10 @@ services:
 *** General
 
 - Restart: The container will always try to restart unless it is manually stopped by the user.
-- Secure_opt: Don't allow container to get more priviliges while it is running.
 - Cap_add: Only needed if you use Pi-hole as a DNS.
 
 #+begin_src yaml
     restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
     #cap_add:
       #- NET_ADMIN
 #+end_src
@@ -96,3 +93,9 @@ networks:
 - Local DNS: Useful for locally hosted services
   - Choose a domain and point it at correct ip.
 - On every device that you want adblocking, change the nameserver/dns to the ip device running Pi-hole.
+
+** Notes
+- If receiving an error trying to run with wireguard network
+  - ~# systemctl stop systemd-resolved && systemctl disable systemd-resolved~
+  - this is a "listen tcp 0.0.0.0:53: bind: address alraedy in use" error
+- Password can be changed without recreating in the container terminal: ~# pihole -a -p~
