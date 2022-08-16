@@ -181,7 +181,7 @@
 
 ** Notes:
 - Wireguard: run ~sysctl net.ipv4.ip_forward=1~ in node and container to actually get things working.
-- Root ssh login: edit ~/etc/ssh/sshd_config~ and add "PermitRootLogin yes"
+- Root ssh login: edit ~/etc/ssh/sshd_config~ and add "PermitRootLogin yes". Ofcourse don't forget to ~systemctl restart ssdh.service~
 
 * Personal setup
 ** Network
@@ -190,7 +190,8 @@
 - 192.168.0.3 = truenas
 - 192.168.0.4 = network: portainer, pihole, wireguard
 - 192.168.0.5 = proxy: traefik
-- 192.168.0.6-9 = reserved vm/container
+- 192.168.0.6 = website: nginx
+- 192.168.0.7-9 = reserved vm/container
 - 192.168.0.10 = media: deluge, prowlarr, radarr, sonarr, bazarr, plex
 - 192.168.0.11 = cloud: nextcloud, mariadb, collabora
 - 192.168.0.12-49 = reserved vm/container
@@ -396,6 +397,7 @@ container:
 - Nextcloud:
   - It's recommended to set up https with Traefik beforehand. This makes the setup a bit easier and automated.
     - If this is not done and you can't log in after registration, use chromium or firefox private window.
+    - If planning to use an editor, add a middleware for onlyoffice: ~middlewares: onlyoffice-headers: headers: customrequestheaders: X-Forwarded-Proto: "https"~ (will fix white infinite loading screen)
   - Editors:
     - Onlyoffice
       - Setup a stack from the boilerplates
@@ -406,6 +408,9 @@ container:
       - Nextcloud apps: install nextcloud office (or sometimes named collabora office)
       - Nextcloud settings: add url of collabora
         - There might be change this gives an error with mismatching http and https but should be fine. In worse case reload page.
+    - There can be some issues with using these. See the paragraph about editing the files below.
+      - This encountering issues with not being able to access the files, redis might be a solution. Also check that the smb is mounted as the correct id.
+      - With doubt, just remove everthing and build fresh (don't even try recreate...)
   - Apps:
     - Enable external storage support
     - Install nextcloud office
@@ -414,6 +419,6 @@ container:
       - External storage: Add local storage linked to ~/data~ (since this is how it's used in the boilerplate)
   - Edit docker files: ~/html/config/config.php~ between ~$CONFIG = array ( ... );~:
     - Add trusted domains if everything was set-up before setting up tls and a domain url
-      - ~'trusted_domains' => array ( 0 => 'subdomain.domain', ),~
+      - ~'trusted_domains' => array ( 0 => 'subdomain nextcloud.domain', 1 => 'subdomain openoffice/collabora.domain' ),~
     - Allow connections from mobile phone app:
       - ~'overwriteprotocol' => 'https',~

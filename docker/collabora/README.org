@@ -1,6 +1,8 @@
 #+title: Collabora
 #+property: header-args :tangle docker-compose.yml
 
+Collabora Online is a powerful online office suite that supports all major document, spreadsheet and presentation file formats, which you can integrate in your own infrastructure. - https://www.collaboraoffice.com/
+
 ** Docker-compose.yml
 *** Docker Image
 

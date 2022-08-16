@@ -1,0 +1,93 @@
+#+title: Nginx Proxy Manager
+#+property: header-args :tangle docker-compose.yml
+
+Expose your services easily and securely - https://nginxproxymanager.com/
+
+** Requirements
+
+- Register a domain.
+  - I use [[http://epik.com]].
+- Move domain to Cloudflare.
+  - Better DNS resolve
+  - Easy encryption certificates
+- Accessibility over the internet.
+  - On Cloudflare set A record for: root (@), subdomain, wildcard (*) and/or www
+  - On router, forward port 80 and 443 to host ip
+- Accessibility locally
+  - Add custom url to local dns records on router (or something like pi-hole)
+  - No need to move url to Cloudflare or to set A records
+
+** Docker-compose.yml
+*** Docker Image
+
+- Docker Service Name = npm
+- Image: Specify the docker image. No version behind colon so always latest version.
+- Container_name: Name that will be given to the container. If not stated, this will be randomized.
+
+#+begin_src yaml
+version: '3'
+
+services:
+  npm:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: npm
+#+end_src
+
+*** General
+
+- Restart: The container will always try to restart.
+
+#+begin_src yaml
+    restart: always
+#+end_src
+
+*** Network
+
+- Ports: This is the port used by Nginx Proxy Manager. Left is the host port, right is the container port.
+  - 81 is the dashboard
+
+#+begin_src yaml
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+#+end_src
+
+*** Variables
+
+- Volumes: Multiple volumes need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a directory or file inside the container.
+  - Data is used for the configuration. Letsencrypt will store all the certificates.
+#+begin_src yaml
+    volumes:
+      - <path/to/local/data>:/data
+      - <path/to/local/letsencrypt>:/etc/letsencrypt
+#+end_src
+
+** Notes
+Dashboard on port 81:
+- Default login = admin@example.com:changeme
+- Create new login
+- Certificates:
+  - On cloudflare create a new api token:
+    - Wildcard: Zone DNS Edit: Include All zones
+  - In npm dashboard under SSL certificates add a let's encrypt certificate:
+    - Add <domain> and *.<domain>
+    - Give an email
+    - Use a DNS Challange (needed for wildcard)
+      - Select Cloudflare and edit the api token.
+    - Accept ToS
+- Hosts:
+  - Add proxy host:
+    - Give domainname
+    - If service uses https by default, change http to https.
+    - Add local ip and port
+    - Good practice to enable "Block Common Exploits"
+    - Change Access List if you want Auth (more info below)
+    - SSL: Select certificate and enable force ssl.
+    - Custom location is used if you want to redirect to a specific file in the domain.
+      - For example add /admin to pihole (since it uses /admin as dashboard).
+      - Location = / ; Set scheme, ip and port again; Add the filename with a trailing " / " so for example "192.168.0.2/admin/"
+    - Access Lists (add auth to website):
+      - Give a name and Satify Any
+      - Under authoization add a user and password
+      - Add the auth to the domain you want.

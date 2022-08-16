@@ -1,6 +1,8 @@
 #+title: Nextcloud
 #+property: header-args :tangle docker-compose.yml
 
+A safe home for all your data - https://nextcloud.com/
+
 - *This is just some experimenting with the linuxserver container.*
 - It works with collabora (I prefer OnlyOffice now).
 - Still need to find an elegant way to integrate it with mariaDB
