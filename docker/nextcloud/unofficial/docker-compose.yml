@@ -2,7 +2,7 @@ version: '3'
 
 services:
   nextcloud:
-    image: lscr.io/linuxserver/nextcloud:latest
+    image: linuxserver/nextcloud
     container_name: nextcloud
 
     restart: unless-stopped
@@ -12,14 +12,14 @@ services:
     networks:
       - proxy
 
-    environment:
-      - PUID=<$ id -u>
-      - PGID=<$ id -g>
-      - TZ=Europe/Brussels
     volumes:
       - </path/to/host/config>:/config
       - </path/to/host/data>:/data
       - </>:/mnt/<name>
+    environment:
+      - PUID=<$ id -u>
+      - PGID=<$ id -g>
+      - TZ=Europe/Brussels
 
     labels:
       - "traefik.enable=true"

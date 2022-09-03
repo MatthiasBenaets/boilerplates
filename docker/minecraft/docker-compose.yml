@@ -2,7 +2,7 @@ version: '3'
 
 services:
   minecraft:
-    image: itzg/minecraft-server:latest
+    image: itzg/minecraft-server
     container_name: minecraft
 
     restart: unless-stopped
@@ -12,15 +12,15 @@ services:
     ports:
       - 25565:25565
 
+    volumes:
+      - minecraftdata:/data
+      - </path/to/host/plugins>:/plugins
     environment:
       EULA: "TRUE"
       #TYPE: "BUKKIT"
       OPS: "<Minecraft Username>"
       ENABLE_WHITELIST: "TRUE"
       ENFORCE_WHITELIST: "TRUE"
-    volumes:
-      - minecraftdata:/data
-      - </path/to/host/plugins>:/plugins
 
 volumes:
   minecraftdata:

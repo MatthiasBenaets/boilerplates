@@ -7,6 +7,8 @@ services:
 
     restart: unless-stopped
 
+    volumes:
+      - </path/to/host/config>:/config
     environment:
       - PUID=<$ id -u>
       - PGID=<$ id -g>
@@ -14,5 +16,3 @@ services:
       - SUBDOMAINS=<duckdns subdomain1>,<subdomain2>
       - TOKEN=<duckdns token>
       - LOG_FILE=false
-    volumes:
-      - </path/to/host/config>:/config

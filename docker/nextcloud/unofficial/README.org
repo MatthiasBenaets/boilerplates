@@ -47,22 +47,22 @@ services:
 
 *** Variables
 
-- Environment:
-  - Set PUID and GUID
-  - Timezone
 - Volumes: Multiple volumes need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a direcotry or file inside the container.
   - Config and Data is needed
   - You can mount extra volumes (drives) for extra storage to manage.
+- Environment:
+  - Set PUID and GUID
+  - Timezone
 
 #+begin_src yaml
-    environment:
-      - PUID=<$ id -u>
-      - PGID=<$ id -g>
-      - TZ=Europe/Brussels
     volumes:
       - </path/to/host/config>:/config
       - </path/to/host/data>:/data
       - </>:/mnt/<name>
+    environment:
+      - PUID=<$ id -u>
+      - PGID=<$ id -g>
+      - TZ=Europe/Brussels
 #+end_src
 
 *** Labels
@@ -213,7 +213,7 @@ networks:
   - Mail
   - Talk
   - External Storage
-    - SMB/CIFS: host = <ip samba sahre> - Share = <share name> - Username & password
+    - SMB/CIFS: host = <ip samba share> - Share = <share name> - Username & password
     - Local = /mnt/<name>
 - At the moment Collabora Online - built-in Code Server is very buggy and unusable. For now it recommended to run your own instance of collabora.
 - If you don't want Collabora, you can also install OnlyOffice:

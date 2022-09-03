@@ -1,0 +1,49 @@
+#+title: Domain
+
+* Get Domain
+- Purchase a domain
+  - I use Epik.com
+
+* Change DNS Host
+- Create account on cloudflare
+- Add a site
+  - Enter domain name
+- Select Free Tier
+- Either keep or remove DNS Records
+- Copy Cloudflare's nameserver to Registar DNS (Epik)
+  - Save Changes
+- On Cloudflare, Done and check servers
+  - This can take a while
+- Run through Cloudflare Quick Start Guide if you want
+  - Enable and always Automatic HTTPS (personal preference)
+
+* DNS Records
+- A - <domain name> - <public ip> - Proxied - Auto
+- A - * - <public ip> - Proxied - Auto
+- A - www - <public ip> - Proxied - Auto
+
+* Cloudflare Email
+** Cloudflare
+- Request Access
+  - Wait
+- Routes
+  - Create address
+  - Alias - Send to - Gmail address
+  - Settings: Add required DNS Records
+- Edit SPF TXT Record as such: ~v=spf1 include:_spf.google.com include:_spf.mx.cloudflare.net ~all~
+** Gmail
+- Verify email from Cloudflare
+- Manage Google Account:
+  - Enable 2FA on your Google Account
+  - Generate an App Password
+    - Keep this for later
+- Gmail Settings
+  - See all settings
+  - Accounts and Import:
+    - Send Mail as: Add another email address:
+    - Enter name and custom email address
+      - SMTP: smtp.google.com Port 587
+      - Username: <user.name@gmail.com>
+      - Passowrd: <password that you just generated>
+      - Leave TLS Enabled
+- In the same Gmail settings menu you can change the default email and wether to reply from same address or from the default address.

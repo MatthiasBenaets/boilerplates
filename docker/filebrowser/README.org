@@ -43,18 +43,18 @@ services:
 
 *** Variables
 
+- Volumes: Multiple volumes need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a direcotry or file inside the container.
 - Environment:
   - Set the PGID and PUID.
-- Volumes: Multiple volumes need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a direcotry or file inside the container.
 
 #+begin_src yaml
-    environment:
-      - PUID=<$ id -u>
-      - PGID=<$ id -g>
     volumes:
       - </path/to/chosen/host/root>:/srv
       - </path/to/filebrowser.db/on/host>:/database.db
       - </path/to/settings.json/on/host>:/config/settings.json
+    environment:
+      - PUID=<$ id -u>
+      - PGID=<$ id -g>
 #+end_src
 
 *** Labels

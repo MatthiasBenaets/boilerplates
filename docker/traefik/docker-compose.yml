@@ -15,15 +15,15 @@ services:
       - 80:80
       - 443:443
 
-    environment:
-      - CF_API_EMAIL=<cloudflare account email>
-      - CF_API_KEY=<cloudflare global account api>
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - </path/to/host/traefik.yml>:/traefik.yml:ro
       - </path/to/host/acme.json>:/acme.json
       - </path/to/host/config.yml>:/config.yml:ro
+    environment:
+      - CF_API_EMAIL=<cloudflare account email>
+      - CF_API_KEY=<cloudflare global account api>
 
     labels:
       - "traefik.enable=true"

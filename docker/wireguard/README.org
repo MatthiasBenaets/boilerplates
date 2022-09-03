@@ -3,7 +3,7 @@
 
 WireGuard is an extremely simple yet fast and modern VPN that utilizes state-of-the-art cryptography. It aims to be faster, simpler, leaner, and more useful than IPsec, while avoiding the massive headache.
 
-** Requirements
+** Prerequisites
 
 - Forward port 51820 on your modem/router to the device ip running Wireguard.
 - Create a new subdomain on your dns resolver that points to your public ip and disable proxy.
@@ -28,12 +28,13 @@ services:
 *** General
 
 - Restart: The container will always try to restart unless it is manually stopped by the user.
-- Security_opt: The container will not be able to get extra privileges while it's running.
+- Sysctls: Some of these sysctl settings need to set for a client to actually be able to connect to wireguard, otherwise the host system might block it.
 - Cap_add: Adds linux capabilities
 
 #+begin_src yaml
     restart: unless-stopped
     sysctls:
+      - net.ipv4.ip_forward=1
       - net.ipv4.conf.all.src_valid_mark=1
     cap_add:
       - NET_ADMIN
@@ -58,6 +59,8 @@ services:
 
 *** Variables
 
+- Volumes: Multiple volumes need to be passed through or keep locally. Left volume is a local directory or file. Right volume is a directory or file inside the container.
+  - Here we link the website to the container.
 - Environments:
   - PUID AND PGID
   - Timezone
@@ -70,10 +73,11 @@ services:
     - Allowedip can be specified.
       - In this example everything gets tunnelled (ipv4 and ipv6).
     - Enable logging or not.
-- Volumes: Multiple volumes need to be passed through or keep locally. Left volume is a local directory or file. Right volume is a directory or file inside the container.
-  - Here we link the website to the container.
 
 #+begin_src yaml
+    volumes:
+      - </path/to/host/config>:/config
+      - /lib/modules:/lib/modules
     environment:
       - PUID=<$ id -u>
       - PGID=<$ id -g>
@@ -87,9 +91,6 @@ services:
       - INTERNAL_SUBNET=10.13.13.0
       - ALLOWEDIPS=0.0.0.0/0,::/0
       - LOG_CONFS=true
-    volumes:
-      - </path/to/host/config>:/config
-      - /lib/modules:/lib/modules
 #+end_src
 
 *** Declared Network
@@ -123,3 +124,5 @@ networks:
 
 ** Notes
 - Depending on the system you might need to allow ip forwarding. ~# sysctl net.ipv4.ip_forward=1~
+  - Uncomment/add ~net.ipv4.ip_forward = 1~ for permanent change at ~/etc/sysctl.conf~
+- If running in an lxc container, it's best to keep it unprivileged.

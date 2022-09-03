@@ -2,7 +2,7 @@
 
 Traefik is a leading modern reverse proxy and load balancer that makes deploying microservices easy. Traefik integrates with your existing infrastructure components and configures itself automatically and dynamically. -<https://traefik.io>
 
-** Requirements
+** Prerequisites
 
 - Register a domain.
   - I use [[http://epik.com]].
@@ -61,22 +61,22 @@ services:
 
 *** Variables
 
-- Environment: This boilerplate uses Cloudflare as the DNS resolver. The Cloudflare account email and general api key need to be given.
 - Volumes: Multiple volumes need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a directory or file inside the container.
   - Traefik expects a traefik.yml and acme.json file before initial startup.
     - ~$ touch traefik.yml acme.json~ or copy the one in this repo
     - ~$ sudo chmod 600 acme.json~
+- Environment: This boilerplate uses Cloudflare as the DNS resolver. The Cloudflare account email and general api key need to be given.
 
 #+begin_src yaml :tangle docker-compose.yml
-    environment:
-      - CF_API_EMAIL=<cloudflare account email>
-      - CF_API_KEY=<cloudflare global account api>
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - </path/to/host/traefik.yml>:/traefik.yml:ro
       - </path/to/host/acme.json>:/acme.json
       - </path/to/host/config.yml>:/config.yml:ro
+    environment:
+      - CF_API_EMAIL=<cloudflare account email>
+      - CF_API_KEY=<cloudflare global account api>
 #+end_src
 
 *** Labels

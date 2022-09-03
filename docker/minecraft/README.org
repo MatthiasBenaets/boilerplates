@@ -3,7 +3,7 @@
 
 This docker image provides a Minecraft Server that will automatically download the latest stable version at startup. -<https://github.com/itzg/docker-minecraft-server/blob/master/README.md>
 
-** Requirements
+** Prerequisites
 
 - Minecraft client (& login)
 
@@ -45,24 +45,24 @@ services:
 
 *** Variables
 
+- Volumes: Multiple volumes need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a direcotry or file inside the container.
+  - Minecraftdata is a volume create on docker. Needs to be created.
 - Environment:
   - Accept the EULA.
   - Specify a specific type of minecraft server.
   - Admins of the server.
   - Enable whitelist or not and wether to enforce it or not.
-- Volumes: Multiple volumes need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a direcotry or file inside the container.
-  - Minecraftdata is a volume create on docker. Needs to be created.
 
 #+begin_src yaml
+    volumes:
+      - minecraftdata:/data
+      - </path/to/host/plugins>:/plugins
     environment:
       EULA: "TRUE"
       #TYPE: "BUKKIT"
       OPS: "<Minecraft Username>"
       ENABLE_WHITELIST: "TRUE"
       ENFORCE_WHITELIST: "TRUE"
-    volumes:
-      - minecraftdata:/data
-      - </path/to/host/plugins>:/plugins
 #+end_src
 
 *** Declared volume

@@ -40,19 +40,19 @@ services:
 
 *** Variables
 
-- Environment: Add timezone, give same id as your user id ~$ id <username>~. Logs are optional.
 - Volumes: Storage volumes need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a direcotry or file inside the container.
   - The movies and tv host path need to be the same as Sonarr and Radarr
+- Environment: Add timezone, give same id as your user id ~$ id <username>~. Logs are optional.
 
 #+begin_src yaml
+    volumes:
+      - </path/to/host/config>:/config
+      - </path/to/host/Downloads>:/downloads
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Brussels
       - DELUGE_LOGLEVEL=error
-    volumes:
-      - </path/to/host/config>:/config
-      - </path/to/host/Downloads>:/downloads
 #+end_src
 
 ** Notes

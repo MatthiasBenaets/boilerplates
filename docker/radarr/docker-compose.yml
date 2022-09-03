@@ -10,11 +10,11 @@ services:
     ports:
       - 7878:7878
 
+    volumes:
+      - </path/to/host/config>:/config
+      - </path/to/host/movies>:/movies
+      - </path/to/host/Downloads>:/downloads
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Brussels
-    volumes:
-      - </path/to/host/config>:/config
-      - </path/to/host/movies>:/movies
-      - </path/to/host/downloads>:/downloads

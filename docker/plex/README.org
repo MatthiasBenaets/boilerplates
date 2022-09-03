@@ -37,20 +37,20 @@ services:
 
 *** Variables
 
-- Environment: Plex version, give same id as your user id ~$ id <username>~
 - Volumes: Storage volumes need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a direcotry or file inside the container.
   - tv and movies should point to same location as existing movies and series (from sonarr and radarr)
+- Environment: Plex version, give same id as your user id ~$ id <username>~
 
 #+begin_src yaml
+    volumes:
+      - </path/to/host/config>:/config
+      - </path/to/host/tv>:/tv
+      - </path/to/host/movies:/movies
     environment:
       - PUID=1000
       - PGID=1000
       - VERSION=docker
       #- PLEX_CLAIM=#optional
-    volumes:
-      - </path/to/host/config>:/config
-      - </path/to/host/tv>:/tv
-      - </path/to/host/movies:/movies
 #+end_src
 
 ** Notes

@@ -20,12 +20,12 @@ services:
       - 80:80/tcp
       - 443:443/tcp
 
-    environment:
-      - TZ=Europe/Brussels
-      - WEBPASSWORD=password
     volumes:
       - <path/to/host/pihole>:/etc/pihole
       - <path/to/host/dnsmasq.d>:/etc/dnsmasq.d
+    environment:
+      - TZ=Europe/Brussels
+      - WEBPASSWORD=password
 
 # Network only needed if you want to use pihole while connected to the WireGuard VPN.
 networks:

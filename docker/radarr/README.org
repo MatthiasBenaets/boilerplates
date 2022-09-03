@@ -38,19 +38,19 @@ services:
 
 *** Variables
 
-- Environment: Add timezone, give same id as your user id ~$ id <username>~
 - Volumes: Storage volumes need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a direcotry or file inside the container.
   - The downloads host path needs to be the same as the download client
+- Environment: Add timezone, give same id as your user id ~$ id <username>~
 
 #+begin_src yaml
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Brussels
     volumes:
       - </path/to/host/config>:/config
       - </path/to/host/movies>:/movies
       - </path/to/host/Downloads>:/downloads
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Brussels
 #+end_src
 
 ** Notes

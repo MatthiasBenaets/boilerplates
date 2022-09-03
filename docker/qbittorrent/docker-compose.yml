@@ -12,11 +12,11 @@ services:
       - 6881:6881
       - 6881:6881/udp
 
+    volumes:
+      - </path/to/host/config>:/config
+      - </path/to/host/Downloads>:/downloads
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Brussels
       - WEBUI_PORT=8080
-    volumes:
-      - </path/to/host/config>:/config
-      - </path/to/host/Downloads>:/downloads

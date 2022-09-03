@@ -1,0 +1,118 @@
+#+title: VaultWarden
+#+property: header-args :tangle docker-compose.yml
+
+- Unofficial Bitwarden compatible server written in Rust, formerly known as bitwarden_rs - https://github.com/dani-garcia/vaultwarden
+- https://bitwarden.com/
+
+** Prerequisites
+For security sake, this boilerplates uses gmail smtp to verify your local vaultwarden. You can ofcourse change this to your prefered smtp host.
+You wil need Google account. Afterwards manage your Google Account Security and enable 2FA.
+You can not register an app password that will be used as an environment variable.
+
+** Docker-compose.yml
+*** Docker Image
+
+- Docker Service Name = vaultwarden
+- Image: Specify the docker image. No version behind the colon so it will use the latest version.
+- Container_name: Name that will be given to the container. If not stated, this will be randomized.
+
+#+begin_src yaml
+version: '3'
+
+services:
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+#+end_src
+
+*** General
+
+- Restart: The container will always try to restart unless it is manually stopped by the user.
+
+#+begin_src yaml
+    restart: always
+#+end_src
+
+*** Network
+
+- Ports: Port the vaultwarden website will become available on. Host port on left, container port on right.
+
+#+begin_src yaml
+    ports:
+      - 80:80
+#+end_src
+
+*** Variables
+
+- Volumes:
+  - Persistent data stored locally
+- Environment:
+  - smtp host for google is 'smtp.gmail.com'
+  - smtp from is the email-address the mail will be send from
+  - smtp from name is the name of the sender
+  - smtp security used by google is starttls
+  - smtp port is 587
+  - smtp username is your google login email
+  - smtp password is the custom password generated (see prerequisites)
+  - smtp timout is 30 seconds
+  - smtp authenticaiton by google is plain
+  - limit the login burst rate to only 5 tries before lock
+  - limiteed to 60 seconds
+  - domain of the vaultwarden website
+  - invitation variables
+  - admin token used as last resort
+  - disabled signup
+  - only people with a specific email domain can register with the whitelist
+  - mail verification needed before login
+  - verification limitation variables
+  - emergency access allowed or not
+  - enable web
+
+#+begin_src yaml
+    volumes:
+      - <path/to/host/data>:/data
+    environment:
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_FROM=<your email address>
+      - SMTP_FROM_NAME=VaultWarden
+      - SMTP_SECURITY=starttls
+      - SMTP_PORT=587
+      - SMTP_USERNAME=<your google email login>
+      - SMTP_PASSWORD=<custom generated app password>
+      - SMTP_TIMEOUT=30
+      - SMTP_AUTH_MECHANISM="Plain"
+      - LOGIN_RATELIMIT_MAX_BURST=5
+      - LOGIN_RATELIMIT_SECONDS=60
+      - DOMAIN=https://<subdomain.domain>
+      - INVITATION_ORG_NAME=VaultWarden
+      - INVITATION_ALLOWED=true
+      - ADMIN_TOKEN=<admin token password>
+      - SIGNUPS_ALLOWED=false
+      - SIGNUPS_DOMAINS_WHITELIST=<whitelisted domain that people can register with>
+      - SIGNUPS_VERIFY=true
+      - SIGNUPS_VERIFY_RESEND_TIME=3600
+      - SIGNUPS_VERIFY_RESEND_LIMIT=2
+      - EMERGENCY_ACCESS_ALLOWED=true
+      - SENDS_ALLOWED=true
+      - WEB_VAULT_ENABLED=true
+#+end_src
+
+** Usage
+*** Initial setup
+- VaultWarden will not allow you to create an account using the local device ip since it is an invalid https certificate. (If localhost is explicitly set, I believe it will allow you, but not recommend to user over internet)
+  - Set the url from environment variable ~DOMAIN~ in your reverse proxy and surf to this link to register your account.
+  - With the current variables nobody is allowed to register unless you have and email-address that is part of the whitelist.
+  - Don't forget the master password!
+- After login, navigate to Tools - Import and import all existing password.
+*** Personal preference
+- Account Settings:
+  - Security: Two-Step login
+  - Preferences: Theme Dark
+  - Emergency Access: Set if needed
+*** Extension and app
+- Install the browser extension or install the app for BitWarden
+  - Open the menu by pressing on the icon and click on the cog-icon
+  - Enter your custom domain of your VaultWarden.
+- For settings, got to Other - Options
+  - Enable auto-fill on load page if you prefer this
+  - If you have many things hosted on your localhost, it might be useful to change Default URI match detection from 'Base Domain' to 'Host'

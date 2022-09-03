@@ -3,7 +3,7 @@
 
 Expose your services easily and securely - https://nginxproxymanager.com/
 
-** Requirements
+** Prerequisites
 
 - Register a domain.
   - I use [[http://epik.com]].
@@ -76,6 +76,7 @@ Dashboard on port 81:
     - Use a DNS Challange (needed for wildcard)
       - Select Cloudflare and edit the api token.
     - Accept ToS
+- Temporarily disable the proxy on nextcloud to set everthing up.
 - Hosts:
   - Add proxy host:
     - Give domainname

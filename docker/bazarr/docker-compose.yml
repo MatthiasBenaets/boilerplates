@@ -10,11 +10,11 @@ services:
     ports:
       - 6767:6767
 
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Brussels
     volumes:
       - </path/to/host/config>:/config
       - </path/to/host/movies>:/movies
       - </path/to/host/tv>:/tv
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Brussels

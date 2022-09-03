@@ -7,6 +7,7 @@ services:
 
     restart: unless-stopped
     sysctls:
+      - net.ipv4.ip_forward=1
       - net.ipv4.conf.all.src_valid_mark=1
     cap_add:
       - NET_ADMIN
@@ -19,21 +20,22 @@ services:
     ports:
       - 51820:51820/udp
 
+    volumes:
+      - </path/to/host/config>:/config
+      - /lib/modules:/lib/modules
     environment:
       - PUID=<$ id -u>
       - PGID=<$ id -g>
       - TZ=Europe/Brussels
       - SERVERURL=<wildcard.domain.example>
       - SERVERPORT=51820
+      #- PEERS=desktop,laptop
       - PEERS=1
-      - PEERDNS=172.20.0.2  #ip of pihole
+      - PEERDNS=172.20.0.2
       #- PEERDNS=auto
       - INTERNAL_SUBNET=10.13.13.0
       - ALLOWEDIPS=0.0.0.0/0,::/0
       - LOG_CONFS=true
-    volumes:
-      - </path/to/host/config>:/config
-      - /lib/modules:/lib/modules
 
 # Network only needed if you want to use pihole while connected to the WireGuard VPN.
 networks:

@@ -9,12 +9,12 @@ services:
 
     network_mode: host
 
+    volumes:
+      - </path/to/host/config>:/config
+      - </path/to/host/tv>:/tv
+      - </path/to/host/movies:/movies
     environment:
       - PUID=1000
       - PGID=1000
       - VERSION=docker
       #- PLEX_CLAIM=#optional
-    volumes:
-      - </path/to/host/config>:/config
-      - </path/to/host/tv>:/tv
-      - </path/to/host/movies:/movies

@@ -1,5 +1,11 @@
 #+title: Proxmox, TrueNAS, VM and Container Setup
 
+* Hardware
+- ECC Memory
+- Processor and board that supports it: AMD/Xeon
+- Motherboard that allows passthrough of iommu groups
+- Enough core
+
 * Bios
 - Enable SVM (amd) or VT-d (intel) 
 - Sata mode to AHCI not RAID
@@ -191,10 +197,13 @@
 - 192.168.0.4 = network: portainer, pihole, wireguard
 - 192.168.0.5 = proxy: traefik
 - 192.168.0.6 = website: nginx
-- 192.168.0.7-9 = reserved vm/container
-- 192.168.0.10 = media: deluge, prowlarr, radarr, sonarr, bazarr, plex
-- 192.168.0.11 = cloud: nextcloud, mariadb, collabora
-- 192.168.0.12-49 = reserved vm/container
+- 192.168.0.7-9 = reserved priority vm/container
+- 192.168.0.10 = cloud: nextcloud, mariadb, collabora, syncthing
+- 192.168.0.11 = media: deluge, prowlarr, radarr, sonarr, bazarr, plex
+- 192.168.0.12-39 = reserved vm/container
+- 192.168.0.40 = windows vm
+- 192.168.0.41 = macos vm
+- 192.168.0.42-49 = main machine vms 
 - 192.168.0.50-99 = static network devices
 - 192.168.0.100-254 = dhcp
 - 192.168.0.255 = broadcast
@@ -295,9 +304,9 @@ vm:
 - Windows 11 iso from official website
 - Virtio drivers: https://pve.proxmox.com/wiki/Windows_VirtIO_Drivers (I believe they are hosted by Fedora)
 - ID = 300
-- CPU = 4 cores
+- CPU = 16 cores
 - CPU type = host (when moved to other host, might need to change)
-- RAM = 8GB (ballooning on)
+- RAM = 8GB (ballooning off)
 - Guest OS = Type MS Windows 11/2022
 - System = q35
 - BIOS = OVMF
@@ -317,9 +326,42 @@ vm:
   - It's also recommended to install the virtio-win-guest-tools (this will fix the mouse stutter when using spice)
 - After installation, press esc during boot to change resolution to prefered resolution
   - This can be buggy and you might need to reboot multiple times
+- It's best to disable auto sleep otherwise the vm will pause in proxmox. By starting it again, it will reboot.
 - If the vm gets stuck or can't reboot or shut down, in the pve shell run:
   - ~ps aux | grep 300~
   - ~kill -9 <id given>~
+**** GPU passthrough
+- After installation not the ip or make it static and enable remote desktop.
+- Edit GRUB_CMDLINE_LINUX_DEFAULT in ~/etc/default/grub~
+  - add ~intel_iommu=on~ or ~amd_iommu=on~ depending on your cpu. This will separate every component on pc into groups that can be passed through.
+  - verify by running: ~dmesg | grep -e DMAR -e IOMMU~
+- Edit ~/etc/modules~ and add: `vfio vfio_iommu_type1 vfio_pci vfio_virqfd` (each on seperate line)
+- Best to reboot.
+- Add hardware: PCI device. Select videocard.
+- Display can be changed to 'None' (novnc will now no longer be possible)
+- Start vm and connect with rdp client (for example Remmina)
+- Install video drivers.
+**** Gaming
+- Either use something like moonlight/sunshine or parsec. Personally I had more success with parsec.
+- If distro does not have parsec packaged, use the flatpak.
+- Set up parsec on windows:
+  - Current best host settings for me:
+    - Window mode: fullscreen
+    - Renderer: Direct3D 11
+    - VSync: Off
+    - Decoder: Software
+    - H265: Off (i believe not supported for both my devices. Otherwise it might be better to turn on)
+    - Hosting: Enables
+    - Resolution: Keep Host Resolution
+    - Bandwith Limit: 30 Mbps
+    - Frames: 30
+  - Current client settings:
+    - Codec: H264
+    - Decoder: Software
+    - Resolution: Keep Host Resolution
+    - Bandwith limit: 30 Mbps (current limit is 35 for my network for some reason. If I set it to 35 it will fully saturate the connection for video meaning input lag)
+    - Constant FPS: off
+
 
 *** MacOS
 - MacOS monterey iso from https://techrechard.com/
@@ -342,6 +384,8 @@ vm:
   - Add hardware: CD/DVD Drive with MacOS monterey iso
 **** Notes
 - Follow this guide: https://i12bretro.github.io/tutorials/0628.html
+- Remote access is via VNC (maybe a bit snappier than noVNC)
+  - Apple - System Preferences - Sharing - Remote Management - Allow all
 
 *** Running with spice
 - Makes sound possible
@@ -365,11 +409,26 @@ proxmox:
 - Storage = 8GB stored on local-lvm
 - Firewall = Disabled
 - IP = 192.168.0.4
-- In proxmox and container shell ~sysctl net.ipv4.ip_forward=1~
 container:
 - Install docker engine: https://docs.docker.com/engine/install/debian/
 - Get portainer: ~docker run -d -p 8000:8000 -p 9443:9443 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest~
   - Inside portainer create a stack for wireguard and pihole (also don't for get to create the needed dirs to store data). Setups can be found in boilerplates.
+- Edit ~/etc/sysctl.conf~ and uncomment ~net.ipv4.ip_forward = 1~. This is needed for wireguard to work properly
+
+*** Proxy
+proxmox:
+- container template of debian 11
+- ID = 201
+- Boot order = 1
+- CPU = 1 core
+- RAM = 512MB (no ballooning)
+- SWAP = 512MB
+- Storage = 8GB stored on local-lvm
+- Firewall = Disabled
+- IP = 192.168.0.5
+container:
+- Install docker engine: https://docs.docker.com/engine/install/debian/
+- Get portainer agent: ~docker run -d -p 9001:9001 --name portainer_agent --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v /var/lib/docker/volumes:/var/lib/docker/volumes portainer/agent:latest~
 
 *** Cloud
 proxmox:
@@ -381,14 +440,14 @@ proxmox:
 - SWAP = 1GB
 - Storage = 8GB stored on local-lvm
 - Firewall = Enabled
-- IP = 192.168.0.11
+- IP = 192.168.0.10
 - Unprivileged container = No (need to mount cifs)
 - Features
   - nesting = enables (makes everything faster in privileged container)
   - mount = cifs
 container:
 - Install docker engine: https://docs.docker.com/engine/install/debian/
-- Get portainer: ~docker run -d -p 8000:8000 -p 9443:9443 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest~
+- Get portainer agent: ~docker run -d -p 9001:9001 --name portainer_agent --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v /var/lib/docker/volumes:/var/lib/docker/volumes portainer/agent:latest~
   - Inside portainer create a stack for nextcloud (+mariadb) and collabora (also don't for get to create the needed dirs to store data). Setups can be found in boilerplates.
 - From personal experience it's better to use the official docker setup (from boilerplates) because it's easier to set it up with mariadb (which is a bit more performant then SQlite)
   - The only issue is that external SMB is not enables but this can still be done using fstab and adding a local directory pass through to docker.
@@ -422,3 +481,21 @@ container:
       - ~'trusted_domains' => array ( 0 => 'subdomain nextcloud.domain', 1 => 'subdomain openoffice/collabora.domain' ),~
     - Allow connections from mobile phone app:
       - ~'overwriteprotocol' => 'https',~
+
+*** Website
+proxmox:
+- container template of debian 11
+- ID = 203
+- Boot order = 1
+- CPU = 1 core
+- RAM = 1GB (no ballooning)
+- SWAP = 1GB
+- Storage = 8GB stored on local-lvm
+- Firewall = Enabled
+- IP = 192.168.0.6
+- Unprivileged container = Yes
+- Features
+  - nesting = enables (makes everything faster in privileged container)
+container:
+- Install nginx with apt
+- Move all website files to ~/var/www/html/~

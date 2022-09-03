@@ -52,18 +52,18 @@ services:
 
 *** Variables
 
+- Volumes: Multiple volumes need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a direcotry or file inside the container.
 - Environment:
   - Timezone
   - Password for the web dashboard
-- Volumes: Multiple volumes need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a direcotry or file inside the container.
 
 #+begin_src yaml
-    environment:
-      - TZ=Europe/Brussels
-      - WEBPASSWORD=password
     volumes:
       - <path/to/host/pihole>:/etc/pihole
       - <path/to/host/dnsmasq.d>:/etc/dnsmasq.d
+    environment:
+      - TZ=Europe/Brussels
+      - WEBPASSWORD=password
 #+end_src
 
 *** Declared Network

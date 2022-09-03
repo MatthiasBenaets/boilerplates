@@ -4,11 +4,12 @@
 Real-Time Messaging Protocol or RTMP is a communication protocol for live audio and video streaming over the internet.
 Docker image with Nginx using the nginx-rtmp-module module for live multimedia (video) streaming. -<https://hub.docker.com/r/tiangolo/nginx-rtmp/>
 
-** Requirements
+** Prerequisites
 
 - If planning to stream over the internet, open the chosen port to your host running, for example, OBS.
 - A device to actually stream from. This readme is aimed at using GoPro's.
 - A phone with internet connectivity and the GoPro Quik app.
+- Port forward port 1935 TCP to host ip if you are planning to use it over the internet.
 
 ** Docker-compose.yml
 *** Docker Image

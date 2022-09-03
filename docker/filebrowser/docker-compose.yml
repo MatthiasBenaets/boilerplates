@@ -12,13 +12,13 @@ services:
     networks:
       - proxy
 
-    environment:
-      - PUID=<$ id -u>
-      - PGID=<$ id -g>
     volumes:
       - </path/to/chosen/host/root>:/srv
       - </path/to/filebrowser.db/on/host>:/database.db
       - </path/to/settings.json/on/host>:/config/settings.json
+    environment:
+      - PUID=<$ id -u>
+      - PGID=<$ id -g>
 
     labels:
       - "traefik.enable=true"

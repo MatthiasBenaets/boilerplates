@@ -118,5 +118,6 @@ networks:
 - When Nextcloud Office/Collabora Online is installed, add your own Collabora Server in the Office menu.
   - https://<wildcard.domain.example collabora>
 - At the moment Collabora Online - built-in Code Server is very buggy and unusable. For now it recommended to run your own instance of collabora.
+- If the reverse proxy if giving some issues, enable "Websockets Support"
 - If you don't want Collabora, you can also install OnlyOffice:
   - Install the included boilerplace and OnlyOffice app on Nextcloud

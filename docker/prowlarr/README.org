@@ -6,7 +6,7 @@ Prowlarr is an indexer manager/proxy built on the popular *arr .net/reactjs base
 ** Docker-compose.yml
 *** Docker Image
 
-- Docker Service Name = lscr.io/linuxserver/prowlarr:latest
+- Docker Service Name = lscr.io/linuxserver/prowlarr:develop
 - Image: Specify the docker image. No version behind colon so always latest version.
 - Container_name: Name that will be given to the container. If not stated, this will be randomized.
 
@@ -15,7 +15,7 @@ version: '2.1'
 
 services:
   prowlarr:
-    image: lscr.io/linuxserver/prowlarr:latest
+    image: lscr.io/linuxserver/prowlarr:develop
     container_name: prowlarr
 #+end_src
 
@@ -38,16 +38,16 @@ services:
 
 *** Variables
 
-- Environment: Add timezone, give same id as your user id ~$ id <username>~
 - Volumes: Storage volumes need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a direcotry or file inside the container.
+- Environment: Add timezone, give same id as your user id ~$ id <username>~
 
 #+begin_src yaml
+    volumes:
+      - </path/to/host/config>:/config
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Brussels
-    volumes:
-      - </path/to/host/config>:/config
 #+end_src
 
 ** Notes

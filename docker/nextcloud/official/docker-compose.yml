@@ -8,20 +8,21 @@ services:
     restart: unless-stopped
     links:
       - mariadb
+      - redis
 
     networks:
       - proxy
     #ports:
       #- 8080:80
 
+    volumes:
+      - </path/to/host/data>:/var/www/html
+      - </path/to/external/data>:/data
     environment:
       - MYSQL_PASSWORD=<password>
       - MYSQL_DATABASE=<db name>
       - MYSQL_USER=<user>
       - MYSQL_HOST=mariadb
-    volumes:
-      - </path/to/host/data>:/var/www/html
-      - </path/to/external/data>:/data
 
     labels:
       - "traefik.enable=true"
@@ -41,6 +42,15 @@ services:
 
       - "traefik.docker.network=proxy"
 
+  redis:
+    image: redis:alpine
+    container_name: redis
+
+    restart: unless-stopped
+
+    volumes:
+      - /docker/nextcloud/redis:/data
+
   mariadb:
     image: mariadb:10.5
     container_name: mariadb
@@ -51,10 +61,10 @@ services:
     networks:
       - proxy
 
+    volumes:
+      - </path/to/host/datadb>:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=<password>
       - MYSQL_PASSWORD=<password>
       - MYSQL_DATABASE=<db name>
       - MYSQL_USER=<user>
-    volumes:
-      - </path/to/host/datadb>:/var/lib/mysql

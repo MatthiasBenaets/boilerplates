@@ -1,0 +1,9 @@
+users:
+  <username>: #username for user 1. change to whatever you'd like
+    displayname: "<username>" #whatever you want the display name to be
+    password: "$argon2id$v=$m=,t=,p=$" #generated at https://argon2.online/ or with ~docker run authalia/authalia:latest authalia hash-password '<password>'
+    email: <email-address> #whatever your email address is
+    groups: #enter the groups you want the user to be part of below
+      - admins
+      - dev
+#any time you add a new user, you will need to restart the Authelia container to recognize the new settings/rules

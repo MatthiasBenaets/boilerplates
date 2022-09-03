@@ -3,7 +3,7 @@
 
 Duck DNS free dynamic DNS hosted on Amazon VPC.
 
-** Requirements
+** Prerequisites
 
 - A DuckDNS domain and token
 
@@ -33,15 +33,17 @@ services:
 
 *** Variables
 
+- Volumes: Volume need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a directory or file inside the container.
 - Environments:
   - User and group ID
   - Timezone
   - All DuckDNS subdomains you want to keep updated
   - Your DuckDNS Token
   - If you want to keep logs, enable LOG_FILE (volume needed)
-- Volumes: Volume need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a directory or file inside the container.
 
 #+begin_src yaml
+    volumes:
+      - </path/to/host/config>:/config
     environment:
       - PUID=<$ id -u>
       - PGID=<$ id -g>
@@ -49,6 +51,4 @@ services:
       - SUBDOMAINS=<duckdns subdomain1>,<subdomain2>
       - TOKEN=<duckdns token>
       - LOG_FILE=false
-    volumes:
-      - </path/to/host/config>:/config
 #+end_src

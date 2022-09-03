@@ -2,7 +2,7 @@ version: '3'
 
 services:
   zoffline:
-    image: zoffline/zoffline:latest
+    image: zoffline/zoffline
     container_name: zoffline
 
     restart: unless-stopped
@@ -13,7 +13,7 @@ services:
       - 3022:3022/udp
       - 3023:3023
 
-    environment:
-      - TZ=Europe/Brussels
     volumes:
       - <path/to/host/storage>:/usr/src/app/zwift-offline/storage
+    environment:
+      - TZ=Europe/Brussels
