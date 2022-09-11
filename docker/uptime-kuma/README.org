@@ -1,0 +1,57 @@
+#+title: Uptime Kuma
+#+property: header-args :tangle docker-compose.yml
+
+A self-hosted monitoring tool - https://uptime.kuma.pet/
+
+** Docker-compose.yml
+*** Docker Image
+
+- Docker Service Name = uptimekuma
+- Image: Specify the docker image. No version behind colon so always latest version.
+- Container_name: Name that will be given to the container. If not stated, this will be randomized.
+
+#+begin_src yaml
+version: '3'
+
+services:
+  uptimekuma:
+    image: louislam/uptime-kuma:latest
+    container_name: uptimekuma
+#+end_src
+
+*** General
+
+- Restart: The container will always try to restart.
+
+#+begin_src yaml
+    restart: always
+#+end_src
+
+*** Network
+
+- Ports: Uptime-Kuma uses port 3001 for the dashboard.
+
+#+begin_src yaml
+    ports:
+      - '3001:3001'
+#+end_src
+
+*** Variables
+
+- Volumes: Multiple volumes need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a directory or file inside the container.
+  - Data is used for the configuration.
+
+#+begin_src yaml
+    volumes:
+      - <path/to/local/data>:/app/data
+#+end_src
+
+** Notes
+- Notification Settings:
+  - Email: SMTP
+  - Host: smtp.gmail.com
+  - Port: 587
+  - Security: STARTTLS
+  - Generate password from google security app password
+  - From: "Uptime Kuma" <email>
+  - To: <email>

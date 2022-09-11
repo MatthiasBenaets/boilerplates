@@ -1,0 +1,50 @@
+#+title: Portainer Agent
+#+property: header-args :tangle docker-compose.yml
+
+The Portainer Agent is a workaround for a Docker API limitation when using the Docker API to manage a Docker environment. The user interactions with specific resources (containers, networks, volumes and images) are limited to those available on the node targeted by the Docker API request.
+
+** Docker run
+- To make it easy and hassle-free:
+~# docker run -d -p 9001:9001 --name portainer_agent --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v /var/lib/docker/volumes:/var/lib/docker/volumes portainer/agent:latest~
+
+** Docker-compose.yml
+*** Docker Image
+
+- Docker Service Name = portainer_agent
+- Image: Specify the docker image. No version behind colon meaning it will pull the latest version.
+  - portainer-ee for business.
+- Container_name: Name that will be given to the container. If not stated, this will be randomized.
+
+#+begin_src yaml
+version: '3'
+
+services:
+  portainer_agent:
+    image: portainer/agent:latest
+    container_name: portainer_agent
+#+end_src
+
+*** General
+
+- Restart: The container will always try to restart unless it is manually stopped by the user.
+
+#+begin_src yaml
+    restart: always
+#+end_src
+
+*** Network
+
+#+begin_src yaml
+    ports:
+      - 9001:9001
+#+end_src
+
+*** Variables
+
+- Volumes: Multiple volumes need to be passed through or keep locally. Left volume is a local directory or file. Right volume is a directory or file inside the container.
+
+#+begin_src yaml
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+#+end_src

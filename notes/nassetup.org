@@ -335,7 +335,8 @@ vm:
 - Edit GRUB_CMDLINE_LINUX_DEFAULT in ~/etc/default/grub~
   - add ~intel_iommu=on~ or ~amd_iommu=on~ depending on your cpu. This will separate every component on pc into groups that can be passed through.
   - verify by running: ~dmesg | grep -e DMAR -e IOMMU~
-- Edit ~/etc/modules~ and add: `vfio vfio_iommu_type1 vfio_pci vfio_virqfd` (each on seperate line)
+- Edit ~/etc/modules~ and add 'vfio vfio_iommu_type1 vfio_pci vfio_virqfd' (each on seperate lines)
+- Edit ~/etc/modprobe.d/pve-blacklist.conf~ and add: 'blacklist nvidiafb blacklist nvidia blacklist radeon blacklist nouveau' (each on seperate lines)
 - Best to reboot.
 - Add hardware: PCI device. Select videocard.
 - Display can be changed to 'None' (novnc will now no longer be possible)
