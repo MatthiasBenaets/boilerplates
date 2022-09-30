@@ -125,4 +125,5 @@ networks:
 ** Notes
 - Depending on the system you might need to allow ip forwarding. ~# sysctl net.ipv4.ip_forward=1~
   - Uncomment/add ~net.ipv4.ip_forward = 1~ for permanent change at ~/etc/sysctl.conf~
+  - Changes need to made for host and vm/lxc.
 - If running in an lxc container, it's best to keep it unprivileged.

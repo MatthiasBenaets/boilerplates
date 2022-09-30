@@ -10,3 +10,7 @@ services:
 
     ports:
       - 80:80
+
+    environment:
+      - JWT_ENABLED=true
+      - JWT_SECRET=<password>

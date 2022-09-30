@@ -192,7 +192,7 @@ services:
 
 ** Usage
 
-- If everything is set-up correctly, on registration you should not be able to pick a database.
+- If everything is set-up correctly, on registration you should now be able to pick a database.
 - Some useful apps to install:
   - Contacts
     - Import google contacts from vCard

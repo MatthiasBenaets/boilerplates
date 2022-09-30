@@ -28,6 +28,8 @@
     - ~update-grub~
   - Edit /etc/modules
     - add on seperate lines: vfio vfio_iommu_type1 vfio_pci vfio_virqfd
+  - Edit ~/etc/modprobe.d/pve-blacklist.conf~ if you want to passthrough a graphics card
+    - add: 'blacklist nvidiafb blacklist nvidia blacklist radeon blacklist nouveau' (each on seperate lines)
   - Reboot
 - Pve Shell: ~pveam update~ to get turnkey templates if they are not available
 - (optional) ACMA (traefik will always grand a certificate, just required for novnc on proxmox mobile (vpn and local dns needed (pihole & wireshark in boileplates))):

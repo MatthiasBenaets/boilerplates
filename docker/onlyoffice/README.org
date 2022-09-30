@@ -30,17 +30,46 @@ services:
 
 *** Network
 
-- Ports:
+- Ports: Website with more information, updates and commands
 
 #+begin_src yaml
     ports:
       - 80:80
 #+end_src
 
+*** Variables:
+
+- Environment:
+  - Variables for JWT to secure your documentserver
+
+#+begin_src yaml
+    environment:
+      - JWT_ENABLED=true
+      - JWT_SECRET=<password>
+#+end_src
+
 ** Usage
 
 - When OnlyOffice is installed, add your own documentserver in the Office menu.
   - https://<wildcard.domain.example onlyoffice>
-- When using traefik, dont forget to add a middleware header: customrequestheaders: X-Forwarded-Proto: "https"
+- Reverse proxy
+  - When using traefik, dont forget to add a middleware header: customrequestheaders: X-Forwarded-Proto: "https"
+  - When using npm, best to just enable all ssl settings.
+  - Maybe also allow websocket support
 - If you don't want OnlyOffice, you can also install Collabora:
   - Install Collabora Office/Nextcloud office and the included boilerplate
+- When using with Nextcloud, there are a few things that need to be added to the ~/html/config/config.php~ Add:
+#+begin_src
+  'trusted_domains' =>
+  array (
+    0 => '<nextcloud.yourdomain.com>',
+    1 => '<onlyoffice.yourdomain.com>',
+  ),
+  'trusted_proxies' =>
+  array (
+    0 => '<nextcloud.yourdomain.com>',
+    1 => '<onlyoffice.yourdomain.com>',
+  ),
+  'overwrite.cli.url' => '<https://nextcloud.yourdomain.com>',
+  'overwriteprotocol' => 'https',
+#+end_src
