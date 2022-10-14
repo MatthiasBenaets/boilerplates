@@ -330,20 +330,35 @@ vm:
   - This can be buggy and you might need to reboot multiple times
 - It's best to disable auto sleep otherwise the vm will pause in proxmox. By starting it again, it will reboot.
 - If the vm gets stuck or can't reboot or shut down, in the pve shell run:
-  - ~ps aux | grep 300~
+  - ~ps aux | grep <vm id>~
   - ~kill -9 <id given>~
 **** GPU passthrough
+- For the best success rate, check out https://pve.proxmox.com/wiki/Pci_passthrough
 - After installation not the ip or make it static and enable remote desktop.
 - Edit GRUB_CMDLINE_LINUX_DEFAULT in ~/etc/default/grub~
   - add ~intel_iommu=on~ or ~amd_iommu=on~ depending on your cpu. This will separate every component on pc into groups that can be passed through.
   - verify by running: ~dmesg | grep -e DMAR -e IOMMU~
+  - *currently kernel issues, also add: ~initcall_blacklist=sysfb_init~
 - Edit ~/etc/modules~ and add 'vfio vfio_iommu_type1 vfio_pci vfio_virqfd' (each on seperate lines)
 - Edit ~/etc/modprobe.d/pve-blacklist.conf~ and add: 'blacklist nvidiafb blacklist nvidia blacklist radeon blacklist nouveau' (each on seperate lines)
+  - or ~echo "blacklist radeon/nouveau/nvidia" >> /etc/modprobe.d/blacklist.conf~. note this needs to be run 3x for each driver seperately
+- If things still don't work:
+  - ~echo "options vfio_iommu_type1 allow_unsafe_interrupts=1" > /etc/modprobe.d/iommu_unsafe_interrupts.conf~
+  - ~lspci -n -s 0x:00~, this is to find the vendor id of the videocard. 0x:00 can be found by ~lspci~
+  - ~echo "options vfio-pci ids=<vendor id gpu>,<vendor id gpu audio" > /etc/modprobe.d/vfio.conf~, note that the vendor id is a 2 part code with a ":" seperator.
+  - Edit ~/etc/pve/qemu-server/<vm id>.conf~ and add:
+    - ~cpu: host,hidden=1,flags=+pcid~ (this one might already exist, you can delete the existing one)
+    - ~args: -cpu 'host,+kvm_pv_unhalt,+kvm_pv_eoi,hv_vendor_id=NV43FIX,kvm=off'~
+  - For nvidia: ~echo "options kvm ignore_msrs=1 report_ignored_msrs=0" > /etc/modprobe.d/kvm.conf~
+  - *Some kernels have issues with passing through stuff correctly, if this is the case try to run (where x is the lspci id):*
+    - ~echo 1 > /sys/bus/pci/devices/0000\:0x\:00.0/remove~
+    - ~echo 1 > /sys/bus/pci/rescan~
 - Best to reboot.
 - Add hardware: PCI device. Select videocard.
 - Display can be changed to 'None' (novnc will now no longer be possible)
 - Start vm and connect with rdp client (for example Remmina)
 - Install video drivers.
+
 **** Gaming
 - Either use something like moonlight/sunshine or parsec. Personally I had more success with parsec.
 - If distro does not have parsec packaged, use the flatpak.
