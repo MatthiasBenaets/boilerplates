@@ -1,0 +1,3 @@
+Personal notes regarding homelab.
+
+Also some old notes I will probably delete in the future but might come useful in the future so i'm keeping them.

@@ -1,0 +1,16 @@
+---
+- hosts: debian
+  become: yes
+  tasks:
+    - name: Change dns nameservers
+      lineinfile:
+        path: /etc/resolv.conf
+        insertbefore: "BOF"
+        line: "nameserver 192.168.0.4"
+        state: present
+
+    - name: Restart the networking service
+      service:
+        name: networking
+        state: restarted
+        enabled: true

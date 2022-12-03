@@ -432,6 +432,17 @@ container:
 - Get portainer: ~docker run -d -p 8000:8000 -p 9443:9443 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest~
   - Inside portainer create a stack for wireguard and pihole (also don't for get to create the needed dirs to store data). Setups can be found in boilerplates.
 - Edit ~/etc/sysctl.conf~ and uncomment ~net.ipv4.ip_forward = 1~. This is needed for wireguard to work properly
+printing:
+- ~apt install cups~
+- edit ~/etc/cups/cupsd.conf~
+  - change "Listen localhost:631" to "Listen <ip>:631" or "Port 631"
+  - Browsing On
+  - Restrict acces to the server & admin pages ... - add "Allow @LOCAL" inbetween <Location>
+  - Admin login = host login
+  - On the web panel add the printer (should be found automatically using avahi)
+    - Pick the ipp drivers for the printer and make it shared over network.
+      - Any linux computer on the network (with cups install will automatically add find this printer)
+      - Pick the "*_network" one while printing since this uses ipp
 
 *** Proxy
 proxmox:

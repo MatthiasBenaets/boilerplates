@@ -1,0 +1,53 @@
+#+title: Actual
+#+property: header-args :tangle docker-compose.yml
+
+Actual is a local-first personal finance tool.
+
+** Docker-compose.yml
+*** Docker Image
+
+- Docker Service Name = actual
+- Image: Specify the docker image. No version behind colon meaning it will pull the latest version.
+- Container_name: Name that will be given to the container. If not stated, this will be randomized.
+
+#+begin_src yaml
+version: '3'
+
+services:
+  actual:
+    image: jlongster/actual-server:latest
+    container_name: actual
+#+end_src
+
+*** General
+
+- Restart: The container will always try to restart unless it is manually stopped by the user.
+
+#+begin_src yaml
+    restart: unless-stopped
+#+end_src
+
+*** Network
+
+- Ports:
+  - port 5006 is used for the web interface.
+
+#+begin_src yaml
+    ports:
+      - 5006:5006
+#+end_src
+
+*** Variables
+
+- Volumes: Data volume need to be passed through to keep locally. Left volume is a local directory or file. Right volume is a directory or file inside the container.
+
+#+begin_src yaml
+    volumes:
+      - </path/to/host/data>:/data
+#+end_src
+
+
+** Notes
+- In the current state it's a bit janky to use on multiple devices at once.
+  - Syncing might be an issue. A solution is to remove the cookies and cache if there is a sync issue. But this can also cause issues like duplicate transactions.
+- Via the dotted hamburger menu, under settings, you can export the database. Useful for backup

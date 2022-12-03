@@ -1,0 +1,11 @@
+Ansible
+
+Inventory -> hosts
+Playbooks -> all automation stuff
+
+Use ssh keys but just to quickly test with password:
+- ping all debian hosts using root user and ask for password
+  - ansible -i ./inventory/hosts debian -m ping --user root --ask-pass
+- run apt update/upgrade playbook using root and ask for password for all hosts
+  - ansible-playbook ./playbooks/apt.yml --user root --ask-pass --ask-become-pass -i ./inventory/hosts
+

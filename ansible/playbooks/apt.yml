@@ -1,0 +1,8 @@
+---
+- hosts: debian
+  become: yes
+  tasks:
+    - name: apt
+      apt:
+        update_cache: yes
+        upgrade: 'yes'

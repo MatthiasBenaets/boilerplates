@@ -3,10 +3,10 @@
 #+author: Matthias Benaets
 
 - This repo is used for all my boilerplates.
-- At the moment it's mainly docker-compose files.
-- Every boilerplate has its own README that explains every single line of code.
+- At the moment it's mainly docker-compose files used for my homelab.
+- Every docker-compose file has its own README that explains every single line of code.
 - For some of the files there are requirement and/or usage guides. These will also be in the README.
 - Many of these need to be adapted to your person use-case. These variable are marked with ~< >~.
-
-At the moment I prefer to use Nginx Proxy Manager but most of these boilerplates are already set up for Traefik.
-If you don't plan on using Traefik, just remove the Traefik labels, remove the proxy network and in some cases re-add the the ~ports: -...:...~
+- At the moment I prefer to use Nginx Proxy Manager but most of these docker-compose files are already set up for Traefik. If you don't plan on using Traefik, just remove the Traefik labels, remove the proxy network and in some cases re-add the the ~ports: -...:...~
+- In this repo you can also find a few of my Ansible playbooks, personal notes and scripts regarding my homelab.
+- This repo is still a WIP!

@@ -67,7 +67,7 @@ services:
 
 *** Declared volume
 
-- The is the colume that is declared above.
+- The is the volume that is declared above.
 - Tell docker to use an already existing volume named minecraftdata.
   - ~$ docker volume create minecraftdata~
 
