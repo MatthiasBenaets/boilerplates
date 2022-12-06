@@ -8,10 +8,10 @@ services:
     restart: always
 
     ports:
-      - '80:80'
-      - '81:81'
-      - '443:443'
+      - 80:80
+      - 81:81
+      - 443:443
 
     volumes:
-      - /root/nginx/data:/data
-      - /root/nginx/letsencrypt:/etc/letsencrypt
+      - <path/to/local/data>:/data
+      - <path/to/local/letsencrypt>:/etc/letsencrypt

@@ -33,7 +33,7 @@ services:
 
 #+begin_src yaml
     ports:
-      - '3001:3001'
+      - 3001:3001
 #+end_src
 
 *** Variables

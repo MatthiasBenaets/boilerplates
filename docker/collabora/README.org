@@ -37,10 +37,12 @@ services:
 - Networks:
   - Use Traefik proxy network so the a domain can be used and everything is secure.
   - It still needs to expose the port so Nextcloud can actually connect to it
-
-#+begin_src yaml
+#+begin_src
     networks:
       - proxy
+#+end_src
+
+#+begin_src yaml
     ports:
       - 9980:9980
     expose:
@@ -69,7 +71,7 @@ services:
 
 - Labels: Using labels to configure container to use Traefik. Questions: Refer to traefik boilerplate.
 - First enable Traefik so it can manage the service.
-#+begin_src yaml
+#+begin_src
     labels:
       - "traefik.enable=true"
 #+end_src
@@ -77,7 +79,7 @@ services:
   - The entrypoint is http.
   - A host domainname is set.
   - A middleware is declare to redirect the unsecure connection to https.
-#+begin_src yaml
+#+begin_src
       - "traefik.http.routers.collabora.entrypoints=http"
       - "traefik.http.routers.collabora.rule=Host(`<wildcard.domain.example collabora>`)"
       - "traefik.http.middlewares.collabora-https-redirect.redirectscheme.scheme=https"
@@ -86,19 +88,19 @@ services:
   - The entrypoint is https.
   - A host domain is set.
   - Enable TLS to get a certificate.
-#+begin_src yaml
+#+begin_src
       - "traefik.http.routers.collabora-secure.entrypoints=https"
       - "traefik.http.routers.collabora-secure.rule=Host(`<wildcard.domain.example collabora`)"
       - "traefik.http.routers.collabora-secure.tls=true"
 #+end_src
 - Configure the declared middleware.
   - This will redirect unsecure to secure connection.
-#+begin_src yaml
+#+begin_src
       - "traefik.http.routers.collabora.middlewares=collabora-https-redirect"
 #+end_src
 - Network that will be used with the container.
   - This is the same network used by Traefik.
-#+begin_src yaml
+#+begin_src
       - "traefik.docker.network=proxy"
 #+end_src
 
@@ -107,7 +109,7 @@ services:
 - The network "proxy" is already defined under networks. This will create or reference the network.
 - It's stated that docker will not need need to create this network since it already should exist. In this case, you should have already created this after setting up Traefik.
 
-#+begin_src yaml
+#+begin_src
 networks:
   proxy:
     external: true

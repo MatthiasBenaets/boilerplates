@@ -9,8 +9,8 @@ services:
     security_opt:
       - no-new-privileges:true
 
-    networks:
-      - proxy
+    ports:
+      - 80:80
 
     volumes:
       - </path/to/chosen/host/root>:/srv
@@ -19,25 +19,3 @@ services:
     environment:
       - PUID=<$ id -u>
       - PGID=<$ id -g>
-
-    labels:
-      - "traefik.enable=true"
-
-      - "traefik.http.routers.filebrowser.entrypoints=http"
-      - "traefik.http.routers.filebrowser.rule=Host(`<wildcard.domain.example>`)"
-      - "traefik.http.middlewares.filebrowser-https-redirect.redirectscheme.scheme=https"
-
-      - "traefik.http.routers.filebrowser-secure.entrypoints=https"
-      - "traefik.http.routers.filebrowser-secure.rule=Host(`<wildcard.domain.example>`)"
-      - "traefik.http.routers.filebrowser-secure.tls=true"
-
-      - "traefik.http.routers.filebrowser.middlewares=filebrowser-https-redirect"
-
-      - "traefik.http.routers.filebrowser-secure.service=filebrowser"
-      - "traefik.http.services.filebrowser.loadbalancer.server.port=80"
-
-      - "traefik.docker.network=proxy"
-
-networks:
-  proxy:
-    external: true

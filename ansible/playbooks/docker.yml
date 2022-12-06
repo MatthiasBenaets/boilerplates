@@ -1,6 +1,6 @@
 ---
 - name: Install Docker on Debian
-  hosts: debian
+  hosts: virtual
   become: true
   tasks:
     - name: Install dependencies

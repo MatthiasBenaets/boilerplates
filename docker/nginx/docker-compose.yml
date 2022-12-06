@@ -9,32 +9,7 @@ services:
     security_opt:
       - no-new-privileges:true
 
-    networks:
-      - proxy
-
     volumes:
       #- /etc/localtime:/etc/localtime:ro
       #- /var/run/docker.sock:/var/run/docker.sock:ro
       - </path/to/host/website>:/usr/share/nginx/html
-
-    labels:
-      - "traefik.enable=true"
-
-      - "traefik.http.routers.nginx.entrypoints=http"
-      - "traefik.http.routers.nginx.rule=Host(`<wildcard.domain.example>`)"
-      - "traefik.http.middlewares.nginx-https-redirect.redirectscheme.scheme=https"
-
-      - "traefik.http.routers.nginx-secure.entrypoints=https"
-      - "traefik.http.routers.nginx-secure.rule=Host(`<wildcard.domain.example>`)"
-      - "traefik.http.routers.nginx-secure.tls=true"
-
-      - "traefik.http.routers.nginx.middlewares=nginx-https-redirect"
-
-      - "traefik.http.routers.nginx-secure.service=nginx"
-      - "traefik.http.services.nginx.loadbalancer.server.port=80"
-
-      - "traefik.docker.network=proxy"
-
-networks:
-  proxy:
-    external: true

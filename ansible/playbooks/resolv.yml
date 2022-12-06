@@ -1,8 +1,9 @@
 ---
-- hosts: debian
+- name: Set local domain nameservers
+  hosts: virtual
   become: yes
   tasks:
-    - name: Change dns nameservers
+    - name: Change dns
       lineinfile:
         path: /etc/resolv.conf
         insertbefore: "BOF"

@@ -1,8 +1,9 @@
 ---
-- hosts: debian
+- name: Update system
+  hosts: virtual
   become: yes
   tasks:
-    - name: apt
+    - name: Update repository and upgrade packages
       apt:
         update_cache: yes
         upgrade: 'yes'

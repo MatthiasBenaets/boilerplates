@@ -48,9 +48,9 @@ services:
 
 #+begin_src yaml
     ports:
-      - '80:80'
-      - '81:81'
-      - '443:443'
+      - 80:80
+      - 81:81
+      - 443:443
 #+end_src
 
 *** Variables

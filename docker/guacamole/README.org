@@ -38,9 +38,14 @@ services:
   - This will make use of the same network as Traefik uses.
   - No ports are set here since Traefik will handle this.
 
-#+begin_src yaml
+#+begin_src
     networks:
       - proxy
+#+end_src
+
+#+begin_src yaml
+    ports:
+      - 8080:8080
 #+end_src
 
 *** Variables
@@ -57,7 +62,7 @@ services:
 
 - Labels: Using labels to configure container to use Traefik. Questions: Refer to traefik boilerplate.
 - First enable Traefik so it can manage the service.
-#+begin_src yaml
+#+begin_src
     labels:
       - "traefik.enable=true"
 #+end_src
@@ -65,7 +70,7 @@ services:
   - The entrypoint is http.
   - A host domainname is set.
   - A middleware is declare to redirect the unsecure connection to https.
-#+begin_src yaml
+#+begin_src
       - "traefik.http.routers.guacamole.entrypoints=http"
       - "traefik.http.routers.guacamole.rule=Host(`<wildcard.domain.example>`)"
       - "traefik.http.middlewares.guacamole-https-redirect.redirectscheme.scheme=https"
@@ -74,7 +79,7 @@ services:
   - The entrypoint is https.
   - A host domain is set.
   - Enable TLS to get a certificate.
-#+begin_src yaml
+#+begin_src
       - "traefik.http.routers.guacamole-secure.entrypoints=https"
       - "traefik.http.routers.guacamole-secure.rule=Host(`<wildcard.domain.example>`)"
       - "traefik.http.routers.guacamole-secure.tls=true"
@@ -82,19 +87,19 @@ services:
 
 - Configure the declared middleware.
   - This will redirect unsecure to secure connection.
-#+begin_src yaml
+#+begin_src
       - "traefik.http.routers.guacamole.middlewares=guacamole-https-redirect"
 #+end_src
 - Configure the service.
   - Declare the service guacamole.
   - Income requests will get forwarded to port 8080 (port used by guacamole)
-#+begin_src yaml
+#+begin_src
       - "traefik.http.routers.guacamole-secure.service=guacamole"
       - "traefik.http.services.guacamole.loadbalancer.server.port=8080"
 #+end_src
 - Network that will be used with the container.
   - This is the same network used by Traefik.
-#+begin_src yaml
+#+begin_src
       - "traefik.docker.network=proxy"
 #+end_src
 

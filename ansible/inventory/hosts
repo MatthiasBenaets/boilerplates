@@ -1,12 +1,26 @@
-[All]
-proxmox
-truenas
+# All proxmox hosts
+[virtual:children]
+vm
+lxc
+
+# All Proxmox Linux VMs
+[vm]
+media
+
+# All Proxmox Debian LXCs
+[lxc]
 network
 proxy
 website
 cloud
-media
 misc
-macos
-desktop
-macbook
+
+# Temporary host
+[temp]
+media
+
+[vm:vars]
+ansible_ssh_user=root
+
+[lxc:vars]
+ansible_ssh_user=root

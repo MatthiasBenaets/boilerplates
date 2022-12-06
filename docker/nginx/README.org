@@ -42,9 +42,14 @@ services:
   - This will make use of the same network as Traefik uses.
   - No ports are set here since Traefik will handle this.
 
-#+begin_src yaml
+#+begin_src
     networks:
       - proxy
+#+end_src
+
+#+begin_src
+    ports:
+      - 80:80
 #+end_src
 
 *** Variables
@@ -63,7 +68,7 @@ services:
 
 - Labels: Using labels to configure container to use Traefik. Questions: Refer to traefik boilerplate.
 - First enable Traefik so it can manage the service.
-#+begin_src yaml
+#+begin_src
     labels:
       - "traefik.enable=true"
 #+end_src
@@ -71,7 +76,7 @@ services:
   - The entrypoint is http.
   - A host domainname is set.
   - A middleware is declare to redirect the unsecure connection to https.
-#+begin_src yaml
+#+begin_src
       - "traefik.http.routers.nginx.entrypoints=http"
       - "traefik.http.routers.nginx.rule=Host(`<wildcard.domain.example>`)"
       - "traefik.http.middlewares.nginx-https-redirect.redirectscheme.scheme=https"
@@ -80,26 +85,26 @@ services:
   - The entrypoint is https.
   - A host domain is set.
   - Enable TLS to get a certificate.
-#+begin_src yaml
+#+begin_src
       - "traefik.http.routers.nginx-secure.entrypoints=https"
       - "traefik.http.routers.nginx-secure.rule=Host(`<wildcard.domain.example>`)"
       - "traefik.http.routers.nginx-secure.tls=true"
 #+end_src
 - Configure the declared middleware.
   - This will redirect unsecure to secure connection.
-#+begin_src yaml
+#+begin_src
       - "traefik.http.routers.nginx.middlewares=nginx-https-redirect"
 #+end_src
 - Configure the service.
   - Declare the service nginx.
   - Income requests will get forwarded to port 80 (port used by nginx)
-#+begin_src yaml
+#+begin_src
       - "traefik.http.routers.nginx-secure.service=nginx"
       - "traefik.http.services.nginx.loadbalancer.server.port=80"
 #+end_src
 - Network that will be used with the container.
   - This is the same network used by Traefik.
-#+begin_src yaml
+#+begin_src
       - "traefik.docker.network=proxy"
 #+end_src
 
@@ -108,7 +113,7 @@ services:
 - The network "proxy" is already defined under networks. This will create or reference the network.
 - It's stated that docker will not need need to create this network since it already should exist. In this case, you should have already created this after setting up Traefik.
 
-#+begin_src yaml
+#+begin_src
 networks:
   proxy:
     external: true

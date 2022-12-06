@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  actual:
+    image: jlongster/actual-server:latest
+    container_name: actual
+
+    restart: unless-stopped
+
+    ports:
+      - 5006:5006
+
+    volumes:
+      - </path/to/host/data>:/data

@@ -10,8 +10,6 @@ services:
       - MKNOD
     tty: true
 
-    networks:
-      - proxy
     ports:
       - 9980:9980
     expose:
@@ -24,22 +22,3 @@ services:
       - VIRTUAL_PORT=9980
       - VIRTUAL_HOST=<wildcard.domain.example of collabora>
       - "extra_params=--o:ssl.enable=false  --o:ssl.termination=true"
-
-    labels:
-      - "traefik.enable=true"
-
-      - "traefik.http.routers.collabora.entrypoints=http"
-      - "traefik.http.routers.collabora.rule=Host(`<wildcard.domain.example collabora>`)"
-      - "traefik.http.middlewares.collabora-https-redirect.redirectscheme.scheme=https"
-
-      - "traefik.http.routers.collabora-secure.entrypoints=https"
-      - "traefik.http.routers.collabora-secure.rule=Host(`<wildcard.domain.example collabora`)"
-      - "traefik.http.routers.collabora-secure.tls=true"
-
-      - "traefik.http.routers.collabora.middlewares=collabora-https-redirect"
-
-      - "traefik.docker.network=proxy"
-
-networks:
-  proxy:
-    external: true
