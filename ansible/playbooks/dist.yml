@@ -1,0 +1,9 @@
+---
+- name: Upgrade a Debian-based distribution
+  hosts: simlab
+  become: yes
+  tasks:
+    - name: Upgrade the distribution
+      apt:
+        update_cache: yes
+        upgrade: dist

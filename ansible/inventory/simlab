@@ -1,0 +1,42 @@
+# Host
+[master]
+simlab.dhcp.uhasselt.be
+
+# PCF: Dell Precision T7500
+[pcf]
+simlab-f1.dhcp.uhasselt.be
+simlab-f2.dhcp.uhasselt.be
+simlab-f3.dhcp.uhasselt.be
+simlab-f4.dhcp.uhasselt.be
+
+# Supermicros
+[supermicro]
+simlab-s1.dhcp.uhasselt.be
+simlab-s2.dhcp.uhasselt.be
+simlab-s3.dhcp.uhasselt.be
+simlab-s4.dhcp.uhasselt.be
+simlab-s5.dhcp.uhasselt.be
+
+# All Simlab Computers
+[simlab:children]
+pcf
+supermicro
+
+# Temporary device
+[temp]
+#...
+
+# Host Variables
+[master:vars]
+ansible_ssh_user=user
+#ansible_ssh_pass= --ask-pass
+
+# PCF Variables
+[pcf:vars]
+ansible_ssh_user=remote
+#ansible_sudo_pass= --ask-become-pass
+
+# Supermicro Variables
+[supermicro:vars]
+ansible_ssh_user=remote
+#ansible_sudo_pass= --ask-become-pass

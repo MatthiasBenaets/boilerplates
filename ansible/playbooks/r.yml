@@ -1,0 +1,49 @@
+---
+- name: Install R (studio) on Ubuntu
+  hosts: simlab
+  become: yes
+  vars:
+    - r: cran40
+    - rstudio: 2022.07.2-576
+    - c2d4u: 4.0+
+  tasks:
+    - name: Install helper packages
+      apt:
+        name:
+            - software-properties-common
+            - dirmngr
+        install_recommends: false
+        update_cache: yes
+
+    - name: Add signed key for the repositories
+      shell:
+        cmd: wget -qO- https://cloud.r-project.org/bin/linux/{{ ansible_distribution|lower }}/marutter_pubkey.asc | tee -a /etc/apt/trusted.gpg.d/cran_{{ ansible_distribution|lower }}_key.asc
+        creates: /etc/apt/trusted.gpg.d/cran_{{ ansible_distribution|lower }}_key.asc
+
+    - name: Add R repository
+      apt_repository:
+        repo: deb https://cloud.r-project.org/bin/linux/{{ ansible_distribution|lower }} {{ ansible_distribution_release|lower }}-{{ r }}/
+        state: present
+
+    - name: Install R-Base
+      apt:
+        name:
+          - r-base
+        install_recommends: false
+
+    - name: Add c2d4u repository
+      apt_repository:
+        repo: ppa:c2d4u.team/c2d4u{{ c2d4u }}
+        state: present
+
+    - name: Get RStudio
+      shell: wget https://download1.rstudio.org/desktop/{{ ansible_distribution_release|lower }}/amd64/rstudio-{{ rstudio }}-amd64.deb
+
+    - name: Install RStudio
+      apt:
+        deb: rstudio-{{ rstudio }}-amd64.deb
+
+    - name: Cleanup
+      file:
+        path: rstudio-{{ rstudio }}-amd64.deb
+        state: absent

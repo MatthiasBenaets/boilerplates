@@ -1,4 +1,4 @@
-# All proxmox hosts
+# All Proxmox Hosts
 [virtual:children]
 vm
 lxc
@@ -15,12 +15,14 @@ website
 cloud
 misc
 
-# Temporary host
+# Temporary Device
 [temp]
-media
+#...
 
+# VM Variables
 [vm:vars]
 ansible_ssh_user=root
 
+# LXC Variables
 [lxc:vars]
 ansible_ssh_user=root

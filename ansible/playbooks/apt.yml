@@ -6,4 +6,4 @@
     - name: Update repository and upgrade packages
       apt:
         update_cache: yes
-        upgrade: 'yes'
+        upgrade: yes
