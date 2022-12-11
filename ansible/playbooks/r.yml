@@ -10,8 +10,8 @@
     - name: Install helper packages
       apt:
         name:
-            - software-properties-common
-            - dirmngr
+          - software-properties-common
+          - dirmngr
         install_recommends: false
         update_cache: yes
 
@@ -29,6 +29,7 @@
       apt:
         name:
           - r-base
+          - r-base-dev
         install_recommends: false
 
     - name: Add c2d4u repository
@@ -47,3 +48,6 @@
       file:
         path: rstudio-{{ rstudio }}-amd64.deb
         state: absent
+
+    #- name: Install R packages
+      #shell: Rscript -e 'install.packages("rstan", dependencies=TRUE)'
