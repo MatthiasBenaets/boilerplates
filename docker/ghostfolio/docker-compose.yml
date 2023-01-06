@@ -1,0 +1,47 @@
+version: '3.9'
+
+services:
+  ghostfolio:
+    image: ghostfolio/ghostfolio:latest
+    container_name: ghostfolio
+
+    restart: always
+    depends_on:
+      - ghostfolio-postgres
+      - ghostfolio-redis
+
+    ports:
+      - 3333:3333
+
+    environment:
+      - NODE_ENV=production
+      - ACCESS_TOKEN_SALT=<32 character token>
+      - JWT_SECRET_KEY=<32 character key>
+      - REDIS_HOST=ghostfolio-redis
+      - REDIS_PASSWORD=
+      - REDIS_PORT=6379
+      - DATABASE_URL=postgresql://ghostfoliouser:ghostfoliopass@ghostfolio-postgres:5432/ghostfoliodb?sslmode=prefer
+
+  ghostfolio-postgres:
+    image: postgres
+    container_name: ghostfolio-postgres
+
+    restart: always
+
+    volumes:
+      - </path/to/host/data>:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=ghostfoliodb
+      - POSTGRES_USER=ghostfoliouser
+      - POSTGRES_PASSWORD=ghostfoliopass
+
+  ghostfolio-redis:
+    image: redis
+    container_name: ghostfolio-redis
+
+    restart: always
+
+    volumes:
+      - </path/to/host/data>:/data
+    environment:
+      - TZ=Europe/Brussels

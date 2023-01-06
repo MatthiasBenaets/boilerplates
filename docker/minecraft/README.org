@@ -46,7 +46,7 @@ services:
 *** Variables
 
 - Volumes: Multiple volumes need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a direcotry or file inside the container.
-  - Minecraftdata is a volume create on docker. Needs to be created.
+  - data is the saved minecraft world.
 - Environment:
   - Accept the EULA.
   - Specify a specific type of minecraft server.
@@ -55,7 +55,7 @@ services:
 
 #+begin_src yaml
     volumes:
-      - minecraftdata:/data
+      - </path/to/host/data>:/data
       - </path/to/host/plugins>:/plugins
     environment:
       EULA: "TRUE"
@@ -65,32 +65,6 @@ services:
       ENFORCE_WHITELIST: "TRUE"
 #+end_src
 
-*** Declared volume
-
-- The is the volume that is declared above.
-- Tell docker to use an already existing volume named minecraftdata.
-  - ~$ docker volume create minecraftdata~
-
-#+begin_src yaml
-volumes:
-  minecraftdata:
-    external: true
-#+end_src
-
 ** Usage
 
 - Connect to server via ~<host ip>:25565~
-- Change server settings.
-  - Full documentation can be found on the github: https://github.com/itzg/docker-minecraft-server/blob/master/README.md
-  - ~$ docker exec -i minecraft rcon-cli~  (or just use portainer to get into contrainer cli)
-  - ~$ whitelist add/remove <Minecraft Username>~
-  - ~$ difficulty easy/hard~
-  - ...
-- Backups:
-  - Use backup.sh in ./scripts
-  - Add to cronjob: ~$ crontab -e~
-    - 0 0,12 * * * bash /./home/matthias/Server/minecraft/scripts/backup.sh -v minecraftdata -c minecraft -o </path/to/saved/backups> -r false -d 3
-    - This will backup every 12h - run script - backup from volume - from container - in this location - don't delete until 3 days old
-- Recover:
-  - $ docker run --rm --volumes-from minecraft -v </path/to/saved/backups>:/backup bash -c "cd /data && tar xvf /backup/<name of backup> --strip 1"
-    - This will remove the volume from container - create a temporary volume with the tar - go into the data folder and uncompress /backup/<name> - and strip all dirs infront of tar

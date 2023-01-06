@@ -1,0 +1,25 @@
+---
+- name: Install R packages
+  host: simlab
+  become: yes
+  tasks:
+    - name: Install dependencies
+      apt:
+        name:
+          - curl
+          - cmake
+          - gcc
+          - libcurl4-openssl-dev
+          - libfreetype6-dev
+          - libfribidi-dev
+          - libharfbuzz-dev
+          - libjpeg-dev
+          - libpng-dev
+          - librsvg2-dev
+          - libtiff5-dev
+          - libudunits2-dev
+          - libxml2-dev
+          - make
+
+    - name: Install R packages
+      shell: Rscript -e 'install.packages(c("caret", "colorspace", "curl", "data.table", "DataExplorer", "dplyr", "e1071", "ggplot2", "ggraph", "gtable", "httr", "knitr", "labeling", "mlr3", "plotly", "plyr", "Rcpp", "reshape2", "rlang", "rstan", "shiny", "tidyquant", "tidyr", "tidyverse", "xgboost", "XML", "xml2", "yaml", "zoo"), dependencies=TRUE)'

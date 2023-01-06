@@ -16,9 +16,9 @@
         update_cache: yes
 
     - name: Add signed key for the repositories
-      shell:
-        cmd: wget -qO- https://cloud.r-project.org/bin/linux/{{ ansible_distribution|lower }}/marutter_pubkey.asc | tee -a /etc/apt/trusted.gpg.d/cran_{{ ansible_distribution|lower }}_key.asc
-        creates: /etc/apt/trusted.gpg.d/cran_{{ ansible_distribution|lower }}_key.asc
+      get_url:
+        url: https://cloud.r-project.org/bin/linux/{{ ansible_distribution|lower }}/marutter_pubkey.asc
+        dest: /etc/apt/trusted.gpg.d/cran_{{ ansible_distribution|lower }}_key.asc
 
     - name: Add R repository
       apt_repository:
@@ -38,15 +38,17 @@
         state: present
 
     - name: Get RStudio
-      shell: wget https://download1.rstudio.org/desktop/{{ ansible_distribution_release|lower }}/amd64/rstudio-{{ rstudio }}-amd64.deb
+      get_url:
+        url: https://download1.rstudio.org/desktop/{{ ansible_distribution_release|lower }}/amd64/rstudio-{{ rstudio }}-amd.deb
+        dest: /tmp/rstudio-{{ rstudio }}-amd.deb
 
     - name: Install RStudio
       apt:
-        deb: rstudio-{{ rstudio }}-amd64.deb
+        deb: /tmp/rstudio-{{ rstudio }}-amd64.deb
 
     - name: Cleanup
       file:
-        path: rstudio-{{ rstudio }}-amd64.deb
+        path: /tmp/rstudio-{{ rstudio }}-amd64.deb
         state: absent
 
     #- name: Install R packages

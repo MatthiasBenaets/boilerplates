@@ -1,0 +1,130 @@
+#+title: Ghostfolio
+#+property: header-args :tangle docker-compose.yml
+
+Ghostfolio is an open source wealth management software built with web technology. The application empowers busy people to keep track of stocks, ETFs or cryptocurrencies and make solid, data-driven investment decisions. - https://ghostfol.io/
+
+** Docker-compose.yml
+*** Docker Image
+
+- Docker Service Name = ghostfolio
+- Image: Specify the docker image. No version behind the colon so it will use the latest version.
+- Container_name: Name that will be given to the container. If not stated, this will be randomized.
+
+#+begin_src yaml
+version: '3.9'
+
+services:
+  ghostfolio:
+    image: ghostfolio/ghostfolio:latest
+    container_name: ghostfolio
+#+end_src
+
+*** General
+
+- Restart: The container will always try to restart unless it is manually stopped by the user.
+- Depends_on: Link database and redis to ghostfolio.
+
+#+begin_src yaml
+    restart: always
+    depends_on:
+      - ghostfolio-postgres
+      - ghostfolio-redis
+#+end_src
+
+*** Network
+
+- Ports: web interface available on port 3333
+
+#+begin_src yaml
+    ports:
+      - 3333:3333
+#+end_src
+
+*** Variables
+
+- Environment:
+  - Variables used for redis and postgres
+
+#+begin_src yaml
+    environment:
+      - NODE_ENV=production
+      - ACCESS_TOKEN_SALT=<32 character token>
+      - JWT_SECRET_KEY=<32 character key>
+      - REDIS_HOST=ghostfolio-redis
+      - REDIS_PASSWORD=
+      - REDIS_PORT=6379
+      - DATABASE_URL=postgresql://ghostfoliouser:ghostfoliopass@ghostfolio-postgres:5432/ghostfoliodb?sslmode=prefer
+#+end_src
+
+* Postgres
+** Docker-compose.yml
+*** Docker Image
+
+- Docker Service Name = ghostfolio-postgres
+- Image: Specify the docker image. No version behind the colon so it will use the latest version.
+- Container_name: Name that will be given to the container. If not stated, this will be randomized.
+
+#+begin_src yaml
+  ghostfolio-postgres:
+    image: postgres
+    container_name: ghostfolio-postgres
+#+end_src
+
+*** General
+
+- Restart: The container will always try to restart unless it is manually stopped by the user.
+- Command: I believe this command is needed to correctly register and use the database.
+
+#+begin_src yaml
+    restart: always
+#+end_src
+
+*** Variables
+
+- Volumes: Left volume is a local directory or file. Right volume is a directory or file inside the container. Store db locally.
+- Environment:
+  - Variable to set up for postgres
+
+#+begin_src yaml
+    volumes:
+      - </path/to/host/data>:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=ghostfoliodb
+      - POSTGRES_USER=ghostfoliouser
+      - POSTGRES_PASSWORD=ghostfoliopass
+#+end_src
+
+* Redis
+** Docker-compose.yml
+*** Docker Image
+
+- Docker Service Name = mariadb
+- Image: Specify the docker image. No version behind the colon so it will use the latest version.
+- Container_name: Name that will be given to the container. If not stated, this will be randomized.
+
+#+begin_src yaml
+  ghostfolio-redis:
+    image: redis
+    container_name: ghostfolio-redis
+#+end_src
+
+*** General
+
+- Restart: The container will always try to restart unless it is manually stopped by the user.
+
+#+begin_src yaml
+    restart: always
+#+end_src
+
+*** Variables
+
+- Volumes: Left volume is a local directory or file. Right volume is a directory or file inside the container. Store redis data locally.
+- Environment:
+  - Variable to set up for Redis
+
+#+begin_src yaml
+    volumes:
+      - </path/to/host/data>:/data
+    environment:
+      - TZ=Europe/Brussels
+#+end_src
