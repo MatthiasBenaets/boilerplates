@@ -1,0 +1,27 @@
+---
+- name: Setting up xrdp on Ubuntu
+  hosts: temp
+  become: yes
+  tasks:
+    - name: Install xrdp
+      apt:
+        name:
+          - xrdp
+
+    - name: Adding user xrdp to ssl-cert
+      user:
+        name: xrdp
+        groups: ssl-cert
+        append: yes
+
+    - name: Allow xrdp port in firewall
+      ufw:
+        rule: allow
+        port: 3389
+
+    - name: Enable and start xrdp service
+      systemd:
+        name: xrdp
+        enabled: yes
+        state: started
+        masked: no

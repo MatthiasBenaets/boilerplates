@@ -3,7 +3,7 @@
 #+author: Matthias Benaets
 
 - This repo is used for all my boilerplates.
-- At the moment it's mainly docker-compose files used for my homelab.
+- At the moment it's mainly docker-compose files and ansible playbooks used for my homelab.
 - Every docker-compose file has its own README that explains every single line of code.
 - For some of the files there are requirement and/or usage guides. These will also be in the README.
 - Many of these need to be adapted to your person use-case. These variable are marked with ~< >~.

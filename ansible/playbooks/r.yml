@@ -4,7 +4,7 @@
   become: yes
   vars:
     - r: cran40
-    - rstudio: 2022.07.2-576
+    - rstudio: 2022.12.0-353
     - c2d4u: 4.0+
   tasks:
     - name: Install helper packages
@@ -39,7 +39,7 @@
 
     - name: Get RStudio
       get_url:
-        url: https://download1.rstudio.org/desktop/{{ ansible_distribution_release|lower }}/amd64/rstudio-{{ rstudio }}-amd.deb
+        url: https://download1.rstudio.org/electron/{{ ansible_distribution_release|lower }}/amd64/rstudio-{{ rstudio }}-amd.deb
         dest: /tmp/rstudio-{{ rstudio }}-amd.deb
 
     - name: Install RStudio

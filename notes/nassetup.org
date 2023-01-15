@@ -394,7 +394,9 @@ Proxmox:
 - CPU = 4 cores
 - RAM = 4GB (no ballooning)
 - Storage = 64GB stored on local-zfs. If storing on a CIFS, change io_uring to native. This is less buggy.
+  - Discard on
 - Enable QEMU Guest Agent
+- Under options disable "Use tablet for pointer"
 VM:
 - ~apt install sudo && vim /etc/sudoers~: add user to sudoers
 - ~apt install qemu-guest-agent && systemctl start qemu-guest-agent && reboot~
@@ -433,11 +435,11 @@ VM:
 - Add TPM
 - Network model = VirtIO
 - Enable Qemu Agent
-- Disk Device = VirtIO Block
+- Disk Device = VirtIO Block - discard on
 - After creation:
   - Add hardware: CD/DVD Drive with virtio iso
 
-**** Notes
+***** Notes
 - On first boot, quickly press enter to correctly boot.
 - During installation load the correct drivers from virtio iso:
   - amd64/win11
@@ -453,8 +455,8 @@ VM:
   - ~ps aux | grep <vm id>~
   - ~kill -9 <id given>~
 
-**** GPU passthrough
-***** General
+***** GPU passthrough
+****** General
 - For the best success rate, check out https://pve.proxmox.com/wiki/Pci_passthrough
 - After installation not the ip or make it static and enable remote desktop.
 - Edit GRUB_CMDLINE_LINUX_DEFAULT in ~/etc/default/grub~
@@ -481,7 +483,7 @@ VM:
 - Start vm and connect with rdp client (for example Remmina)
 - Install video drivers.
 
-***** Personal
+****** Personal
 For my RX580 8GB best result with:
 - Edit ~/etc/default/grub~ and change GRUB_CMDLINE_LINUX_DEFAULT to ~amd_iommu=on initcall_blacklist=sysfb_init~
 - Edit ~/etc/modules~ and add 'vfio vfio_iommu_type1 vfio_pci vfio_virqfd' (each on seperate lines)
@@ -493,7 +495,7 @@ For my RX580 8GB best result with:
   - If Parsec complains, check that monitors are duplicated, within Parsec OpenGL is enabled, 30Mbps and 30fps, new beta controller disabled and in proxmox display is set to none.
     Also if unable to use keyboard and mouse after connecting, force the ctrl+alt+del via de overlay menu.
 
-**** Gaming
+***** Gaming
 - Either use something like moonlight/sunshine or parsec. Personally I had more success with parsec.
 - If distro does not have parsec packaged, use the flatpak.
 - Set up parsec on windows:
@@ -528,7 +530,7 @@ For my RX580 8GB best result with:
 - BIOS = OVMF
 - Pre-Enrolled Keys unchecked
 - Network model = VirtIO
-- Disk Device = VirtIO Block
+- Disk Device = VirtIO Block - discard on
 - Cache = Write back (unsafe)
 - Network Model: VirtIO or VMware vmxnet3
 - After creation:
