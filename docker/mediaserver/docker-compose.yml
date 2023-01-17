@@ -1,0 +1,171 @@
+version: '2.1'
+services:
+  #Media Server
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - </path/to/host/config>:/config
+      - </path/to/host/tv>:/tv
+      - </path/to/host/movies:/movies
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - VERSION=docker
+      #- PLEX_CLAIM= #optional
+  # -----
+  # jellyfin:
+  #   image: lscr.io/linuxserver/jellyfin:latest
+  #   container_name: jellyfin
+  #   restart: unless-stopped
+  #   ports:
+  #     - 8096:8096
+  #     - 8920:8920 #optional
+  #     - 7359:7359/udp #optional
+  #     - 1900:1900/udp #optional
+  #   volumes:
+  #     - </path/to/host/config>:/config
+  #     - </path/to/host/shows>:/data/tvshows
+  #     - </path/to/host/movies>:/data/movies
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=Europe/Brussels
+  #     - JELLYFIN_PublishedServerUrl=<ip>
+
+  # Indexer
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:develop
+    container_name: prowlarr
+    restart: unless-stopped
+    ports:
+      - 9696:9696
+    volumes:
+      - </path/to/host/config>:/config
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Brussels
+  # -----
+  # jackett:
+  #   image: lscr.io/linuxserver/jackett:latest
+  #   container_name: jackett
+  #   restart: unless-stopped
+  #   ports:
+  #     - 9117:9117
+  #   volumes:
+  #     - </path/to/host/config>:/config
+  #     - </path/to/host/downloads>:/downloads
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=Europe/London
+
+  # Movies
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    restart: unless-stopped
+    ports:
+      - 7878:7878
+    volumes:
+      - </path/to/host/config>:/config
+      - </path/to/host/movies>:/movies
+      - </path/to/host/Downloads>:/downloads
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Brussels
+
+  # TV Shows
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    restart: unless-stopped
+    ports:
+      - 8989:8989
+    volumes:
+      - </path/to/host/config>:/config
+      - </path/to/host/tv>:/tv
+      - </path/to/host/Downloads>:/downloads
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Brussels
+
+  # Subtitles
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    restart: unless-stopped
+    ports:
+      - 6767:6767
+    volumes:
+      - </path/to/host/config>:/config
+      - </path/to/host/movies>:/movies
+      - </path/to/host/tv>:/tv
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Brussels
+
+  # Requester
+  overseerr:
+    image: lscr.io/linuxserver/overseerr:latest
+    container_name: overseerr
+    restart: unless-stopped
+    ports:
+      - 5055:5055
+    volumes:
+      - </path/to/host/config>:/config
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Brussels
+  # -----
+  # jellyseerr:
+  #   image: fallenbagel/jellyseerr:latest
+  #   container_name: jellyseerr
+  #   restart: unless-stopped
+  #   ports:
+  #     - 5055:5055
+  #   volumes:
+  #     - </path/to/host/config>:/app/config
+  #   environment:
+  #     - LOG_LEVEL=debug
+  #     - TZ=Europe/Brussels
+
+  # Torrent Client
+  deluge:
+    image: lscr.io/linuxserver/deluge:latest
+    container_name: deluge
+    restart: unless-stopped
+    ports:
+      - 8112:8112
+      - 6881:6881
+      - 6881:6881/udp
+    volumes:
+      - </path/to/host/config>:/config
+      - </path/to/host/Downloads>:/downloads
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Brussels
+      - DELUGE_LOGLEVEL=error
+  # -----
+  # sabnzbd:
+  #   image: lscr.io/linuxserver/sabnzbd:latest
+  #   container_name: sabnzbd
+  #   restart: unless-stopped
+  #   ports:
+  #     - 8080:8080
+  #   volumes:
+  #     - </path/to/host/config>:/config
+  #     - </path/to/host/downloads>:/downloads #optional
+  #     - </path/to/host/incomplete-downloads>:/incomplete-downloads #optional
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=Europe/Brussels

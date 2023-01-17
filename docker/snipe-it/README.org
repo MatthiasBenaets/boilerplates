@@ -51,6 +51,7 @@ services:
     environment:
       - PUID=<$ id u>
       - PGID=<$ id g>
+      - APP_ENV=production
       - APP_URL=http://<local ip-address>:<port>
       - MYSQL_PORT_3306_TCP_ADDR=mysql
       - MYSQL_PORT_3306_TCP_PORT=3306
@@ -58,6 +59,13 @@ services:
       - MYSQL_USER=<username>
       - MYSQL_PASSWORD=<password>
       - TZ=Europe/Brussels
+      - MAIL_PORT_587_TCP_ADDR=smtp.gmail.com
+      - MAIL_PORT_587_TCP_PORT=587
+      - MAIL_ENV_USERNAME=<email>
+      - MAIL_ENV_PASSWORD=<google app password>
+      - MAIL_ENV_ENCRYPTION=tls
+      - MAIL_ENV_FROM_ADDR=<email>
+      - MAIL_ENV_FROM_NAME="<name>"
 #+end_src
 
 * MySQL
