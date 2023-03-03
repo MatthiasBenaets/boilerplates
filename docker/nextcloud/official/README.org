@@ -204,7 +204,10 @@ services:
     - Import google calendars from the secret ical
   - Talk
   - External Storage
-    - SMB/CIFS: host = <ip samba share> - Share = <share name> - Username & password
     - Local = /mnt/<name>
+    - SMB does not come out of the box with offical image.
+      - Either run ~docker exec -it nextcloud sh -c "apt update && apt install smbclient"~
+      - or build a custom image using the ~Dockerfile~ provided. Don't forget to rename the image in the ~docker-compose.yml~ file to the custom image.
+      - SMB/CIFS: host = <ip samba share> - Share = <share name> - Username & password
     - Install Community Document Server and OnlyOffice (This might only work with the offical docker image)
 - You can use the OnlyOffice or Collabora boilerplates to edit documents inside Nextcloud.

@@ -29,6 +29,16 @@ In my opinion this is a solid setup to start your own homelab.
     - x.x.x.3 = truenas
 - Finish installation
 
+*** Troubleshoot notes
+Most often issue occurre with Proxmox when new hardware is added to the system.
+- If the CPU has no integrated graphics, and your main graphics card is passed through, do not forget to remove it form the vm.
+- On boot, edit the grub boot options and change it to ~GRUB_CMDLINE_LINUX_DEFAULT=''~.
+- If the proxmox install does not have access to the internet, there is a change the pci address have changed.
+  - Via ~ip a~ find the new name of the network peripheral. Check if the is the same in ~/etc/network/interfaces~, most likely you need to change it. Don't forget to change it aswell on the virtual bridge.
+- If disks have been moved, and Proxmox complains about a degraded zfs pool, a simple ~zpool export~ can fix this issue. (proxmox should now use the disk by id instead of label)
+- Check all the passed trough modules for the vm's. The iommu group might have changed when installing new hardware in the system.
+- Afterwards you can reboot into with the normal grub config.
+
 *** Web Interface
 - Open the interface on https://x.x.x.2:8006
 **** Repositories
@@ -52,6 +62,7 @@ If the CPU allows it, it's highly recommended to enable IOMMU grouping. This wil
   - Add on seperate lines: ~vfio vfio_iommu_type1 vfio_pci vfio_virqfd~.
 - Edit ~/etc/modprobe.d/blacklist.conf~ if you want to passthrough a graphics card.
   - Add on seperate lines: ~blacklist nvidiafb blacklist nvidia blacklist radeon blacklist nouveau~.
+  - OR add it in the grub command like ~GRUB_CMDLINE_LINUX_DEFAULT='quiet amd_iommu=on init_blacklist=sysfb_init modprobe.blacklist=radeon,nouveau,nvidia,nvidiafb,nvidia-gpu'~, this makes it easier to troubleshoot when having boot issue when you only have one video card that automatically get's passed through.
 - To make these changes take effect, reboot.
 
 **** LXC Templates
@@ -155,12 +166,20 @@ TrueNAS will be used as for the major storage solution. It's a bit easier to man
   - Memory: 8GB RAM & Disable Ballooning Device
 
 When created, selected the VM and open the hardware menu.
-Don't add the disk using this menu. Eitherpass through a PCI device such as a sata controller or a SAS HBA card. This will pass through the card and all the disk to the VM.
+Don't add the disk using this menu. Either pass through a PCI device such as a sata controller or a SAS HBA card. This will pass through the card and all the disk to the VM.
 To manually pass through the disk:
 - Open the shell of the node.
   - Run ~ls -l /dev/disk/by-id/~. This will list the serial and model number of the disks.
   - To add them to a VM run ~qm set <vm id> -scsi<1,2,3,...> /dev/disk/by-id/<full serial-model-number>~
     - Not scsi0. This is the disk the VM is installed on.
+- NOTE: This means all SMART Tests need to be done via Proxmox since TrueNAS does not have complete access to the drive (unlike with an HBA).
+When passing throug a SATA controller some actions need to be take aswell.
+- If the mobo has a seperate group for the sata controller, you can pass it through without additional steps.
+- If a raid controller (IT mode) is installed:
+  - Open the hardware menu and change the machine to a q35 system.
+  - Add a new PCI Device and select the HBA card.
+    - Enable "All functions" and "PCI-Express"
+    - If the system does not boot or boots into the card, disable "ROM-Bar"
 
 *** Installation
 - Start VM with the console.
