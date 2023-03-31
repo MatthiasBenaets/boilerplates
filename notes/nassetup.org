@@ -558,6 +558,12 @@ For my RX580 8GB best result with:
 - Follow this guide: https://i12bretro.github.io/tutorials/0628.html
 - Remote access is via VNC (maybe a bit snappier than noVNC)
   - Apple - System Preferences - Sharing - Remote Management - Allow all
+- Automatically boot into MacOS.
+  - Install xcode (~$ xcode-select --install~) and the editor from the App Store.
+  - ~$ sudo mkdir /Volumes/EFI~
+  - ~$ sudo mount -t msdos /dev/<diskparition - find with diskutil list> /Volumes/EFI~
+  - Edit /Volumes/EFI/EFI/OC/config.plist with xcode.
+  - Under Misc - Boot - Timout, change it to x seconds
 
 ***** Running with spice
 - Makes sound possible

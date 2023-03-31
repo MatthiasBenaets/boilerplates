@@ -1,0 +1,4 @@
+#+title: Superset
+#+property: header-args :tangle docker-compose.yml
+
+This is a work in progress. It's highly recommended to just use the official superset docker compose from the Superset repo. However, this docker-compose file should work as well, but it has some limitations.

@@ -1,0 +1,43 @@
+version: '3.7'
+
+services:
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis:/data
+  db:
+    image: mysql:5.7
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: superset
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+  superset:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: superset
+    restart: always
+    depends_on:
+      - db
+      - redis
+    environment:
+      SUPERSET_LOAD_EXAMPLES: 'no'
+      SUPERSET_SECRET_KEY: 'changeme'
+      SUPERSET_CONFIG_PATH: /etc/config/superset_config.py
+    ports:
+      - "8088:8088"
+    volumes:
+      - ./superset:/etc/config
+
+volumes:
+  redis:
