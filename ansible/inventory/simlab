@@ -34,9 +34,11 @@ ansible_ssh_user=user
 # PCF Variables
 [pcf:vars]
 ansible_ssh_user=remote
-#ansible_sudo_pass= --ask-become-pass
+ansible_sudo_pass= #--ask-become-pass
+cpu=4
 
 # Supermicro Variables
 [supermicro:vars]
 ansible_ssh_user=remote
-#ansible_sudo_pass= --ask-become-pass
+ansible_sudo_pass= #--ask-become-pass
+cpu=8

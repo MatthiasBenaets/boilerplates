@@ -28,7 +28,7 @@
           - unixodbc-dev
 
           - name: Install R packages
-            shell: Rscript -e 'install.packages(c("Cairo", "caret", "colorspace", "config", "csv", "curl", "dash", "data.table", "DataExplorer", "dbplyr", "devtools", "dplyr", "e1071", "esquisse", "ggmap", "ggplot2", "ggraph", "glue", "gtable", "ggvis", "here", "httr", "janitor", "jsonlite", "knitr", "labeling", "lattice", "log4r", "lubridate", "mgcv", "mlr3", "outliers", "plotly", "plyr", "purrr", "Rcrawler", "Rcpp", "readr", "reshape2", "rlang", "rstan", "scales", "shiny", "stringr", "survival", "tibble", "tidymodels", "tidyquant", "tidyr", "tidyverse", "tree", "tseries", "xgboost", "XML", "xml2", "yaml", "zoo"), dependencies=TRUE)'
+            shell: Rscript -e 'install.packages(c("Cairo", "caret", "colorspace", "config", "csv", "curl", "dash", "data.table", "DataExplorer", "dbplyr", "devtools", "dplyr", "e1071", "esquisse", "ggmap", "ggplot2", "ggraph", "glue", "gtable", "ggvis", "here", "httr", "janitor", "jsonlite", "knitr", "labeling", "lattice", "log4r", "lubridate", "mgcv", "mlr3", "outliers", "plotly", "plyr", "purrr", "Rcrawler", "Rcpp", "readr", "reshape2", "rlang", "rstan", "scales", "shiny", "stringr", "survival", "tibble", "tidymodels", "tidyquant", "tidyr", "tidyverse", "tree", "tseries", "xgboost", "XML", "xml2", "yaml", "zoo"), dependencies=TRUE, Ncpus={{ cpu }} )'
 
 #
 # List packages in RStudio: x <- installed.packages(); x[ is.na(x[,"Priority"]), c("Package", "Version")]
