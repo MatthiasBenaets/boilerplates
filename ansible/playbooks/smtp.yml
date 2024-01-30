@@ -1,0 +1,70 @@
+---
+- name: Set up a SMTP server for SMART monitoring
+  hosts: simlab
+  become: yes
+  vars:
+    - email:
+    - password:
+  tasks:
+    - name: Install helper packages
+      apt:
+        name:
+          - smartmontools
+          - opensmtpd
+          - mailutils
+        install_recommends: false
+        update_cache: yes
+
+    - name: Create mail directory
+      file:
+        path: /etc/mail
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: Create /etc/smtpd.conf
+      copy:
+        content: |
+          table aliases file:/etc/aliases
+          table secrets file:/etc/mail/secrets
+
+          listen on localhost
+
+          action "local" maildir alias <aliases>
+          action "relay" relay host smtp+tls://user@smtp.gmail.com:587 auth <secrets>
+
+          match for local action "local"
+          match from local for any action "relay"
+        dest: /etc/smtpd.conf
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Create /etc/mail/secrets
+      copy:
+        content: "user {{ email }}:{{ password }}"
+        dest: /etc/mail/secrets
+        owner: root
+        group: opensmtpd
+        mode: 0640
+
+    - name: Create /etc/smartd.conf
+      copy:
+        content: "{{ disk }} -d sat -o on -S on -H -l error -l selftest -f -n standby,15,q -s (L/../(01|16)/./03|S/../.././01|O/../.././(00|06|12|18)) -m matthias.benaets@uhasselt.be -M exec /usr/share/smartmontools/smartd-runner"
+        dest: /etc/smartd.conf
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Restart and enable opensmtp
+      systemd:
+        name: opensmtpd
+        state: restarted
+        enabled: yes
+
+    - name: Restart and enable smartd
+      systemd:
+        name: smartd
+        state: restarted
+        enabled: ye

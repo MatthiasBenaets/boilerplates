@@ -36,9 +36,11 @@ ansible_ssh_user=user
 ansible_ssh_user=remote
 ansible_sudo_pass= #--ask-become-pass
 cpu=4
+disk=/dev/sda
 
 # Supermicro Variables
 [supermicro:vars]
 ansible_ssh_user=remote
 ansible_sudo_pass= #--ask-become-pass
 cpu=8
+disk=/dev/sda
