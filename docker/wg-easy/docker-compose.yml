@@ -1,0 +1,38 @@
+services:
+  wg-easy:
+    image: ghcr.io/wg-easy/wg-easy
+    container_name: wg-easy
+    restart: unless-stopped
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv4.conf.all.src_valid_mark=1
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    networks:
+      wireguard-pihole:
+        ipv4_address: 172.20.0.3
+    ports:
+      - "51820:51820/udp"
+      - "51821:51821/tcp"
+    volumes:
+      - /root/wireguard/etc/wireguard:/etc/wireguard
+    environment:
+      - LANG=en
+      - WG_HOST=<wireguard external host/url>
+      - PASSWORD_HASH=<password as hash, escape all $ with additional $>
+      - PORT=51821
+      - WG_PORT=51820
+      - WG_DEFAULT_DNS=172.20.0.2
+      - WG_ALLOWED_IPS=0.0.0.0/0
+
+
+
+networks:
+  wireguard-pihole:
+    name: "wireguard-pihole"
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/24

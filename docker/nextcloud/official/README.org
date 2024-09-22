@@ -211,3 +211,4 @@ services:
       - SMB/CIFS: host = <ip samba share> - Share = <share name> - Username & password
     - Install Community Document Server and OnlyOffice (This might only work with the offical docker image)
 - You can use the OnlyOffice or Collabora boilerplates to edit documents inside Nextcloud.
+- If files, uploaded via SMB, are not showing up, edit `html/config/config.php` and add `'filesystem_check_changes' => 1,`

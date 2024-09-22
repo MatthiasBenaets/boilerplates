@@ -1,0 +1,113 @@
+#+title: WireGuard
+#+property: header-args :tangle docker-compose.yml
+
+The easiest way to run WireGuard VPN + Web-based Admin UI.
+
+** Prerequisites
+
+- Forward port 51820 on your modem/router to the device ip running Wireguard.
+- Create a new subdomain on your dns resolver that points to your public ip and disable proxy.
+- Locally hosted services might not be accessible because the firewall of the device blocks it. Allow these port on the firewall.
+
+** Docker-compose.yml
+*** Docker Image
+
+- Docker Service Name = wireguard
+- Image: Specify the docker image and behind the colon the tag used. This is the version.
+- Container_name: Name that will be given to the container. If not stated, this will be randomized.
+
+#+begin_src yaml
+services:
+  wg-easy:
+    image: ghcr.io/wg-easy/wg-easy
+    container_name: wg-easy
+#+end_src
+
+*** General
+
+- Restart: The container will always try to restart unless it is manually stopped by the user.
+- Sysctls: Some of these sysctl settings need to set for a client to actually be able to connect to wireguard, otherwise the host system might block it.
+- Cap_add: Adds linux capabilities
+
+#+begin_src yaml
+    restart: unless-stopped
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv4.conf.all.src_valid_mark=1
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+#+end_src
+
+*** Network
+
+- Networks: Setting up a network that can be accessed by Pihole and WireGuard.
+  - This is useful if you want to use Pihole while connected to your VPN.
+  - Setting a static-ip so it can be reference in the WireGuard docker-compose.yml file.
+- Ports: port 51820 is used by WireGuard. 51820 for Admin Web UI.
+
+#+begin_src yaml
+    # Network only needed if you want to use pihole while connected to the WireGuard VPN.
+    networks:
+      wireguard-pihole:
+        ipv4_address: 172.20.0.3
+    ports:
+      - "51820:51820/udp"
+      - "51821:51821/tcp"
+#+end_src
+
+*** Variables
+
+- Volumes: Multiple volumes need to be passed through or keep locally. Left volume is a local directory or file. Right volume is a directory or file inside the container.
+  - Here we link the website to the container.
+- Environments:
+  - Language
+  - Wireguard host name. For external connection, it's suggested to use the subdomain url.
+  - Hashed password
+  - Ports used for the webui and wireguard
+  - Default DNS: in this case using pi-hole
+  - Allowed IPs
+
+#+begin_src yaml
+    volumes:
+      - /root/wireguard/etc/wireguard:/etc/wireguard
+    environment:
+      - LANG=en
+      - WG_HOST=<wireguard external host/url>
+      - PASSWORD_HASH=<password as hash, escape all $ with additional $>
+      - PORT=51821
+      - WG_PORT=51820
+      - WG_DEFAULT_DNS=172.20.0.2
+      - WG_ALLOWED_IPS=0.0.0.0/0
+
+
+#+end_src
+
+*** Declared Network
+
+- Create (if it does not exist) a network that can be used by Pihole and WireGuard
+  - This is useful if you want to use Pihole while connected to your VPN.
+
+#+begin_src yaml
+# Network only needed if you want to use pihole while connected to the WireGuard VPN.
+networks:
+   wireguard-pihole:
+     name: "wireguard-pihole"
+     driver: bridge
+     ipam:
+       driver: default
+       config:
+         - subnet: 172.20.0.0/24
+#+end_src
+
+** Usage
+- Go to ~<hostip>:<webui-port>~.
+- Create connection.
+  - Use QR to load profile (for mobile)
+  - Use download configuration to download config for manual applying
+
+** Notes
+- Depending on the system you might need to allow ip forwarding. ~# sysctl net.ipv4.ip_forward=1~
+  - Uncomment/add ~net.ipv4.ip_forward = 1~ for permanent change at ~/etc/sysctl.conf~
+  - Changes need to made for host and vm/lxc.
+- If running in an lxc container, it's best to keep it unprivileged.
