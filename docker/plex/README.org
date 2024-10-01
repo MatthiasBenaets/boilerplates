@@ -55,3 +55,5 @@ Plex is a global streaming media service and a client–server media player plat
 
 ** Notes
 - Portal can be found on <ip address>:32400/web/index.html
+- With large media collections, transcoding might not work on the web interface. This can be fixed on the host machine with adding ~fs.inotify.max_user_watches=<number>~ to ~/etc/sysctl.conf~.
+     - To calculate this number, refer to: https://forums.plex.tv/t/increase-the-number-of-directories-linux-can-monitor-notify/209156

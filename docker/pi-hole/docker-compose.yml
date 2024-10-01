@@ -19,6 +19,9 @@ services:
       - 67:67/udp
       - 80:80/tcp
       - 443:443/tcp
+    #dns:
+      #- 1.1.1.1
+      #- 1.0.0.1
 
     volumes:
       - <path/to/host/pihole>:/etc/pihole

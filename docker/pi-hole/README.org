@@ -22,7 +22,7 @@ services:
 *** General
 
 - Restart: The container will always try to restart unless it is manually stopped by the user.
-- Cap_add: Only needed if you use Pi-hole as a DNS.
+- Cap_add: Enable if no dns found in container.
 
 #+begin_src yaml
     restart: unless-stopped
@@ -36,6 +36,7 @@ services:
   - This is useful if you want to use Pihole while connected to your VPN.
   - Setting a static-ip so it can be reference in the WireGuard docker-compose.yml file.
 - Ports: Used for Pi-hole
+- Dns: Set DNS of container. This should solve the issue if pi-hole complains about not finding dns.
 
 #+begin_src yaml
     # Network only needed if you want to use pihole while connected to the WireGuard VPN.
@@ -48,6 +49,9 @@ services:
       - 67:67/udp
       - 80:80/tcp
       - 443:443/tcp
+    #dns:
+      #- 1.1.1.1
+      #- 1.0.0.1
 #+end_src
 
 *** Variables
