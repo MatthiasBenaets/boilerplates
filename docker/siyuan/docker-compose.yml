@@ -1,0 +1,14 @@
+services:
+  main:
+    image: b3log/siyuan
+    container_name: siyuan
+    command: ["--workspace=/siyuan/workspace/", "--accessAuthCode=apassword"]
+    ports:
+      - 6806:6806
+    volumes:
+      - <path/to/local/workspace>:/siyuan/workspace
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Brussels
+      #- PUID=1000
+      #- PGID=1000

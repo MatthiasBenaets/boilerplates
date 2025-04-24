@@ -1,0 +1,16 @@
+services:
+  calibre-web-automated:
+    image: crocodilestick/calibre-web-automated:latest
+    container_name: calibre-web-automated
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Brussels
+    volumes:
+      - <path/to/localconfig>:/config
+      - <path/to/local/books/ingest>:/cwa-book-ingest
+      - <path/to/local/calibre-web/db>:/calibre-library
+      - <path/to/local/books>:/books
+    ports:
+      - 8083:8083
+    restart: unless-stopped

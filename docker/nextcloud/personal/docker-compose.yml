@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+  nextcloud:
+    image: nextcloud
+    container_name: nextcloud
+
+    restart: unless-stopped
+    links:
+      - mariadb
+      - redis
+
+    ports:
+      - 8080:80
+
+    volumes:
+      - </path/to/host/data>:/var/www/html
+      - </path/to/external/data>:/data
+    environment:
+      - MYSQL_PASSWORD=<password>
+      - MYSQL_DATABASE=<db name>
+      - MYSQL_USER=<user>
+      - MYSQL_HOST=mariadb
+    command: >
+      /bin/bash -c "apt update && apt install -y smbclient && apache2-foreground"
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+
+    restart: unless-stopped
+
+    volumes:
+      - /docker/nextcloud/redis:/data
+
+  mariadb:
+    image: mariadb:10.5
+    container_name: mariadb
+
+    restart: unless-stopped
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+
+    volumes:
+      - </path/to/host/datadb>:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=<password>
+      - MYSQL_PASSWORD=<password>
+      - MYSQL_DATABASE=<db name>
+      - MYSQL_USER=<user>

@@ -1,0 +1,15 @@
+services:
+  silverbullet:
+    image: ghcr.io/silverbulletmd/silverbullet:latest
+    container_name: silverbullet
+    ports:
+      - "3000:3000"
+    volumes:
+      - <path/to/local/space>/space
+    environment:
+      - SB_USER=<user>:<password>
+      #- PUID=0
+      #- GUID=0
+    # change entrypoint to first install additional packages before starting silverbullet
+    #entrypoint: >
+    #  /bin/bash -c "apt-get update && apt-get install -y ripgrep && /tini -- /docker-entrypoint.sh"

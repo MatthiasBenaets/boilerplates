@@ -1,0 +1,13 @@
+version: '3.8'
+
+name: reiverr
+
+services:
+  reiverr:
+    image: ghcr.io/aleksilassila/reiverr:latest
+    container_name: reiverr
+    ports:
+      - 9494:9494
+    volumes:
+      - <path/to/local/reiverr/config>:/config
+    restart: unless-stopped

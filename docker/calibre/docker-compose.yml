@@ -1,0 +1,24 @@
+
+services:
+  calibre:
+    image: lscr.io/linuxserver/calibre:latest
+    container_name: calibre
+    security_opt:
+      - seccomp=unconfined
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Brussels
+      - CALIBRE_OVERRIDE_DATABASE_PATH=/config/metadata.db
+    volumes:
+      - <path/to/local/config>/config
+      #- <path/to/local/books>:/books
+      #- <path/to/local/raw>:/raw
+      #- <path/to/downloads>:/downloads
+    ports:
+      - 8080:8080
+      - 8081:8081
+      - 8181:8181
+    restart: unless-stopped
+
+# don't store db on smb

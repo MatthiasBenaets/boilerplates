@@ -1,0 +1,219 @@
+#+title: Nextcloud
+#+property: header-args :tangle docker-compose.yml
+
+A safe home for all your data - https://nextcloud.com/
+
+** Docker-compose.yml
+*** Docker Image
+
+- Docker Service Name = nextcloud
+- Image: Specify the docker image. No version behind the colon so it will use the latest version.
+- Container_name: Name that will be given to the container. If not stated, this will be randomized.
+
+#+begin_src yaml
+version: '3'
+
+services:
+  nextcloud:
+    image: nextcloud
+    container_name: nextcloud
+#+end_src
+
+*** General
+
+- Restart: The container will always try to restart unless it is manually stopped by the user.
+- Links: Link database and redis to nextcloud.
+
+#+begin_src yaml
+    restart: unless-stopped
+    links:
+      - mariadb
+      - redis
+#+end_src
+
+*** Network
+
+- Networks:
+  - This will make use of the same network as Traefik uses.
+  - No ports are set here since Traefik will handle this.
+
+#+begin_src
+    networks:
+      - proxy
+#+end_src
+
+#+begin_src yaml
+    ports:
+      - 8080:80
+#+end_src
+
+*** Variables
+
+- Volumes: Multiple volumes need to be passed trough or keep locally. Left volume is a local directory or file. Right volume is a direcotry or file inside the container.
+  - Most data is stored on /var/www/html so save this locally
+  - You can mount extra volumes (drives) for extra storage to manage (cifs/smb).
+- Environment:
+  - Variables used for mariaDB
+
+#+begin_src yaml
+    volumes:
+      - </path/to/host/data>:/var/www/html
+      - </path/to/external/data>:/data
+    environment:
+      - MYSQL_PASSWORD=<password>
+      - MYSQL_DATABASE=<db name>
+      - MYSQL_USER=<user>
+      - MYSQL_HOST=mariadb
+#+end_src
+
+*** Labels
+- Labels: Using labels to configure container to use Traefik. Questions: Refer to traefik boilerplate.
+- First enable Traefik so it can manage the service.
+#+begin_src
+    labels:
+      - "traefik.enable=true"
+#+end_src
+- Add a router for unsecure connection.
+  - The entrypoint is http.
+  - A host domainname is set.
+  - A middleware is declare to redirect the unsecure connection to https.
+#+begin_src
+      - "traefik.http.routers.nextcloud.entrypoints=http"
+      - "traefik.http.routers.nextcloud.rule=Host(`<wildcard.domain.example>`)"
+      - "traefik.http.middlewares.nextcloud-https-redirect.redirectscheme.scheme=https"
+#+end_src
+- Add a router for secure connections.
+  - The entrypoint is https.
+  - A host domain is set.
+  - Enable TLS to get a certificate.
+#+begin_src
+      - "traefik.http.routers.nextcloud-secure.entrypoints=https"
+      - "traefik.http.routers.nextcloud-secure.rule=Host(`<wildcard.domain.example>`)"
+      - "traefik.http.routers.nextcloud-secure.tls=true"
+#+end_src
+
+- Configure the declared middleware.
+  - This will redirect unsecure to secure connection.
+#+begin_src
+      - "traefik.http.routers.nextcloud.middlewares=guacamole-https-redirect"
+#+end_src
+- Configure the service.
+  - Declare the service guacamole.
+  - Income requests will get forwarded to port 8080 (port used by guacamole)
+#+begin_src
+      - "traefik.http.routers.nextcloud-secure.service=nextcloud"
+      - "traefik.http.services.nextcloud.loadbalancer.server.port=80"
+#+end_src
+- Network that will be used with the container.
+  - This is the same network used by Traefik.
+#+begin_src
+      - "traefik.docker.network=proxy"
+#+end_src
+
+* Redis
+** Docker-compose.yml
+*** Docker Image
+
+- Docker Service Name = redis
+- Image: Specify the docker image. No version behind the colon so it will use the latest version.
+- Container_name: Name that will be given to the container. If not stated, this will be randomized.
+
+#+begin_src yaml
+  redis:
+    image: redis:alpine
+    container_name: redis
+#+end_src
+
+*** General
+
+- Restart: The container will always try to restart unless it is manually stopped by the user.
+
+#+begin_src yaml
+    restart: unless-stopped
+#+end_src
+
+*** Variables
+
+- Volumes: access the nextcloud redis directory on data.
+
+#+begin_src yaml
+    volumes:
+      - /docker/nextcloud/redis:/data
+#+end_src
+
+* MariaDB
+** Docker-compose.yml
+*** Docker Image
+
+- Docker Service Name = mariadb
+- Image: Specify the docker image. No version behind the colon so it will use the latest version.
+- Container_name: Name that will be given to the container. If not stated, this will be randomized.
+
+#+begin_src yaml
+  mariadb:
+    image: mariadb:10.5
+    container_name: mariadb
+#+end_src
+
+*** General
+
+- Restart: The container will always try to restart unless it is manually stopped by the user.
+- Command: I believe this command is needed to correctly register and use the database.
+
+#+begin_src yaml
+    restart: unless-stopped
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+#+end_src
+
+*** Network
+
+- Networks:
+  - Use Traefik proxy network so the a domain can be used and everything is secure.
+  - It still needs to expose the port so Nextcloud can actually connect to it
+
+#+begin_src
+    networks:
+      - proxy
+#+end_src
+
+*** Variables
+
+- Volumes: Left volume is a local directory or file. Right volume is a directory or file inside the container. Store db locally.
+- Environment:
+  - Variable to set up mariaDB
+
+
+#+begin_src yaml
+    volumes:
+      - </path/to/host/datadb>:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=<password>
+      - MYSQL_PASSWORD=<password>
+      - MYSQL_DATABASE=<db name>
+      - MYSQL_USER=<user>
+#+end_src
+
+*** Custom command
+
+- Command: first installs smbclient for smb shared and then starts nextcloud
+
+#+begin_src yaml
+    command: >
+      /bin/bash -c "apt update && apt install -y smbclient && apache2-foreground"
+#+end_src
+
+** Usage
+
+- If everything is set-up correctly, on registration you should now be able to pick a database.
+- Some useful apps to install:
+  - Contacts
+    - Import google contacts from vCard
+  - Calendar
+  - Mail:
+    - Import google calendars from the secret ical
+  - Talk
+  - External Storage
+    - Local = /mnt/<name>
+    - Install Community Document Server and OnlyOffice (This might only work with the offical docker image)
+- You can use the OnlyOffice or Collabora boilerplates to edit documents inside Nextcloud.
+- If files, uploaded via SMB, are not showing up, edit `html/config/config.php` and add `'filesystem_check_changes' => 1,`
