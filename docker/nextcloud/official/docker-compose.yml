@@ -1,8 +1,6 @@
-version: '3'
-
 services:
   nextcloud:
-    image: nextcloud
+    image: nextcloud:31
     container_name: nextcloud
 
     restart: unless-stopped
@@ -22,6 +20,10 @@ services:
       - MYSQL_USER=<user>
       - MYSQL_HOST=mariadb
 
+    # Do not uncomment when updating to other version
+    # command: >
+    #   /bin/bash -c "apt update && apt install -y smbclient && apache2-foreground"
+
   redis:
     image: redis:alpine
     container_name: redis
@@ -32,7 +34,7 @@ services:
       - /docker/nextcloud/redis:/data
 
   mariadb:
-    image: mariadb:10.5
+    image: mariadb:11.4
     container_name: mariadb
 
     restart: unless-stopped
