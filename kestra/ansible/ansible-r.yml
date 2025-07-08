@@ -1,0 +1,43 @@
+id: ansible-r
+namespace: ansible
+description: Install R and RStudio on a Debian-based system.
+
+inputs:
+  - id: hosts
+    displayName: "Hosts (comma separated)"
+    type: STRING
+    defaults: simlab
+  - id: cran
+    displayName: "R version"
+    type: STRING
+    defaults: cran40
+  - id: c2d4u
+    displayName: "c2d4u"
+    type: STRING
+    defaults: 4.0+
+  - id: rstudio
+    displayName: "RStudio version (format: 2024.12.1-563)"
+    type: STRING
+    defaults: 2025.05.0-496
+
+tasks:
+  - id: ansible_task
+    type: io.kestra.plugin.ansible.cli.AnsibleCLI
+    ansibleConfig: |
+      [defaults]
+      interpreter_python = auto_silent
+    namespaceFiles:
+      enabled: true
+      include:
+        - inventory.ini
+        - playbooks/r.yml
+        - id_rsa
+    taskRunner:
+      type: io.kestra.plugin.scripts.runner.docker.Docker
+      pullPolicy: IF_NOT_PRESENT
+      user: "1000"
+    containerImage: cytopia/ansible:latest-tools
+    commands:
+      - ansible-playbook -i inventory.ini --key-file id_rsa --extra-vars "target={{ inputs.hosts }} cran={{ inputs.cran }} c2d4u={{ inputs.c2d4u }} rstudio={{ inputs.rstudio }}" playbooks/r.yml
+    env:
+      ANSIBLE_HOST_KEY_CHECKING: "False"

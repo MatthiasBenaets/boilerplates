@@ -1,0 +1,25 @@
+id: log-diskusage
+namespace: log
+description: |
+  Check the disk usage / space left on a disk.
+
+inputs:
+  - id: local_host
+    displayName: Local host name
+    type: STRING
+    defaults: simlab
+  - id: local_user
+    displayName: Local user
+    type: STRING
+    defaults: remote
+
+tasks:
+  - id: get-diskusage
+    type: io.kestra.plugin.fs.ssh.Command
+    host: "{{ inputs.local_host }}"
+    username: "{{ inputs.local_user }}"
+    authMethod: PUBLIC_KEY
+    privateKey: "{{ read('id_rsa') }}"
+    warningOnStdErr: false
+    commands:
+     - df -h / | tail -1 | awk '{print $5}'

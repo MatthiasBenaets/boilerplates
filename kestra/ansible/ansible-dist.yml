@@ -1,0 +1,40 @@
+id: ansible-dist
+namespace: ansible
+description: |
+  Prepare Debian-based system for a new release by running an `sudo apt dist-upgrade`.
+  Afterwards, it's required to run a `sudo do-release-upgrade`.
+
+inputs:
+  - id: hosts
+    displayName: "Hosts (comma separated)"
+    type: STRING
+    defaults: simlab
+
+tasks:
+  - id: ansible_task
+    type: io.kestra.plugin.ansible.cli.AnsibleCLI
+    ansibleConfig: |
+      [defaults]
+      interpreter_python = auto_silent
+    inputFiles:
+      inventory.ini: "{{ read('inventory.ini') }}"
+      playbook.yml: |
+        ---
+        - name: Upgrade a Debian-based distribution
+          hosts: {{ inputs.hosts }}
+          become: yes
+          tasks:
+            - name: Upgrade the distribution
+              apt:
+                update_cache: yes
+                upgrade: "dist"
+      id_rsa: "{{ read('id_rsa') }}"
+    taskRunner:
+      type: io.kestra.plugin.scripts.runner.docker.Docker
+      pullPolicy: IF_NOT_PRESENT
+      user: "1000"
+    containerImage: cytopia/ansible:latest-tools
+    commands:
+      - ansible-playbook -i inventory.ini --key-file id_rsa playbook.yml
+    env:
+      ANSIBLE_HOST_KEY_CHECKING: "False"

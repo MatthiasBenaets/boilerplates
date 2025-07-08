@@ -1,0 +1,48 @@
+id: ansible-groups
+namespace: ansible
+description: |
+  Add a specific user to a group
+
+inputs:
+  - id: hosts
+    displayName: "Hosts (comma separated)"
+    type: STRING
+    defaults: simlab
+  - id: user
+    displayName: "User"
+    type: STRING
+    defaults: remote
+  - id: group
+    displayName: "Group"
+    type: STRING
+    defaults: remote
+
+tasks:
+  - id: ansible_task
+    type: io.kestra.plugin.ansible.cli.AnsibleCLI
+    ansibleConfig: |
+      [defaults]
+      interpreter_python = auto_silent
+    inputFiles:
+      inventory.ini: "{{ read('inventory.ini') }}"
+      playbook.yml: |
+        ---
+        - name: Add user to a specific group
+          hosts: {{ inputs.hosts }}
+          become: yes
+          tasks:
+            - name: Adding user to {{ inputs.group }}
+              ansible.builtin.user:
+                name: {{ inputs.user }}
+                append: true
+                groups: {{ inputs.group }}
+      id_rsa: "{{ read('id_rsa') }}"
+    taskRunner:
+      type: io.kestra.plugin.scripts.runner.docker.Docker
+      pullPolicy: IF_NOT_PRESENT
+      user: "1000"
+    containerImage: cytopia/ansible:latest-tools
+    commands:
+      - ansible-playbook -i inventory.ini --key-file id_rsa playbook.yml
+    env:
+      ANSIBLE_HOST_KEY_CHECKING: "False"

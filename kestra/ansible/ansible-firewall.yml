@@ -1,0 +1,47 @@
+id: ansible-firewall
+namespace: ansible
+description: |
+  Update firewall
+
+inputs:
+  - id: hosts
+    displayName: "Hosts (comma separated)"
+    type: STRING
+    defaults: simlab
+
+tasks:
+  - id: ansible_task
+    type: io.kestra.plugin.ansible.cli.AnsibleCLI
+    ansibleConfig: |
+      [defaults]
+      interpreter_python = auto_silent
+    inputFiles:
+      inventory.ini: "{{ read('inventory.ini') }}"
+      playbook.yml: |
+        ---
+        - name: Manage firewall with UFW
+          hosts: {{ inputs.hosts }}
+          become: yes
+          tasks:
+            - name: Allow SSH
+              community.general.ufw:
+                rule: allow
+                port: '22'
+                proto: tcp
+            - name: Allow RDP
+              community.general.ufw:
+                rule: allow
+                port: '3389'
+            - name: Enable UFW
+              community.general.ufw:
+                state: enabled
+      id_rsa: "{{ read('id_rsa') }}"
+    taskRunner:
+      type: io.kestra.plugin.scripts.runner.docker.Docker
+      pullPolicy: IF_NOT_PRESENT
+      user: "1000"
+    containerImage: cytopia/ansible:latest-tools
+    commands:
+      - ansible-playbook -i inventory.ini --key-file id_rsa playbook.yml
+    env:
+      ANSIBLE_HOST_KEY_CHECKING: "False"

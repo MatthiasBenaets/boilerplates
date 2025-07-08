@@ -1,0 +1,79 @@
+id: backup-windows
+namespace: backup
+description: |
+  Deploy a backup Windows 11 Virtual Machine on a Debian-based distribution.
+  VM will be available on port 8089 via remote desktop.
+  First it will copy over all files inside the host `windows` directory.
+  Then, it run the `pre.sh` script, which will install dependencies, set up the firewall and create the desktop application icon.
+  WARNING: At the moment the `pre.sh` script is hardcoded to only work with the user `remote`.
+
+inputs:
+  - id: local_host
+    displayName: Local host name
+    type: STRING
+    defaults: simlab.dhcp.uhasselt.be
+  - id: local_user
+    displayName: Local user
+    type: STRING
+    defaults: uh
+  - id: local_path
+    displayName: Local path to Windows VM files
+    type: STRING
+    defaults: /home/uh/windows/*
+  - id: remote_host
+    displayName: Remote host name
+    type: STRING
+    defaults: simlab-h.dhcp.uhasselt.be
+  - id: remote_user
+    displayName: Remote user
+    type: STRING
+    defaults: remote
+  - id: remote_pass
+    displayName: Remote password
+    type: STRING
+    defaults: secret
+  - id: remote_path
+    displayName: Remote path
+    type: STRING
+    defaults: /home/remote/.vm/
+
+tasks:
+  - id: deploy-vm
+    type: io.kestra.plugin.fs.ssh.Command
+    host: "{{ inputs.local_host }}"
+    username: "{{ inputs.local_user }}"
+    authMethod: PUBLIC_KEY
+    privateKey: "{{ read('id_rsa') }}"
+    warningOnStdErr: false
+    commands:
+      - |
+        #!/bin/bash
+        set -e
+
+        echo "Preparing remote host directory"
+        ssh -i "/home/uh/.ssh/id_rsa" {{ inputs.remote_user }}@{{ inputs.remote_host }} 'mkdir {{ inputs.remote_path }}'
+
+        echo "Transfering VM files"
+        scp -r -O -i "/home/uh/.ssh/id_rsa" {{ inputs.local_path }} {{ inputs.remote_user }}@{{ inputs.remote_host }}:{{ inputs.remote_path }}
+
+        echo "Deploying remote vm"
+        ssh -i "/home/uh/.ssh/id_rsa" {{ inputs.remote_user }}@{{ inputs.remote_host }} 'echo "{{ inputs.remote_pass}}" | sudo -S {{ inputs.remote_path }}pre.sh'
+
+        echo "All done."
+  - id: notify-done
+    type: io.kestra.plugin.notifications.google.GoogleChatIncomingWebhook
+    url: "{{ secret('GOOGLE_CHAT_WEBHOOK') }}"
+    payload: |
+      {
+        "text": "SUCCESS: {{ flow.id }} - {{ execution.id }} - {{ trigger.date ?? execution.startDate | date('yyyy-MM-dd@HH:mm:ss') }}"
+      }
+
+errors:
+  - id: notify-fail
+    type: io.kestra.plugin.notifications.google.GoogleChatIncomingWebhook
+    url: "{{ secret('GOOGLE_CHAT_WEBHOOK') }}"
+    payload: |
+      {
+        "text": "FAILED: {{ flow.id }} - {{ execution.id }} - {{ trigger.date ?? execution.startDate | date('yyyy-MM-dd@HH:mm:ss') }}"
+      }
+

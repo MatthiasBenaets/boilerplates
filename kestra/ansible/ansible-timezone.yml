@@ -1,0 +1,41 @@
+id: ansible-timezone
+namespace: ansible
+description: |
+  Update timezone
+
+inputs:
+  - id: hosts
+    displayName: "Hosts (comma separated)"
+    type: STRING
+    defaults: simlab
+  - id: timezone
+    displayName: "Timezone TZ identifier"
+    type: STRING
+    defaults: Europe/Brussels
+
+tasks:
+  - id: ansible-task
+    type: io.kestra.plugin.ansible.cli.AnsibleCLI
+    ansibleConfig: |
+      [defaults]
+      interpreter_python = auto_silent
+    inputFiles:
+      inventory.ini: "{{ read('inventory.ini') }}"
+      playbook.yml: |
+        ---
+        - name: Set timezone
+          hosts: {{ inputs.hosts }}
+          become: yes
+          tasks:
+            - community.general.timezone:
+                name: {{ inputs.timezone }}
+      id_rsa: "{{ read('id_rsa') }}"
+    taskRunner:
+      type: io.kestra.plugin.scripts.runner.docker.Docker
+      pullPolicy: IF_NOT_PRESENT
+      user: "1000"
+    containerImage: cytopia/ansible:latest-tools
+    commands:
+      - ansible-playbook -i inventory.ini --key-file id_rsa playbook.yml
+    env:
+      ANSIBLE_HOST_KEY_CHECKING: "False"

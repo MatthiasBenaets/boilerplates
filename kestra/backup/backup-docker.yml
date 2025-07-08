@@ -1,0 +1,105 @@
+id: backup-docker
+namespace: backup
+description: |
+  Backup local docker containers to {{ inputs.remote_host }}.
+  It's best to start a ssh/scp connection first so the remote host is know.
+  The local host user should have root access or can run sudo without password.
+  For example in `/etc/sudoers` add:
+  user ALL=(ALL: ALL) ALL
+  user ALL=(ALL: ALL) NOPASSWD: /bin/tar, /usr/bin/scp, /bin/rm
+
+inputs:
+  - id: local_host
+    displayName: Local host name
+    type: STRING
+    defaults: simlab.dhcp.uhasselt.be
+  - id: local_user
+    displayName: Local user
+    type: STRING
+    defaults: uh
+  - id: local_path
+    displayName: Local path to backup
+    type: STRING
+    defaults: /home/uh
+  - id: remote_host
+    displayName: Remote host name
+    type: STRING
+    defaults: dsi.dhcp.uhasselt.be
+  - id: remote_user
+    displayName: Remote user
+    type: STRING
+    defaults: matthias
+  - id: remote_path
+    displayName: Remote path
+    type: STRING
+    defaults: /volume1/docker/.
+  - id: exclude_dirs
+    displayName: Exclused directories
+    type: ARRAY
+    itemType: STRING
+    defaults:
+      - windows
+      # - kestra
+
+tasks:
+  - id: backup-and-transfer
+    type: io.kestra.plugin.fs.ssh.Command
+    host: "{{ inputs.local_host }}"
+    username: "{{ inputs.local_user }}"
+    authMethod: PUBLIC_KEY
+    privateKey: "{{ read('id_rsa') }}"
+    warningOnStdErr: false
+    commands:
+      - |
+        #!/bin/bash
+
+        echo "Starting backup of all non-hidden files that are not in the exclude-list"
+
+        EXCLUDE_DIRS=({{ inputs.exclude_dirs | join(' ') }})
+        echo "Exclude directories: ${EXCLUDE_DIRS[@]}"
+
+        cd {{ inputs.local_path }}
+
+        for item in *; do
+          found_match=false
+          for exclude in "${EXCLUDE_DIRS[@]}"; do
+            if [[ "$item" == "$exclude" ]]; then
+              found_match=true
+              break
+            fi
+          done
+
+          if [[ "$found_match" == "false" ]]; then
+            echo "Creating tar for $item"
+            sudo tar --warning=no-file-changed -czpf "/tmp/${item}.tar.gz" "$item"
+
+            echo "Transfering $item to {{ inputs.remote_host }}"
+            sudo scp -O -i "/home/uh/.ssh/id_rsa" "/tmp/${item}.tar.gz" {{ inputs.remote_user }}@{{ inputs.remote_host }}:{{ inputs.remote_path }}
+
+            echo "Removing local temp file"
+            sudo rm -f "/tmp/${item}.tar.gz"
+          fi
+        done
+
+        echo "All done."
+  - id: notify-done
+    type: io.kestra.plugin.notifications.google.GoogleChatIncomingWebhook
+    url: "{{ secret('GOOGLE_CHAT_WEBHOOK') }}"
+    payload: |
+      {
+        "text": "SUCCESS: {{ flow.id }} - {{ execution.id }} - {{ trigger.date ?? execution.startDate | date('yyyy-MM-dd@HH:mm:ss') }}"
+      }
+
+triggers:
+  - id: backup-docker
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "0 0 * * 1"
+
+errors:
+  - id: notify-fail
+    type: io.kestra.plugin.notifications.google.GoogleChatIncomingWebhook
+    url: "{{ secret('GOOGLE_CHAT_WEBHOOK') }}"
+    payload: |
+      {
+        "text": "FAILED: {{ flow.id }} - {{ execution.id }} - {{ trigger.date ?? execution.startDate | date('yyyy-MM-dd@HH:mm:ss') }}"
+      }

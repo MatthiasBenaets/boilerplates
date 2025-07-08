@@ -1,0 +1,39 @@
+id: log-journalctl
+namespace: log
+description: |
+  Search for services, words, errors in the journalctl logs.
+  The local_host should be part of the systemd-journal group for this to work.
+  Run the ansible-group flow to add this group to a specific user.
+
+inputs:
+  - id: local_host
+    displayName: Local host name
+    type: STRING
+    defaults: simlab
+  - id: local_user
+    displayName: Local user
+    type: STRING
+    defaults: remote
+  - id: key
+    displayName: Search word
+    type: STRING
+    defaults: error
+  - id: since
+    displayName: Search start time
+    type: STRING
+    defaults: 2 days ago
+  - id: until
+    displayName: Search end time
+    type: STRING
+    defaults: now
+
+tasks:
+  - id: print-journalctl
+    type: io.kestra.plugin.fs.ssh.Command
+    host: "{{ inputs.local_host }}"
+    username: "{{ inputs.local_user }}"
+    authMethod: PUBLIC_KEY
+    privateKey: "{{ read('id_rsa') }}"
+    warningOnStdErr: false
+    commands:
+     - journalctl --since '{{ inputs.since }}' --until '{{ inputs.until }}' | grep {{ inputs.key }}

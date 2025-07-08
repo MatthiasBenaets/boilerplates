@@ -1,0 +1,34 @@
+id: ansible-debug
+namespace: ansible
+description: A testing/debugging template for Kestra's AnsibleCLI.
+
+inputs:
+  - id: hosts
+    displayName: "Hosts (comma separated)"
+    type: STRING
+    defaults: temp
+
+tasks:
+  - id: ansible_task
+    type: io.kestra.plugin.ansible.cli.AnsibleCLI
+    inputFiles:
+      inventory.ini: "{{ read('inventory.ini') }}"
+      playbook.yml: |
+        ---
+        - name: Log Message Playbook
+          hosts: {{ inputs.hosts }}
+          gather_facts: true
+          tasks:
+            - name: Print distribution
+              debug:
+                msg: !unsafe '{{ ansible_distribution|raw }}'
+      id_rsa: "{{ read('id_rsa') }}"
+    taskRunner:
+      type: io.kestra.plugin.scripts.runner.docker.Docker
+      pullPolicy: IF_NOT_PRESENT
+      user: "1000"
+    containerImage: cytopia/ansible:latest-tools
+    commands:
+      - ansible-playbook -i inventory.ini --key-file id_rsa playbook.yml
+    env:
+      ANSIBLE_HOST_KEY_CHECKING: "False"
