@@ -8,18 +8,19 @@
         name:
           - nfs-kernel-server
 
-    - name: Create nfs directory
-      ansible.builtin.file:
-        path: /cloud
-        state: directory
-        mode: "0755"
+    # - name: Create nfs directory
+    #   ansible.builtin.file:
+    #     path: /cloud
+    #     state: directory
+    #     mode: "0755"
 
     - name: Configure exports file
       ansible.builtin.lineinfile:
         path: /etc/exports
-        line: "/cloud  *(rw,sync,no_root_squash,no_subtree_check)"
+        # line: "/cloud  *(rw,sync,no_root_squash,no_subtree_check)"
+        # regexp: "^/cloud"
+        line: "/home  *(rw,sync,no_root_squash,no_subtree_check)"
         state: present
-        regexp: "^/cloud"
 
     - name: Export share
       ansible.builtin.command: exportfs -a
