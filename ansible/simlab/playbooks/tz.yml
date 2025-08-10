@@ -1,0 +1,8 @@
+---
+- name: Update Timezone
+  hosts: virtual
+  become: yes
+  tasks:
+    - name: Update Timezone to Europe/Brussels
+      timezone:
+        name: Europe/Brussels

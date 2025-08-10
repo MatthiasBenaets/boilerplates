@@ -1,0 +1,10 @@
+---
+- name: Set up keys for all hosts
+  hosts: virtual
+  become: yes
+  tasks:
+    - name: Set up key on host
+      authorized_key:
+        user: root
+        state: present
+        key: "{{ lookup('file', '/home/matthias/.ssh/id_rsa.pub') }}" # Generate id_rsa using $ ssh-keygen -t rsa -b 4096

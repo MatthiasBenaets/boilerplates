@@ -1,0 +1,30 @@
+Job ID: 98
+Nodes allocated: node[1-3]
+Number of nodes: 3
+Tasks per node: 2(x3)
+Number of tasks: 6
+CPUs per task: 
+/var/spool/slurm/slurmd/job00098/slurm_script: line 12: export: `/home/matthias/cloud/examples/R/Rmpi/single': not a valid identifier
+Process 0 node1: my number is 20099
+Process 1 node1: my number is 20101
+Process 2 node2: my number is 18642
+Process 3 node2: my number is 18644
+Process 4 node3: my number is 20887
+Process 5 node3: my number is 20889
+Error in file(con, "w") : cannot open the connection
+Calls: writeLines -> file
+In addition: Warning message:
+In file(con, "w") :
+  cannot open file '--args/result.txt': No such file or directory
+Execution halted
+--------------------------------------------------------------------------
+Primary job  terminated normally, but 1 process returned
+a non-zero exit code. Per user-direction, the job has been aborted.
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+mpirun detected that one or more processes exited with non-zero status, thus causing
+the job to be terminated. The first process to do so was:
+
+  Process name: [[1297,1],0]
+  Exit code:    1
+--------------------------------------------------------------------------

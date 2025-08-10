@@ -1,0 +1,3 @@
+Numbers from all processes: 20145, 20147, 20925, 18680, 18682, 20927
+Sum of all numbers: 119506
+Process 0 finished

@@ -1,0 +1,43 @@
+---
+- name: Install Docker on Debian-based distributions
+  hosts: simlab
+  become: true
+  tasks:
+    - name: Install dependencies
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - software-properties-common
+        state: latest
+        update_cache: true
+
+    - name: Add GPG key
+      apt_key:
+        url: https://download.docker.com/linux/{{ ansible_distribution|lower }}/gpg
+
+    - name: Add repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/{{ ansible_distribution|lower }} {{ansible_distribution_release}} stable
+
+    - name: Update source and install docker
+      apt: 
+        name: 
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose
+          - docker-compose-plugin
+        state: latest
+        update_cache: yes
+
+    - name: Add user
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+
+    #- name: Reboot. Required to have group accessible
+      #reboot:

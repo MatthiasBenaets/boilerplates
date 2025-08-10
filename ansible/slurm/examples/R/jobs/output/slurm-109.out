@@ -1,0 +1,41 @@
+/var/spool/slurm/slurmd/job00109/slurm_script: line 7: export: `/home/matthias/cloud/examples/R/jobs': not a valid identifier
+/var/spool/slurm/slurmd/job00109/slurm_script: line 8: export: `0': not a valid identifier
+Error in file(con, "w") : cannot open the connection
+Calls: writeLines -> file
+Error in file(con, "w") : cannot open the connection
+Calls: writeLines -> file
+Error in file(con, "w") : cannot open the connection
+Calls: writeLines -> file
+In addition: Warning message:
+In file(con, "w") :
+  cannot open file '/home/matthias/cloud/examples/R/jobs/results/result3.txt': No such file or directory
+Execution halted
+In addition: Warning message:
+In file(con, "w") :
+  cannot open file '/home/matthias/cloud/examples/R/jobs/results/result5.txt': No such file or directory
+Execution halted
+Error in file(con, "w") : cannot open the connection
+Calls: writeLines -> file
+In addition: Warning message:
+In file(con, "w") :
+  cannot open file '/home/matthias/cloud/examples/R/jobs/results/result4.txt': No such file or directory
+Execution halted
+In addition: Warning message:
+In file(con, "w") :
+  cannot open file '/home/matthias/cloud/examples/R/jobs/results/result1.txt': No such file or directory
+Execution halted
+Error in file(con, "w") : cannot open the connection
+Calls: writeLines -> file
+In addition: Warning message:
+In file(con, "w") :
+  cannot open file '/home/matthias/cloud/examples/R/jobs/results/result0.txt': No such file or directory
+Execution halted
+Error in file(con, "w") : cannot open the connection
+Calls: writeLines -> file
+In addition: Warning message:
+In file(con, "w") :
+  cannot open file '/home/matthias/cloud/examples/R/jobs/results/result2.txt': No such file or directory
+Execution halted
+srun: error: node3: tasks 4-5: Exited with exit code 1
+srun: error: node1: tasks 0-1: Exited with exit code 1
+srun: error: node2: tasks 2-3: Exited with exit code 1

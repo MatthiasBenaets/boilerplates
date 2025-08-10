@@ -1,0 +1,59 @@
+---
+- name: Set up Slurm on a worker node
+  hosts: nodes
+  become: yes
+  tasks:
+    - name: Install packages
+      ansible.builtin.apt:
+        name:
+          - munge
+          - libmunge2
+          - libmunge-dev
+          - slurm-wlm
+
+    - name: Fetch munge.key from controller
+      delegate_to: "{{ groups['controller'][0] }}"
+      slurp:
+        src: /etc/munge/munge.key
+      register: munge_key_encoded
+
+    - name: Copy munge.key to worker nodes
+      copy:
+        content: "{{ munge_key_encoded.content | b64decode }}"
+        dest: /etc/munge/munge.key
+        owner: munge
+        group: munge
+        mode: "0600"
+
+    - name: Copy over slurm.conf
+      ansible.builtin.copy:
+        src: ./config/slurm.conf
+        dest: /etc/slurm/slurm.conf
+        owner: slurm
+        group: slurm
+        mode: "0644"
+
+    - name: Create slurm spool directory
+      ansible.builtin.file:
+        path: /var/spool/slurm
+        state: directory
+        owner: slurm
+        group: slurm
+        mode: "0755"
+
+    - name: Restart services
+      ansible.builtin.service:
+        name: "{{ item }}"
+        enabled: true
+        state: restarted
+      loop:
+        - munge
+        - slurmd
+
+    - name: Install OpenMPI
+      ansible.builtin.apt:
+        name:
+          - openmpi-bin
+          - openmpi-common
+          - libopenmpi3
+          - libopenmpi-dev

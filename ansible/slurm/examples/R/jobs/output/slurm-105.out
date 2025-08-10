@@ -1,0 +1,4 @@
+/var/spool/slurm/slurmd/job00105/slurm_script: line 7: export: `/home/matthias/cloud/examples/R/jobs': not a valid identifier
+/var/spool/slurm/slurmd/job00105/slurm_script: line 8: export: `0': not a valid identifier
+File written successfully.
+File written successfully.

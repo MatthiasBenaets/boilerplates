@@ -1,0 +1,10 @@
+- name: Update /etc/hosts file on controller and nodes
+  hosts: controller,nodes
+  become: yes
+  tasks:
+    - name: Add hosts entries for all controller and nodes
+      lineinfile:
+        path: /etc/hosts
+        line: "{{ '127.0.1.1' if item == inventory_hostname else hostvars[item]['ip'] }} {{ item }}"
+        state: present
+      loop: "{{ groups['controller'] + groups['nodes'] }}"

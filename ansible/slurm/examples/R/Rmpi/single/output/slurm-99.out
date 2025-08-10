@@ -1,0 +1,14 @@
+Job ID: 99
+Nodes allocated: node[1-3]
+Number of nodes: 3
+Tasks per node: 2(x3)
+Number of tasks: 6
+CPUs per task: 
+/var/spool/slurm/slurmd/job00099/slurm_script: line 12: export: `/home/matthias/cloud/examples/R/Rmpi/single': not a valid identifier
+Process 1 node1: my number is 20147
+Process 0 node1: my number is 20145
+Process 5 node3: my number is 20927
+Process 2 node2: my number is 18680
+Process 4 node3: my number is 20925
+Process 3 node2: my number is 18682
+Process 0 finished

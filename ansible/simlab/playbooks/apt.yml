@@ -1,0 +1,9 @@
+---
+- name: Update system
+  hosts: virtual
+  become: yes
+  tasks:
+    - name: Update repository and upgrade packages
+      apt:
+        update_cache: yes
+        upgrade: yes

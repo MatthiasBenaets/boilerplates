@@ -1,0 +1,13 @@
+Job ID: 96
+Nodes allocated: node[1-3]
+Number of nodes: 3
+Tasks per node: 2(x3)
+Number of tasks: 6
+CPUs per task: 
+Process 2 node2: my number is 18561
+Process 3 node2: my number is 18563
+Process 1 node1: my number is 19993
+Process 0 node1: my number is 19991
+Process 4 node3: my number is 20806
+Process 5 node3: my number is 20808
+Process 0 finished

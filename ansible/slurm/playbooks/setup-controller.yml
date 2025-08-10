@@ -1,0 +1,73 @@
+---
+- name: Set up Slurm on a controller node
+  hosts: controller
+  become: yes
+  tasks:
+    - name: Install Munge
+      ansible.builtin.apt:
+        name:
+          - munge
+          - libmunge2
+          - libmunge-dev
+
+    - name: Check if munge.key exists
+      ansible.builtin.stat:
+        path: /etc/munge/munge.key
+      register: munge_key
+
+    - name: Generate munge.key
+      ansible.builtin.command: /usr/sbin/mungekey
+      when: not munge_key.stat.exists
+
+    - name: Set ownership of munge.key
+      ansible.builtin.file:
+        path: /etc/munge/munge.key
+        owner: munge
+        group: munge
+      when: not munge_key.stat.exists
+
+    - name: Install Slurm
+      ansible.builtin.apt:
+        name:
+          - slurm-wlm
+
+    - name: Copy over slurm.conf
+      ansible.builtin.copy:
+        src: ./config/slurm.conf
+        dest: /etc/slurm/slurm.conf
+        owner: slurm
+        group: slurm
+        mode: "0644"
+
+    - name: Create slurm spool directory
+      ansible.builtin.file:
+        path: /var/spool/slurm
+        state: directory
+        owner: slurm
+        group: slurm
+        mode: "0755"
+
+    - name: Create slurmctld.log
+      ansible.builtin.file:
+        path: /var/log/slurmctld.log
+        state: touch
+        owner: slurm
+        group: slurm
+        mode: "0644"
+
+    - name: Restart services
+      ansible.builtin.service:
+        name: "{{ item }}"
+        enabled: true
+        state: restarted
+      loop:
+        - munge
+        - slurmctld
+
+    - name: Install OpenMPI
+      ansible.builtin.apt:
+        name:
+          - openmpi-bin
+          - openmpi-common
+          - libopenmpi3
+          - libopenmpi-dev
