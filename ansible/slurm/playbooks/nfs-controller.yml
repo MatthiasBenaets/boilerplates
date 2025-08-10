@@ -1,0 +1,31 @@
+---
+- name: Configure NFS Server
+  hosts: controller
+  become: yes
+  tasks:
+    - name: Install nfs-kernel-server package
+      ansible.builtin.apt:
+        name:
+          - nfs-kernel-server
+
+    - name: Create nfs directory
+      ansible.builtin.file:
+        path: /cloud
+        state: directory
+        mode: "0755"
+
+    - name: Configure exports file
+      ansible.builtin.lineinfile:
+        path: /etc/exports
+        line: "/cloud  *(rw,sync,no_root_squash,no_subtree_check)"
+        state: present
+        regexp: "^/cloud"
+
+    - name: Export share
+      ansible.builtin.command: exportfs -a
+
+    - name: Start and enable the nfs-kernel-server service
+      ansible.builtin.service:
+        name: nfs-kernel-server
+        state: started
+        enabled: yes
