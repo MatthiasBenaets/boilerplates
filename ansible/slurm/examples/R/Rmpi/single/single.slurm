@@ -10,4 +10,7 @@ echo "Number of tasks: $SLURM_NTASKS"
 echo "CPUs per task: $SLURM_CPUS_PER_TASK"
 
 cd $SLURM_SUBMIT_DIR
-mpirun -np 6 Rscript single.R $SLURM_SUBMIT_DIR 
+
+module load R/4.4.0
+
+mpirun -np 6 Rscript single.R $SLURM_SUBMIT_DIR

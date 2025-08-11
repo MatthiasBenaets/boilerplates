@@ -1,0 +1,28 @@
+---
+- name: Configure lmod on the controller
+  hosts: controller
+  become: yes
+  tasks:
+    - name: Install lmod package
+      ansible.builtin.apt:
+        name: lmod
+
+    # - name: Create directory for applications
+    #   ansible.builtin.file:
+    #     path: /opt
+    #     state: directory
+    #     mode: "0755"
+
+    - name: Update lmod to point to modules
+      lineinfile:
+        path: /etc/profile.d/lmod.sh
+        line: "export MODULEPATH=/opt/modulefiles:$MODULEPATH"
+
+    - name: Configure exports file
+      ansible.builtin.lineinfile:
+        path: /etc/exports
+        line: "/opt  *(ro,sync,no_root_squash,no_subtree_check)"
+        state: present
+
+    - name: Export application share
+      ansible.builtin.command: exportfs -a

@@ -1,0 +1,21 @@
+---
+- name: Configure lmod app availability on node
+  hosts: nodes
+  become: yes
+  tasks:
+    - name: Install lmod package
+      ansible.builtin.apt:
+        name: lmod
+
+    - name: Update lmod to point to modules
+      lineinfile:
+        path: /etc/profile.d/lmod.sh
+        line: "export MODULEPATH=/opt/modulefiles:$MODULEPATH"
+
+    - name: Mount the nfs share and ensure it is in fstab
+      ansible.posix.mount:
+        src: "{{ groups['controller'][0] }}:/opt"
+        path: /opt
+        fstype: nfs
+        opts: "defaults,bg,_netdev,noatime,nodiratime,hard,intr"
+        state: mounted

@@ -21,5 +21,5 @@
         src: "{{ groups['controller'][0] }}:/home"
         path: /home
         fstype: nfs
-        opts: "defaults,bg,_netdev"
+        opts: "defaults,bg,_netdev,noatime,nodiratime,hard,intr"
         state: mounted
