@@ -6,7 +6,6 @@
 #SBATCH --output=output/parallel_%j.out
 
 cd $SLURM_SUBMIT_DIR
-export SLURM_NTASKS
 
 module load R/4.4.0
 
