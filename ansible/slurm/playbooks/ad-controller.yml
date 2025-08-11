@@ -1,0 +1,35 @@
+---
+- name: Join active directory as controller
+  hosts: controller
+  become: yes
+  tasks:
+    - name: Install dependencies
+      ansible.builtin.apt:
+        name:
+          - realmd
+          - sssd
+          - sssd-tools
+          - libnss-sss
+          - libpam-sss
+          - samba-common-bin
+          - adcli
+
+    - name: Preconfigure some krb5.conf settings
+      ansible.builtin.blockinfile:
+        path: /etc/krb5.conf
+        create: yes
+        block: |
+          [libdefaults]
+            rdns = false
+        marker: "# {mark} ANSIBLE MANAGED"
+
+    - name: Set permissions on krb5.conf
+      ansible.builtin.file:
+        path: /etc/krb5.conf
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Join active directory
+      ansible.builtin.command:
+        cmd: realm join -U {{ ad_user }} -P {{ ad_password }} {{ ad_domain }}

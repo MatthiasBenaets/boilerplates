@@ -7,21 +7,21 @@
       ansible.builtin.apt:
         name: lmod
 
-    # - name: Create directory for applications
-    #   ansible.builtin.file:
-    #     path: /opt
-    #     state: directory
-    #     mode: "0755"
+    - name: Create directory for applications
+      ansible.builtin.file:
+        path: "{{ shared_app }}"
+        state: directory
+        mode: "0755"
 
     - name: Update lmod to point to modules
       lineinfile:
         path: /etc/profile.d/lmod.sh
-        line: "export MODULEPATH=/opt/modulefiles:$MODULEPATH"
+        line: "export MODULEPATH={{ module_path }}:$MODULEPATH"
 
     - name: Configure exports file
       ansible.builtin.lineinfile:
         path: /etc/exports
-        line: "/opt  *(ro,sync,no_root_squash,no_subtree_check)"
+        line: "{{ shared_app }}  *(ro,sync,no_root_squash,no_subtree_check)"
         state: present
 
     - name: Export application share

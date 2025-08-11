@@ -10,12 +10,12 @@
     - name: Update lmod to point to modules
       lineinfile:
         path: /etc/profile.d/lmod.sh
-        line: "export MODULEPATH=/opt/modulefiles:$MODULEPATH"
+        line: "export MODULEPATH={{ module_path }}:$MODULEPATH"
 
     - name: Mount the nfs share and ensure it is in fstab
       ansible.posix.mount:
-        src: "{{ groups['controller'][0] }}:/opt"
-        path: /opt
+        src: "{{ groups['controller'][0] }}:{{ shared_app }}"
+        path: "{{ shared_app }}"
         fstype: nfs
         opts: "defaults,bg,_netdev,noatime,nodiratime,hard,intr"
         state: mounted

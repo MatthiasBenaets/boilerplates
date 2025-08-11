@@ -8,18 +8,16 @@
         name: nfs-common
         state: present
 
-    # - name: Create nfs directory
-    #   ansible.builtin.file:
-    #     path: /cloud
-    #     state: directory
-    #     mode: "0755"
+    - name: Create nfs directory
+      ansible.builtin.file:
+        path: "{{ shared_dir }}"
+        state: directory
+        mode: "0755"
 
     - name: Mount the nfs share and ensure it is in fstab
       ansible.posix.mount:
-        # src: "{{ groups['controller'][0] }}:/cloud"
-        # path: /cloud
-        src: "{{ groups['controller'][0] }}:/home"
-        path: /home
+        src: "{{ groups['controller'][0] }}:{{ shared_dir }}"
+        path: "{{ shared_dir }}"
         fstype: nfs
         opts: "defaults,bg,_netdev,noatime,nodiratime,hard,intr"
         state: mounted
