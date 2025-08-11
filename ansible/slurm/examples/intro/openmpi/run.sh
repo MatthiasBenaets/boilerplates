@@ -1,1 +1,1 @@
-mpirun --hostfile hosts -np 6 hostname
+mpirun --hostfile hosts -np 4 hostname

@@ -1,9 +1,0 @@
-/var/spool/slurm/slurmd/job00102/slurm_script: line 7: export: `/home/matthias/cloud/examples/R/jobs': not a valid identifier
-Error in file(con, "w") : cannot open the connection
-Calls: writeLines -> file
-In addition: Warning messages:
-1: In file(con, "w") :
-  'raw = FALSE' but '/home/matthias/cloud/examples/R/jobs/output' is not a regular file
-2: In file(con, "w") :
-  cannot open file '/home/matthias/cloud/examples/R/jobs/output': Is a directory
-Execution halted

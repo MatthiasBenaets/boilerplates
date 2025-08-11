@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --ntasks=6
+#SBATCH --ntasks=4
 #SBATCH --time=00:01:00
 #SBATCH --output=output/slurm-%j.out
 echo "Job ID: $SLURM_JOB_ID"

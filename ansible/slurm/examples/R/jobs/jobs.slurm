@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --ntasks=6
+#SBATCH --ntasks=4
 #SBATCH --cpus-per-task=1
 #SBATCH --time=00:01:00
 #SBATCH --output=output/slurm-%j.out
