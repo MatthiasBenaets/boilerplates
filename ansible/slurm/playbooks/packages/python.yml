@@ -1,0 +1,76 @@
+---
+- name: Install Python from source
+  hosts: controller
+  become: true
+  vars:
+    version: "3.11.9"
+    install_path: "/opt/apps/python/{{ version }}"
+    src_dir: "/tmp/python-{{ version }}"
+
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install build dependencies for Python
+      ansible.builtin.apt:
+        name:
+          - build-essential
+          - pkg-config
+          - libffi-dev
+          - libssl-dev
+          - libsqlite3-dev
+          - libgdbm-dev
+          - libgdbm-compat-dev
+          - libnsl-dev
+          - tcl-dev
+          - tk-dev
+          - uuid-dev
+        state: present
+
+    - name: Download Python source tarball
+      ansible.builtin.get_url:
+        url: "https://www.python.org/ftp/python/{{ version }}/Python-{{ version }}.tgz"
+        dest: "/tmp/python-{{ version }}.tgz"
+        mode: '0644'
+
+    - name: Extract Python source tarball
+      ansible.builtin.unarchive:
+        src: "/tmp/python-{{ version }}.tgz"
+        dest: "/tmp"
+        remote_src: true
+
+    - name: Configure Python installation
+      ansible.builtin.command:
+        cmd: "./configure --prefix={{ install_path }} --with-pydebug --enable-optimizations"
+        chdir: "{{ src_dir }}"
+
+    - name: Compile Python
+      ansible.builtin.make:
+        chdir: "{{ src_dir }}"
+
+    - name: Install Python
+      ansible.builtin.make:
+        target: install
+        chdir: "{{ src_dir }}"
+
+    - name: Create /opt/modulefiles/python directory for Lua modules
+      ansible.builtin.file:
+        path: /opt/modulefiles/python
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Create the Lua module file
+      ansible.builtin.copy:
+        dest: "/opt/modulefiles/python/{{ version }}.lua"
+        content: |
+          whatis("Description: python version {{ version }}")
+
+          local home = os.getenv("HOME")
+          setenv("PIP_TARGET", pathJoin(home, "python/{{ version }}/packages"))
+
+          -- Add the Python binary to the user's PATH
+          prepend_path("PATH", "/opt/apps/python/{{ version }}/bin")
