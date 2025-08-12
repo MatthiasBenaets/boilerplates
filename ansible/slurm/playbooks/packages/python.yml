@@ -5,7 +5,7 @@
   vars:
     version: "3.11.9"
     install_path: "/opt/apps/python/{{ version }}"
-    src_dir: "/tmp/python-{{ version }}"
+    src_dir: "/tmp/Python-{{ version }}"
 
   tasks:
     - name: Update apt cache
@@ -32,12 +32,12 @@
     - name: Download Python source tarball
       ansible.builtin.get_url:
         url: "https://www.python.org/ftp/python/{{ version }}/Python-{{ version }}.tgz"
-        dest: "/tmp/python-{{ version }}.tgz"
+        dest: "/tmp/Python-{{ version }}.tgz"
         mode: '0644'
 
     - name: Extract Python source tarball
       ansible.builtin.unarchive:
-        src: "/tmp/python-{{ version }}.tgz"
+        src: "/tmp/Python-{{ version }}.tgz"
         dest: "/tmp"
         remote_src: true
 
