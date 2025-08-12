@@ -3,9 +3,9 @@
   hosts: controller
   become: true
   vars:
-    r_version: "4.3.0"
-    r_install_path: "/opt/apps/R/{{ r_version }}"
-    r_src_dir: "/tmp/R-{{ r_version }}"
+    version: "4.3.0"
+    install_path: "/opt/apps/R/{{ version }}"
+    src_dir: "/tmp/R-{{ version }}"
 
   tasks:
     - name: Update apt cache
@@ -29,29 +29,29 @@
 
     - name: Download R source tarball
       ansible.builtin.get_url:
-        url: "https://cran.rstudio.com/src/base/R-{{ r_version.split('.')[0] }}/R-{{ r_version }}.tar.gz"
-        dest: "/tmp/R-{{ r_version }}.tar.gz"
+        url: "https://cran.rstudio.com/src/base/R-{{ version.split('.')[0] }}/R-{{ version }}.tar.gz"
+        dest: "/tmp/R-{{ version }}.tar.gz"
         mode: '0644'
 
     - name: Extract R source tarball
       ansible.builtin.unarchive:
-        src: "/tmp/R-{{ r_version }}.tar.gz"
+        src: "/tmp/R-{{ version }}.tar.gz"
         dest: "/tmp"
         remote_src: true
 
     - name: Configure R installation
       ansible.builtin.command:
-        cmd: "./configure --prefix={{ r_install_path }} --enable-R-shlib --enable-memory-profiling --with-blas --with-lapack --with-x=no"
-        chdir: "{{ r_src_dir }}"
+        cmd: "./configure --prefix={{ install_path }} --enable-R-shlib --enable-memory-profiling --with-blas --with-lapack --with-x=no"
+        chdir: "{{ src_dir }}"
 
     - name: Compile R
       ansible.builtin.make:
-        chdir: "{{ r_src_dir }}"
+        chdir: "{{ src_dir }}"
 
     - name: Install R
       ansible.builtin.make:
         target: install
-        chdir: "{{ r_src_dir }}"
+        chdir: "{{ src_dir }}"
 
     - name: Create /opt/modulefiles/R directory for Lua modules
       ansible.builtin.file:
@@ -63,27 +63,26 @@
 
     - name: Create the Lua module file
       ansible.builtin.copy:
-        dest: "/opt/modulefiles/R/{{ r_version }}.lua"
+        dest: "/opt/modulefiles/R/{{ version }}.lua"
         content: |
-          whatis("Description: R programming language version {{ r_version }}")
+          whatis("Description: R programming language version {{ version }}")
 
           local home = os.getenv("HOME")
 
           -- Set the R_HOME and R_LIBS_USER environment variables
-          setenv("R_HOME", "/opt/apps/R/{{ r_version }}/lib/R")
-          setenv("R_LIBS_USER", pathJoin(home, "R/{{ r_version }}/library"))
+          setenv("R_HOME", "/opt/apps/R/{{ version }}/lib/R")
+          setenv("R_LIBS_USER", pathJoin(home, "R/{{ version }}/library"))
 
           -- Add the R binary to the user's PATH
-          prepend_path("PATH", "/opt/apps/R/{{ r_version }}/bin")
+          prepend_path("PATH", "/opt/apps/R/{{ version }}/bin")
 
     - name: Create .Rprofile for default CRAN mirror and user packages
       ansible.builtin.copy:
-        dest: "/opt/apps/R/{{ r_version }}/lib/R/etc/Rprofile.site"
+        dest: "/opt/apps/R/{{ version }}/lib/R/etc/Rprofile.site"
         content: |
           options(repos = c(CRAN = "https://cloud.r-project.org"))
 
           if (Sys.info()["user"] != "root") {
-            r_version <- R.version.string
             user_library_path <- file.path(Sys.getenv("HOME"), "R", paste(version[c("major", "minor")], collapse = "."), "library")
             if (!dir.exists(user_library_path)) {
                 dir.create(user_library_path, recursive = TRUE)
@@ -96,4 +95,4 @@
 
     - name: Install Rmpi package
       ansible.builtin.command:
-        cmd: "/opt/apps/R/{{ r_version }}/bin/R -e 'install.packages(\"Rmpi\", configure.args = c(\"--with-Rmpi-type=OPENMPI\"))'"
+        cmd: "/opt/apps/R/{{ version }}/bin/R -e 'install.packages(\"Rmpi\", configure.args = c(\"--with-Rmpi-type=OPENMPI\"))'"
