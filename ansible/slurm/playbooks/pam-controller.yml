@@ -3,28 +3,32 @@
   hosts: controller
   become: yes
   tasks:
-    - name: Apply SSSD configuration changes
-      ansible.builtin.lineinfile:
-        path: /etc/sssd/sssd.conf
-        regexp: "{{ item.regexp }}"
-        line: "{{ item.line }}"
-        insertafter: "{{ item.insertafter | default(omit) }}"
-        state: present
-      loop:
-        - {
-            regexp: "^use_fully_qualified_names =",
-            line: "use_fully_qualified_names = False",
-          }
-        - {
-            regexp: "^#?fallback_homedir =",
-            line: "#fallback_homedir = /home/%u@%d",
-          }
-        - {
-            regexp: '\[domain/{{ ad_domain }}\]',
-            line: "override_homedir = /home/%u",
-            insertafter: '\[domain/{{ ad_domain }}\]',
-          }
-      notify: Restart sssd
+    - name: Apply SSSD configuration chanages
+      block:
+        - name: Change existing settings
+          ansible.builtin.lineinfile:
+            path: /etc/sssd/sssd.conf
+            regexp: "{{ item.regexp }}"
+            line: "{{ item.line }}"
+            insertafter: "{{ item.insertafter | default(omit) }}"
+            state: present
+          loop:
+            - {
+                regexp: "^use_fully_qualified_names =",
+                line: "use_fully_qualified_names = False",
+              }
+            - {
+                regexp: "^#?fallback_homedir =",
+                line: "#fallback_homedir = /home/%u@%d",
+              }
+          notify: Restart sssd
+
+        - name: Set homedir
+          ansible.builtin.lineinfile:
+            path: /etc/sssd/sssd.conf
+            insertafter: '\[domain/{{ ad_domain }}\]'
+            line: "override_homedir = /home/%u"
+          notify: Restart sssd
 
     - name: Ensure pam_mkhomedir is configured in common-session
       ansible.builtin.lineinfile:

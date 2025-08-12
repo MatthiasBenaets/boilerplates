@@ -1,51 +1,12 @@
-# TODO: maybe make update-hostname and update-etc-hosts into one
 ---
-- name: Controller - Join active directory and set up hostnames
-  hosts: controller
-  tasks:
-    - name: Run controller-specific playbooks
-      include_tasks: "{{ item }}"
-      loop:
-        - playbooks/ad-controller.yml
-        - playbooks/pam-controller.yml
-        - playbooks/update-hostname.yml
-        - playbooks/update-etc-hosts.yml
-
----
-- name: Nodes - Change hostnames
-  hosts: nodes
-  tasks:
-    include_tasks: "{{ item }}"
-    loop:
-      - playbooks/update-hostname.yml
-      - playbooks/update-etc-hosts.yml
-
----
-- name: Controller - setup NFS and Lmod
-  hosts: controller
-  tasks:
-    include_tasks: "{{ item }}"
-    loop:
-      - playbooks/nfs-controller.yml
-      - playbooks/lmod-controller.yml
-
----
-- name: Nodes - setup NFS and Lmod
-  hosts: nodes
-  tasks:
-    include_tasks: "{{ item }}"
-    loop:
-      - playbooks/nfs-node.yml
-      - playbooks/lmod-node.yml
-
----
-- name: Controller - Setup Slurm
-  hosts: controller
-  tasks:
-    include_tasks: playbooks/slurm-controller.yml
-
----
-- name: Nodes - Setup Slurm
-  hosts: nodes
-  tasks:
-    include_tasks: playbooks/slurm-node.yml
+- import_playbook: playbooks/ad-controller.yml
+- import_playbook: playbooks/pam-controller.yml
+- import_playbook: playbooks/hostname-controller.yml
+- import_playbook: playbooks/etc-hosts.yml
+- import_playbook: playbooks/hostname-node.yml
+- import_playbook: playbooks/nfs-controller.yml
+- import_playbook: playbooks/lmod-controller.yml
+- import_playbook: playbooks/nfs-node.yml
+- import_playbook: playbooks/lmod-node.yml
+- import_playbook: playbooks/slurm-controller.yml
+- import_playbook: playbooks/slurm-node.yml

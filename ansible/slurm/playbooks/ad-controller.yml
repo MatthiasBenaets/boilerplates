@@ -13,6 +13,7 @@
           - libpam-sss
           - samba-common-bin
           - adcli
+          - python3-pexpect
 
     - name: Preconfigure some krb5.conf settings
       ansible.builtin.blockinfile:
@@ -31,5 +32,7 @@
         mode: "0644"
 
     - name: Join active directory
-      ansible.builtin.command:
-        cmd: realm join -U {{ ad_user }} -P {{ ad_password }} {{ ad_domain }}
+      ansible.builtin.expect:
+        command: realm join --user={{ ad_user }} {{ ad_domain }}
+        responses:
+          '.*Password.*:': '{{ ad_password }}'

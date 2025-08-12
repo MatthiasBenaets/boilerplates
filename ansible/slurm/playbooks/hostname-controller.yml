@@ -1,0 +1,15 @@
+---
+- name: Update hostname based on inventory
+  hosts: controller
+  become: true
+  tasks:
+    - name: Set the system hostname to inventory hostname
+      ansible.builtin.hostname:
+        name: "{{ inventory_hostname }}"
+
+    - name: Update /etc/hosts with IP and hostname
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        regexp: '^127\.0\.1\.1'
+        line: "127.0.1.1 {{ inventory_hostname }}"
+        backup: yes
