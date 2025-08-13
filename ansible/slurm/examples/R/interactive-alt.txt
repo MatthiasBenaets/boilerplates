@@ -1,0 +1,11 @@
+# Multiple interactive R shells
+# Run in shell
+
+salloc --nodes=2 --ntasks-per-node=2
+
+module load R
+
+#mpirun --np 4 R --no-save
+srun -pty -n 4 R --no-save
+
+Sys.info()

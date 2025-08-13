@@ -30,6 +30,7 @@
       ansible.builtin.apt:
         name:
           - slurm-wlm
+          - libslurm-dev
 
     - name: Copy over slurm.conf
       ansible.builtin.copy:

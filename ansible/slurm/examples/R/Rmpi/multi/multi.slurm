@@ -13,6 +13,6 @@ echo "CPUs per task: $SLURM_CPUS_PER_TASK"
 
 cd $SLURM_SUBMIT_DIR
 
-module load R/4.4.0
+module load R/4.3.0
 
-mpirun -np 6 Rscript multi.R
+mpirun -np 4 Rscript multi.R
