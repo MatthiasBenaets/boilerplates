@@ -1,0 +1,27 @@
+---
+- name: Install RStudio
+  hosts: controller
+  become: true
+  vars:
+    release: "{{ ansible_distribution_release|lower}}"
+    version: "2025.05.1-513"
+
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install gdebi
+      ansible.builtin.apt:
+        name: gdebi
+        state: present
+
+    - name: Get Rsudio Server
+      ansible.builtin.get_url:
+        url: "https://download2.rstudio.org/server/{{ release }}/amd64/rstudio-server-{{version}}-amd64.deb"
+        dest: "/tmp/rstudio.deb"
+
+    - name: Install RStudio Server
+      ansible.builtin.command:
+        cmd: "/usr/bin/gdebi --non-interactive /tmp/rstudio.deb"

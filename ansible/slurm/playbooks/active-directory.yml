@@ -1,6 +1,6 @@
 ---
 - name: Join active directory as controller
-  hosts: controller
+  hosts: controller, nodes
   become: yes
   tasks:
     - name: Install dependencies

@@ -1,6 +1,6 @@
 ---
 - name: Configure SSSD and PAM for Active Directory users
-  hosts: controller
+  hosts: controller,nodes
   become: yes
   tasks:
     - name: Apply SSSD configuration chanages
