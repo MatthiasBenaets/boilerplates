@@ -80,7 +80,7 @@
     - name: Ensure PAM home dir creation enabled
       lineinfile:
         path: /etc/pam.d/common-session
-        line: "session required pam_mkhomedir.so skel=/etc/skel/ umask=0022"
+        line: "session required pam_mkhomedir.so skel=/etc/skel/ umask=0077"
         state: present
 
     - name: Create TLS cert dir
