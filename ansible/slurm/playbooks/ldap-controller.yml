@@ -1,0 +1,158 @@
+---
+- name: Setup LDAP Server with TLS and phpLDAPadmin
+  hosts: controller
+  become: yes
+  vars:
+    ldap_domain: "example.com"
+    ldap_org: "example"
+    ldap_password: "secret"
+    ldap_base_dn: "dc=example,dc=com"
+    ldap_admin_dn: "cn=admin,dc=example,dc=com"
+    cert_days: 10000
+
+  pre_tasks:
+    - name: Ensure debconf-utils is installed
+      apt:
+        name: debconf-utils
+        state: present
+        update_cache: yes
+
+    - name: Pre-seed slapd debconf
+      debconf:
+        name: slapd
+        question: "{{ item.question }}"
+        value: "{{ item.value }}"
+        vtype: "{{ item.vtype }}"
+      loop:
+        - {
+            question: "slapd/no_configuration",
+            value: "false",
+            vtype: "boolean",
+          }
+        - {
+            question: "slapd/domain",
+            value: "{{ ldap_domain }}",
+            vtype: "string",
+          }
+        - {
+            question: "slapd/organization",
+            value: "{{ ldap_org }}",
+            vtype: "string",
+          }
+        - {
+            question: "slapd/password1",
+            value: "{{ ldap_password }}",
+            vtype: "password",
+          }
+        - {
+            question: "slapd/password2",
+            value: "{{ ldap_password }}",
+            vtype: "password",
+          }
+        - { question: "slapd/backend", value: "MDB", vtype: "select" }
+        - { question: "slapd/purge_database", value: "true", vtype: "boolean" }
+        - {
+            question: "slapd/move_old_database",
+            value: "true",
+            vtype: "boolean",
+          }
+
+  tasks:
+    - name: Ensure ldap url can be resolved
+      lineinfile:
+        path: /etc/hosts
+        regexp: '.*ldap\.benaets\.com'
+        line: "127.0.0.1   ldap.{{ldap_domain}}"
+        state: present
+
+    - name: Install required packages
+      apt:
+        name:
+          - slapd
+          - ldap-utils
+          - libpam-mkhomedir
+          - libnss-ldapd
+          - phpldapadmin
+          - openssl
+        state: present
+        update_cache: yes
+
+    - name: Ensure PAM home dir creation enabled
+      lineinfile:
+        path: /etc/pam.d/common-session
+        line: "session required pam_mkhomedir.so skel=/etc/skel/ umask=0022"
+        state: present
+
+    - name: Create TLS cert dir
+      file:
+        path: /etc/ldap/ssl
+        state: directory
+        owner: openldap
+        mode: "0755"
+
+    - name: Generate private key
+      community.crypto.openssl_privatekey:
+        path: /etc/ldap/ssl/slapdkey.pem
+        owner: openldap
+        mode: "0400"
+
+    - name: Generate CSR
+      community.crypto.openssl_csr:
+        path: /etc/ldap/ssl/slapd.csr
+        privatekey_path: /etc/ldap/ssl/slapdkey.pem
+        common_name: "{{ ldap_domain }}"
+        owner: openldap
+
+    - name: Generate self-signed cert with CSR
+      community.crypto.x509_certificate:
+        path: /etc/ldap/ssl/slapdcert.pem
+        csr_path: /etc/ldap/ssl/slapd.csr
+        privatekey_path: /etc/ldap/ssl/slapdkey.pem
+        provider: selfsigned
+        selfsigned_not_after: "+{{ cert_days }}d"
+        owner: openldap
+        mode: "0444"
+
+    - name: Configure slapd TLS
+      shell: |
+        ldapmodify -Y EXTERNAL -H ldapi:/// <<EOF
+        dn: cn=config
+        changetype: modify
+        replace: olcTLSCertificateFile
+        olcTLSCertificateFile: /etc/ldap/ssl/slapdcert.pem
+        -
+        replace: olcTLSCertificateKeyFile
+        olcTLSCertificateKeyFile: /etc/ldap/ssl/slapdkey.pem
+        EOF
+      args:
+        creates: /etc/ldap/ssl/.tls_configured
+
+    - name: Configure ldap.conf
+      template:
+        src: ldap.conf.j2
+        dest: /etc/ldap/ldap.conf
+
+    - name: Configure nsswitch.conf
+      template:
+        src: nsswitch.conf.j2
+        dest: /etc/nsswitch.conf
+
+    - name: Configure nslcd.conf
+      template:
+        src: nslcd.conf.j2
+        dest: /etc/nslcd.conf
+
+    - name: Configure phpLDAPadmin
+      template:
+        src: phpldapadmin-config.php.j2
+        dest: /etc/phpldapadmin/config.php
+
+    - name: Restart nslcd
+      service:
+        name: nslcd
+        state: restarted
+
+    - name: Restart apache
+      service:
+        name: apache2
+        state: restarted
