@@ -3,11 +3,11 @@
   hosts: controller
   become: yes
   vars:
-    ldap_domain: "example.com"
-    ldap_org: "example"
-    ldap_password: "secret"
-    ldap_base_dn: "dc=example,dc=com"
-    ldap_admin_dn: "cn=admin,dc=example,dc=com"
+  #  ldap_domain: "example.com"
+  #  ldap_org: "example"
+  #  ldap_password: "secret"
+  #  ldap_base_dn: "dc=example,dc=com"
+  #  ldap_admin_dn: "cn=admin,dc=example,dc=com"
     cert_days: 10000
 
   pre_tasks:
