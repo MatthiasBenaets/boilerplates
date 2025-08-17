@@ -61,7 +61,7 @@
     - name: Ensure ldap url can be resolved
       lineinfile:
         path: /etc/hosts
-        regexp: '.*ldap\.benaets\.com'
+        regexp: '.*ldap\.{{ ldap_domain }}'
         line: "127.0.0.1   ldap.{{ldap_domain}}"
         state: present
 

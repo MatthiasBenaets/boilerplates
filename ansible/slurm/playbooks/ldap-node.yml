@@ -1,0 +1,44 @@
+---
+- name: Setup LDAP Authentication
+  hosts: nodes
+  become: yes
+  #vars:
+  #  ldap_domain: "example.com"
+  #  ldap_base_dn: "dc=example,dc=com"
+  tasks:
+    - name: Ensure ldap url can be resolved
+      lineinfile:
+        path: /etc/hosts
+        regexp: '.*ldap\.{{ ldap_domain }}'
+        line: "{{ hostvars[groups['controller'][0]].ip }}   ldap.{{ldap_domain}}"
+        state: present
+
+    - name: Install required packages
+      apt:
+        name:
+          - ldap-utils
+          - libpam-mkhomedir
+          - libnss-ldapd
+        state: present
+        update_cache: yes
+
+    - name: Ensure PAM home dir creation enabled
+      lineinfile:
+        path: /etc/pam.d/common-session
+        line: "session required pam_mkhomedir.so skel=/etc/skel/ umask=0077"
+        state: present
+
+    - name: Configure nsswitch.conf
+      template:
+        src: nsswitch.conf.j2
+        dest: /etc/nsswitch.conf
+
+    - name: Configure nslcd.conf
+      template:
+        src: nslcd.conf.j2
+        dest: /etc/nslcd.conf
+
+    - name: Restart nslcd
+      service:
+        name: nslcd
+        state: restarted
