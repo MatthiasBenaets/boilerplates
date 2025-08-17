@@ -2,8 +2,8 @@
 # Put this file on all nodes of your cluster.
 # See the slurm.conf man page for more information.
 #
-ClusterName=cluster
-SlurmctldHost=control
+ClusterName={{ cluster_name }}
+SlurmctldHost={{ groups["controller"][0]  }}
 #SlurmctldHost= #
 #
 #DisableRootJobs=NO
@@ -150,5 +150,6 @@ SlurmdLogFile=/var/log/slurmd.log
 #
 #
 # COMPUTE NODES
-NodeName=node[1-2] CPUs=2 State=UNKNOWN
-PartitionName=debug Nodes=ALL Default=YES MaxTime=INFINITE State=UP
+{% for line in slurm_compute_nodes %}
+{{ line }}
+{% endfor %}
