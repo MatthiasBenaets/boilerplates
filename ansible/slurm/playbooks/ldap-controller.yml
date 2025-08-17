@@ -12,13 +12,13 @@
 
   pre_tasks:
     - name: Ensure debconf-utils is installed
-      apt:
+      ansible.builtin.apt:
         name: debconf-utils
         state: present
         update_cache: yes
 
     - name: Pre-seed slapd debconf
-      debconf:
+      ansible.builtin.debconf:
         name: slapd
         question: "{{ item.question }}"
         value: "{{ item.value }}"
@@ -59,14 +59,14 @@
 
   tasks:
     - name: Ensure ldap url can be resolved
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/hosts
         regexp: '.*ldap\.{{ ldap_domain }}'
         line: "127.0.0.1   ldap.{{ldap_domain}}"
         state: present
 
     - name: Install required packages
-      apt:
+      ansible.builtin.apt:
         name:
           - slapd
           - ldap-utils
@@ -78,13 +78,13 @@
         update_cache: yes
 
     - name: Ensure PAM home dir creation enabled
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/pam.d/common-session
         line: "session required pam_mkhomedir.so skel=/etc/skel/ umask=0077"
         state: present
 
     - name: Create TLS cert dir
-      file:
+      ansible.builtin.file:
         path: /etc/ldap/ssl
         state: directory
         owner: openldap
@@ -114,7 +114,7 @@
         mode: "0444"
 
     - name: Configure slapd TLS
-      shell: |
+      ansible.builtin.shell: |
         ldapmodify -Y EXTERNAL -H ldapi:/// <<EOF
         dn: cn=config
         changetype: modify
@@ -128,31 +128,31 @@
         creates: /etc/ldap/ssl/.tls_configured
 
     - name: Configure ldap.conf
-      template:
+      ansible.builtin.template:
         src: ldap.conf.j2
         dest: /etc/ldap/ldap.conf
 
     - name: Configure nsswitch.conf
-      template:
+      ansible.builtin.template:
         src: nsswitch.conf.j2
         dest: /etc/nsswitch.conf
 
     - name: Configure nslcd.conf
-      template:
+      ansible.builtin.template:
         src: nslcd.conf.j2
         dest: /etc/nslcd.conf
 
     - name: Configure phpLDAPadmin
-      template:
+      ansible.builtin.template:
         src: phpldapadmin-config.php.j2
         dest: /etc/phpldapadmin/config.php
 
     - name: Restart nslcd
-      service:
+      ansible.builtin.service:
         name: nslcd
         state: restarted
 
     - name: Restart apache
-      service:
+      ansible.builtin.service:
         name: apache2
         state: restarted

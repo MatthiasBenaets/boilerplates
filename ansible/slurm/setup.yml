@@ -8,13 +8,11 @@
 # OpenLDAP
 - import_playbook: playbooks/ldap-controller.yml
   when: auth_backend == "ldap"
-- import_playbook: playbooks/ldap-nodes.yml
+- import_playbook: playbooks/ldap-node.yml
   when: auth_backend == "ldap"
 
 # Hosts Setup
-- import_playbook: playbooks/hostname-controller.yml
 - import_playbook: playbooks/etc-hosts.yml
-- import_playbook: playbooks/hostname-node.yml
 
 # NFS Share & Environment Modules
 - import_playbook: playbooks/nfs-controller.yml

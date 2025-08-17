@@ -1,9 +1,13 @@
-- name: Update /etc/hosts file on controller and nodes
+- name: Set hostnames and update /etc/hosts
   hosts: controller,nodes
   become: yes
   tasks:
+    - name: Set the system hostname to inventory hostname
+      ansible.builtin.hostname:
+        name: "{{ inventory_hostname }}"
+
     - name: Add hosts entries for all controller and nodes
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/hosts
         line: "{{ '127.0.1.1' if item == inventory_hostname else hostvars[item]['ip'] }} {{ item }}"
         state: present
