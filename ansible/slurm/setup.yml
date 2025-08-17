@@ -1,12 +1,27 @@
 ---
+# Windows Active Directory
 - import_playbook: playbooks/active-directory.yml
+  when: auth_backend == "ad"
 - import_playbook: playbooks/pam.yml
+  when: auth_backend == "ad"
+
+# OpenLDAP
+- import_playbook: playbooks/ldap-controller.yml
+  when: auth_backend == "ldap"
+- import_playbook: playbooks/ldap-nodes.yml
+  when: auth_backend == "ldap"
+
+# Hosts Setup
 - import_playbook: playbooks/hostname-controller.yml
 - import_playbook: playbooks/etc-hosts.yml
 - import_playbook: playbooks/hostname-node.yml
+
+# NFS Share & Environment Modules
 - import_playbook: playbooks/nfs-controller.yml
 - import_playbook: playbooks/lmod-controller.yml
 - import_playbook: playbooks/nfs-node.yml
 - import_playbook: playbooks/lmod-node.yml
+
+# Slurm Setup
 - import_playbook: playbooks/slurm-controller.yml
 - import_playbook: playbooks/slurm-node.yml
