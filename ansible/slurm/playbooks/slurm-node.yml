@@ -26,8 +26,8 @@
         mode: "0600"
 
     - name: Copy over slurm.conf
-      ansible.builtin.copy:
-        src: ./config/slurm.conf
+      ansible.builtin.template:
+        src: slurm.conf.j2
         dest: /etc/slurm/slurm.conf
         owner: slurm
         group: slurm
