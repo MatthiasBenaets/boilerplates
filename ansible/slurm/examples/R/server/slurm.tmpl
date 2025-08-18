@@ -1,0 +1,11 @@
+#!/bin/bash -l
+#SBATCH --job-name=future_job
+#SBATCH --output=future_%j.log
+#SBATCH --time=00:10:00
+#SBATCH --cpus-per-task=1
+
+# requires /bin/bash -l to use the user environment
+
+module load R
+
+Rscript -e "batchtools::doJobCollection('<%= uri %>')"

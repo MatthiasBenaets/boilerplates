@@ -25,3 +25,37 @@
     - name: Install RStudio Server
       ansible.builtin.command:
         cmd: "/usr/bin/gdebi --non-interactive /tmp/rstudio.deb"
+
+    # Be sure to have R version installed
+    - name: Get list of installed R versions
+      ansible.builtin.find:
+        paths: /opt/apps/R/
+        file_type: directory
+      register: r_versions
+
+    - name: Debug found directories
+      debug:
+        var: r_versions.files | map(attribute='path') | list
+
+    - name: Set full R binary path
+      set_fact:
+        r_binary_path: >-
+          /opt/apps/R/{{ (r_versions.files
+          | map(attribute='path')
+          | map('basename')
+          | select('match', '^[0-9]+\.[0-9]+\.[0-9]+$')
+          | sort
+          | last) }}/bin/R
+
+    - name: Add R binary path to rserver.conf
+      ansible.builtin.lineinfile:
+        path: /etc/rstudio/rserver.conf
+        line: "rsession-which-r={{ r_binary_path }}"
+        create: yes
+        state: present
+        insertafter: EOF
+
+    # Might need to run this manually
+    - name: Start RStudio Server
+      ansible.builtin.command:
+        cmd: "rstudio-server start"
