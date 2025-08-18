@@ -69,8 +69,13 @@
         content: |
           whatis("Description: python version {{ version }}")
 
+          -- Add the Python binary to the user's PATH
+          prepend_path("PATH", "/opt/apps/python/{{ version }}/bin")
+
+          -- Set pip package location
           local home = os.getenv("HOME")
           setenv("PIP_TARGET", pathJoin(home, "python/{{ version }}/packages"))
 
-          -- Add the Python binary to the user's PATH
-          prepend_path("PATH", "/opt/apps/python/{{ version }}/bin")
+          -- Create aliases
+          set_alias("python", "/opt/apps/python/{{ version }}/bin/python3")
+          set_alias("pip", "/opt/apps/python/{{ version }}/bin/pip3")
