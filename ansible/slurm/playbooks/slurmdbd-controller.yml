@@ -23,7 +23,8 @@
         command: mysql_secure_installation
         responses:
           'Enter current password for root*': '{{ mysql_password }}'
-          'Set root password*': 'n'
+          'Switch to unix_socket authentication*': 'n'
+          'Change the root password*': 'n'
           'Remove anonymous users*': 'y'
           'Disallow root login remotely*': 'y'
           'Remove test database*': 'y'
@@ -44,7 +45,7 @@
         name: slurm
         host: localhost
         password: "{{ slurmdb_password }}"
-        priv: 'slurm_acct_db.*:ALL'
+        priv: 'slurm_acct_db.*:ALL,GRANT'
         state: present
         login_unix_socket: /run/mysqld/mysqld.sock
 

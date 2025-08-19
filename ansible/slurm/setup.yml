@@ -26,6 +26,6 @@
 
 # Slurm Accounting Database
 - import_playbook: playbooks/slurmdb-node.yml
-  when: slurm_acct == true
+  when: slurm_acct == "true"
 - import_playbook: playbooks/slurmdbd-controller.yml
-  when: slurm_acct == true
+  when: slurm_acct == "true"
