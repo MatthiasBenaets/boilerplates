@@ -12,9 +12,11 @@
         update_cache: true
         cache_valid_time: 3600
 
-    - name: Install gdebi
+    - name: Install gdebi and dependencies
       ansible.builtin.apt:
-        name: gdebi
+        name:
+          - gdebi
+          - zip
         state: present
 
     - name: Get Rsudio Server
