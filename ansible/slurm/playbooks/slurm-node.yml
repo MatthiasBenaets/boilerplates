@@ -33,6 +33,14 @@
         group: slurm
         mode: "0644"
 
+    - name: Copy over cgroup.conf
+      ansible.builtin.template:
+        src: cgroup.conf.j2
+        dest: /etc/slurm/cgroup.conf
+        owner: slurm
+        group: slurm
+        mode: "0644"
+
     - name: Create slurm spool directory
       ansible.builtin.file:
         path: /var/spool/slurm
