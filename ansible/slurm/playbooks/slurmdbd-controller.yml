@@ -1,0 +1,82 @@
+---
+- name: Setup SlurmDBD with MariaDB backend
+  hosts: controller
+  become: yes
+  tasks:
+    - name: Install Slurmdbd and MariaDB server
+      ansible.builtin.package:
+        name:
+          - slurmdbd
+          - mariadb-server
+          - python3-pexpect
+          - python3-pymysql
+        state: present
+
+    - name: Start and enable MariaDB
+      ansible.builtin.service:
+        name: mariadb
+        state: started
+        enabled: yes
+
+    - name: Secure MariaDB installation
+      expect:
+        command: mysql_secure_installation
+        responses:
+          'Enter current password for root*': '{{ mysql_password }}'
+          'Set root password*': 'n'
+          'Remove anonymous users*': 'y'
+          'Disallow root login remotely*': 'y'
+          'Remove test database*': 'y'
+          'Reload privilege tables now*': 'y'
+        timeout: 1
+      register: secure_mariadb
+      failed_when: "'... Failed!' in secure_mariadb.stdout_lines"
+      ignore_errors: true
+
+    - name: Create Slurm accounting database
+      community.mysql.mysql_db:
+        name: slurm_acct_db
+        state: present
+        login_unix_socket: /run/mysqld/mysqld.sock
+
+    - name: Create slurm user in MySQL
+      community.mysql.mysql_user:
+        name: slurm
+        host: localhost
+        password: "{{ slurmdb_password }}"
+        priv: 'slurm_acct_db.*:ALL'
+        state: present
+        login_unix_socket: /run/mysqld/mysqld.sock
+
+    - name: Deploy slurmdbd.conf
+      ansible.builtin.template:
+        src: slurmdbd.conf.j2
+        dest: /etc/slurm/slurmdbd.conf
+        owner: slurm
+        group: slurm
+        mode: "0600"
+
+    - name: Ensure slurmdbd log file exists and is owned correctly
+      ansible.builtin.file:
+        path: /var/log/slurmdbd.log
+        state: touch
+        owner: slurm
+        group: slurm
+        mode: '0644'
+
+    - name: Update slurm.conf
+      ansible.builtin.template:
+        src: slurm-acct.conf.j2
+        dest: /etc/slurm/slurm.conf
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Enable and start slurmdbd
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      loop:
+        - slurmdbd
+        - slurmctld

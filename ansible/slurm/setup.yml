@@ -23,3 +23,9 @@
 # Slurm Setup
 - import_playbook: playbooks/slurm-controller.yml
 - import_playbook: playbooks/slurm-node.yml
+
+# Slurm Accounting Database
+- import_playbook: playbooks/slurmdb-node.yml
+  when: slurm_acct == true
+- import_playbook: playbooks/slurmdbd-controller.yml
+  when: slurm_acct == true

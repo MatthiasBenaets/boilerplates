@@ -1,0 +1,18 @@
+---
+- name: Update slurm.conf after Slurmdbd install
+  hosts: nodes
+  become: yes
+  tasks:
+    - name: Copy over slurm.conf
+      ansible.builtin.template:
+        src: slurm.conf.j2
+        dest: /etc/slurm/slurm.conf
+        owner: slurm
+        group: slurm
+        mode: "0644"
+
+    - name: Restart services
+      ansible.builtin.service:
+        name: "slurmd"
+        enabled: true
+        state: restarted
