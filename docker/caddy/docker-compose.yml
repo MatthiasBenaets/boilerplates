@@ -1,0 +1,29 @@
+services:
+  caddy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    pull_policy: build
+    container_name: caddy
+    restart: always
+    environment:
+      - CLOUDFLARE_EMAIL=${CF_EMAIL}
+      - CLOUDFLARE_API_TOKEN=${CF_API_TOKEN}
+      - ACME_AGREE=true
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./caddy/caddy:/etc/caddy
+      - ./caddy/site:/srv
+      - ./caddy/data:/data
+      - ./caddy/config:/config
+    command:
+      - caddy
+      - run
+      - --watch
+      - --config
+      - /etc/caddy/Caddyfile
+      - --adapter
+      - caddyfile
+networks: {}

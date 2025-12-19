@@ -1,0 +1,11 @@
+*.example.com {
+	tls {
+		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+		propagation_delay 2m
+		resolvers 1.1.1.1
+	}
+	@home host home.example.com
+	handle @home {
+		reverse_proxy 192.168.0.2:3000
+	}
+}
