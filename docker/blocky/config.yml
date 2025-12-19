@@ -1,0 +1,30 @@
+upstreams:
+  groups:
+    default:
+      - 1.1.1.1
+      - 1.0.0.1
+      - 8.8.8.8
+
+ports:
+  dns: 53
+  http: 4000
+
+blocking:
+  denylists:
+    ads:
+      - https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+      - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/multi.txt
+      - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/popupads.txt
+  clientGroupsBlock:
+    default:
+      - ads
+
+customDNS:
+  customTTL: 1h
+  filterUnmappedTypes: false
+  mapping:
+    home.example.com: 192.168.0.5
+    home2.example.com: 192.168.0.6
+
+log:
+  level: error
