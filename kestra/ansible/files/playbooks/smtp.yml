@@ -6,6 +6,14 @@
   #  email: email@gmail.com
   #  password: secret
   tasks:
+    - name: Create mail directory
+      file:
+        path: /etc/mail
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+
     - name: Install helper packages
       apt:
         name:
@@ -15,13 +23,15 @@
         install_recommends: false
         update_cache: yes
 
-    - name: Create mail directory
-      file:
-        path: /etc/mail
-        state: directory
-        owner: root
-        group: root
-        mode: 0755
+    - name: Get parent device and transport type
+      shell: "lsblk -no pkname,TRAN {{ ansible_mounts | json_query('[?mount == `/`].device') | first }}"
+      register: disk_info
+      changed_when: false
+
+    - name: Set disk facts (sata or nvme)
+      set_fact:
+        root_parent_disk: "/dev/{{ disk_info.stdout.split()[0] }}"
+        drive_type_flag: "{{ '-d nvme' if 'nvme' in disk_info.stdout else '-d sat' }}"
 
     - name: Create /etc/smtpd.conf
       copy:
@@ -49,9 +59,9 @@
         group: opensmtpd
         mode: 0640
 
-    - name: Comment out /etc/smartd.conf or remove it
+    - name: Configure /etc/smartd.conf
       copy:
-        content: "{{ disk }} -d sat -o on -S on -H -l error -l selftest -f -n standby,15,q -s (L/../(01|16)/./03|S/../.././01|O/../.././(00|06|12|18)) -m matthias.benaets@uhasselt.be -M exec /usr/share/smartmontools/smartd-runner"
+        content: "{{ root_parent_disk }} {{ drive_type_flag }} -o on -S on -H -l error -l selftest -f -n standby,15,q -s (L/../(01|16)/./03|S/../.././01|O/../.././(00|06|12|18)) -m matthias.benaets@uhasselt.be -M exec /usr/share/smartmontools/smartd-runner"
         dest: /etc/smartd.conf
         owner: root
         group: root
