@@ -1,6 +1,6 @@
 services:
   nextcloud:
-    image: nextcloud:31
+    image: nextcloud:33
     container_name: nextcloud
 
     restart: unless-stopped
@@ -22,8 +22,7 @@ services:
 
     # Do not uncomment when updating to other version
     # command: >
-    #   /bin/bash -c "apt update && apt install -y smbclient && apache2-foreground"
-
+    #   /bin/bash -c "apt-get update && apt-get install -y smbclient libsmbclient-dev && if ! php -m | grep -q 'smbclient'; then pecl install smbclient && docker-php-ext-enable smbclient; fi && apache2-foreground"
   redis:
     image: redis:alpine
     container_name: redis
