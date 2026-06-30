@@ -1,0 +1,17 @@
+---
+- name: Manage firewall with UFW
+  hosts: simlab
+  become: yes
+  tasks:
+    - name: Allow SSH
+      community.general.ufw:
+        rule: allow
+        port: "22"
+        proto: tcp
+    - name: Allow RDP
+      community.general.ufw:
+        rule: allow
+        port: "3389"
+    - name: Enable UFW
+      community.general.ufw:
+        state: enabled

@@ -1,11 +1,16 @@
 ---
-- name: Set up a SMTP server for SMART monitoring
+- name: Set up smtp server and smart monitoring
   hosts: simlab
   become: yes
-  vars:
-    - email:
-    - password:
   tasks:
+    - name: Pre-create mail directory for broken uninstalls
+      file:
+        path: /etc/mail
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+
     - name: Install helper packages
       apt:
         name:
@@ -15,13 +20,23 @@
         install_recommends: false
         update_cache: yes
 
+    - name: Get parent device and transport type
+      shell: "lsblk -no pkname,TRAN {{ ansible_mounts | json_query('[?mount == `/`].device') | first }}"
+      register: disk_info
+      changed_when: false
+
+    - name: Set disk facts (sata or nvme)
+      set_fact:
+        root_parent_disk: "/dev/{{ disk_info.stdout.split()[0] }}"
+        drive_type_flag: "{{ '-d nvme' if 'nvme' in disk_info.stdout else '-d sat' }}"
+
     - name: Create mail directory
       file:
         path: /etc/mail
         state: directory
         owner: root
         group: root
-        mode: 0755
+        mode: "0755"
 
     - name: Create /etc/smtpd.conf
       copy:
@@ -39,7 +54,7 @@
         dest: /etc/smtpd.conf
         owner: root
         group: root
-        mode: 0644
+        mode: "0644"
 
     - name: Create /etc/mail/secrets
       copy:
@@ -47,15 +62,15 @@
         dest: /etc/mail/secrets
         owner: root
         group: opensmtpd
-        mode: 0640
+        mode: "0640"
 
-    - name: Create /etc/smartd.conf
+    - name: Configure /etc/smartd.conf
       copy:
-        content: "{{ disk }} -d sat -o on -S on -H -l error -l selftest -f -n standby,15,q -s (L/../(01|16)/./03|S/../.././01|O/../.././(00|06|12|18)) -m matthias.benaets@uhasselt.be -M exec /usr/share/smartmontools/smartd-runner"
+        content: "{{ root_parent_disk }} {{ drive_type_flag }} -o on -S on -H -l error -l selftest -f -n standby,15,q -s (L/../(01|16)/./03|S/../.././01|O/../.././(00|06|12|18)) -m matthias.benaets@uhasselt.be -M exec /usr/share/smartmontools/smartd-runner"
         dest: /etc/smartd.conf
         owner: root
         group: root
-        mode: 0644
+        mode: "0644"
 
     - name: Restart and enable opensmtp
       systemd:
@@ -63,8 +78,8 @@
         state: restarted
         enabled: yes
 
-    - name: Restart and enable smartd
+    - name: Restart smartd
       systemd:
         name: smartd
         state: restarted
-        enabled: ye
+        enabled: yes

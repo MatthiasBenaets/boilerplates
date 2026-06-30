@@ -1,0 +1,44 @@
+---
+- name: Install VS Code Non-Interactively via Repository
+  hosts: { { inputs.hosts } }
+  become: yes
+  tasks:
+    - name: Install dependencies for repository management
+      ansible.builtin.apt:
+        name:
+          - apt-transport-https
+          - curl
+          - gnupg
+        state: present
+        update_cache: true
+
+    - name: Create directory for system keyrings
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: "0755"
+
+    - name: Download Microsoft GPG key
+      ansible.builtin.get_url:
+        url: https://packages.microsoft.com/keys/microsoft.asc
+        dest: /tmp/microsoft.asc
+        mode: "0644"
+
+    - name: De-armor the Microsoft GPG key
+      ansible.builtin.command:
+        cmd: gpg --dearmor -o /etc/apt/keyrings/packages.microsoft.gpg /tmp/microsoft.asc
+        creates: /etc/apt/keyrings/packages.microsoft.gpg
+
+    - name: Add VS Code repository to sources list
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main"
+        state: present
+        filename: vscode
+
+    - name: Install VS Code non-interactively
+      ansible.builtin.apt:
+        name: code
+        state: present
+        update_cache: true
+      environment:
+        DEBIAN_FRONTEND: noninteractive

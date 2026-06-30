@@ -7,3 +7,6 @@
       apt:
         update_cache: yes
         upgrade: yes
+        autoclean: true
+        autoremove: true
+        purge: true

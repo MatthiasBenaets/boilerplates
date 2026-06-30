@@ -1,0 +1,7 @@
+---
+- name: Log Message Playbook
+  hosts: all
+  tasks:
+    - name: Ptrint distribution
+      debug:
+        msg: "{{ ansible_distribution }}"

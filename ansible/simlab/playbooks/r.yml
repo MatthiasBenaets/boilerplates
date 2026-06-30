@@ -7,22 +7,26 @@
     - rstudio: 2022.12.0-353
     - c2d4u: 4.0+
   tasks:
+    - name: Update repository caches
+      apt:
+        update_cache: yes
+
     - name: Install helper packages
       apt:
         name:
           - software-properties-common
           - dirmngr
         install_recommends: false
-        update_cache: yes
 
     - name: Add signed key for the repositories
       get_url:
-        url: https://cloud.r-project.org/bin/linux/{{ ansible_distribution|lower }}/marutter_pubkey.asc
-        dest: /etc/apt/trusted.gpg.d/cran_{{ ansible_distribution|lower }}_key.asc
+        url: "http://cloud.r-project.org/bin/linux/{{ ansible_distribution|lower }}/marutter_pubkey.asc"
+        dest: "/etc/apt/trusted.gpg.d/cran_{{ ansible_distribution|lower }}_key.asc"
+        #state: present
 
     - name: Add R repository
       apt_repository:
-        repo: deb https://cloud.r-project.org/bin/linux/{{ ansible_distribution|lower }} {{ ansible_distribution_release|lower }}-{{ r }}/
+        repo: "deb https://cloud.r-project.org/bin/linux/{{ ansible_distribution|lower }} {{ ansible_distribution_release|lower }}-{{ cran }}/"
         state: present
 
     - name: Install R-Base
@@ -31,25 +35,27 @@
           - r-base
           - r-base-dev
         install_recommends: false
+        state: latest
 
-    - name: Add c2d4u repository
-      apt_repository:
-        repo: ppa:c2d4u.team/c2d4u{{ c2d4u }}
-        state: present
+    #- name: Add c2d4u repository
+    #  apt_repository:
+    #    repo: "ppa:c2d4u.team/c2d4u{{ c2d4u }}"
+    #    state: present
 
     - name: Get RStudio
       get_url:
-        url: https://download1.rstudio.org/electron/{{ ansible_distribution_release|lower }}/amd64/rstudio-{{ rstudio }}-amd.deb
-        dest: /tmp/rstudio-{{ rstudio }}-amd.deb
+        #url: "https://download1.rstudio.org/electron/{{ ansible_distribution_release|lower }}/amd64/rstudio-{{ rstudio }}-amd64.deb"
+        url: "https://download1.rstudio.org/electron/jammy/amd64/rstudio-{{ rstudio }}-amd64.deb"
+        dest: "/tmp/rstudio-{{ rstudio }}-amd64.deb"
 
     - name: Install RStudio
       apt:
-        deb: /tmp/rstudio-{{ rstudio }}-amd64.deb
+        deb: "/tmp/rstudio-{{ rstudio }}-amd64.deb"
 
     - name: Cleanup
       file:
-        path: /tmp/rstudio-{{ rstudio }}-amd64.deb
+        path: "/tmp/rstudio-{{ rstudio }}-amd64.deb"
         state: absent
 
     #- name: Install R packages
-      #shell: Rscript -e 'install.packages("rstan", dependencies=TRUE)'
+    #shell: Rscript -e 'install.packages("rstan", dependencies=TRUE)'

@@ -1,0 +1,13 @@
+---
+- name: Add user to a specific group
+  hosts: simlab
+  become: yes
+  vars:
+    - group: simlab
+    - user: remote
+  tasks:
+    - name: Adding user to {{ group }}
+      ansible.builtin.user:
+        name: "{{ user }}"
+        append: true
+        groups: "{{ group }}"
