@@ -364,6 +364,9 @@ Proxmox:
   - Run ~crontab -e~.
   - ~* * * * * rsync -r </file/or/dir/being/backed/up> </mounted/location/of/truenas/smb>~ where the start are changed to the correct interval (min, hour, dom, mon, dow)
 
+*** Common Issues
+- If docker (engine) takes long to start it's probably because of a network timeout. To fix this ~systemctl edit systemd-networkd-wait-online.service~ and add ~[Service] ExecStart= ExecStart=/usr/lib/systemd/systemd-networkd-wait-online --interface=eth0 --timeout=30~ (3 lines)
+
 *** VM
 **** TrueNAS
 Proxmox:
